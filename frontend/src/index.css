@@ -46,6 +46,47 @@
 
 @layer components {
     .custom-card {
-      @apply bg-psecondary ;
+      /* @apply bg-psecondary ; */
     }
 }
+
+.chips-container {
+    display: flex;
+    overflow-x: auto; /* Enables horizontal scrolling */
+    white-space: nowrap; /* Prevents wrapping */
+    gap: 10px;
+    /* padding: 10px; */
+    scrollbar-width: none; /* Hide scrollbar on Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar on IE/Edge */
+  }
+  
+  /* Hide scrollbar for WebKit browsers (Chrome, Safari) */
+  .chips-container::-webkit-scrollbar {
+    display: none;
+  }
+  
+  @media screen and (min-width: 1168px) {
+    .chips-container{
+        justify-content: center;
+    }
+  }
+
+  .chip {
+    padding: 8px 16px;
+    padding-top: 6px;
+    border-radius: 16px;
+  }
+  
+  .chip:hover{
+    background: rgb(39, 39, 39);
+    cursor: pointer;
+  }
+  .chip:active{
+    background: white;
+  }
+
+
+
+  .font-boldnblack{
+    font-family: 'AnotherFont';
+  }

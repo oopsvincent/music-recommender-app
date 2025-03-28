@@ -3,7 +3,7 @@ import "./App.css";
 import Card from "./Components/Card";
 import ChipSection from "./Components/ChipSection";
 
-const SPOTIFY_TOKEN = "BQCBP5aoMalcBM0rsKufrpd2_vNGl1L4PRAvPdco9rzdC-fxboVrK1Tk8feG7N4qRQ93bQKKb4jxFjPAa8fVUey1Y4pup71qCzOheRRN_wAGftaCa05GaPdDfjbXicioKSbUSo_sp4Y";
+const SPOTIFY_TOKEN = "BQBl1T2I8LPoNSz4Q4qOz1vtrJ4r3EZKiQ_9QXDm4kOkUvwtGdmXnA7V8Qkn0QHeZ4J_LRYhM_lCfhrtbFMPFYNeF8DqwWb3f30RbSNeSl2Xn2fhQ42plhmYiP0yEGUgtQDIGqUdr1E";
 
 // Fetch Spotify Track Data
 async function fetchSpotifyData(title) {
@@ -55,7 +55,7 @@ function App() {
   return (
 
     <div>
-      <h1 className="font-heavy text-6xl dark:text-white m-2 mb-6">Hello, Vincent Adam Brown</h1>
+      <h1 className="font-heavy text-6xl dark:text-white m-2 mb-6 font-boldnblack">Hello, Vincent Adam Brown</h1>
       <ChipSection />
       <div className="flex flex-row flex-wrap justify-center">
         {trackData.map((track, index) => (
