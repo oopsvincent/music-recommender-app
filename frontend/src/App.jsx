@@ -1,35 +1,75 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.css";
+import Card from "./Components/Card";
+import ChipSection from "./Components/ChipSection";
 
-function App() {
-  const [count, setCount] = useState(0)
+const SPOTIFY_TOKEN = "BQCBP5aoMalcBM0rsKufrpd2_vNGl1L4PRAvPdco9rzdC-fxboVrK1Tk8feG7N4qRQ93bQKKb4jxFjPAa8fVUey1Y4pup71qCzOheRRN_wAGftaCa05GaPdDfjbXicioKSbUSo_sp4Y";
 
-  return (
-    <>
-      <div className="max-w-sm rounded-lg shadow-lg overflow-hidden">
-  <img src="https://placehold.co/150" alt="Image" />
-  <div className="p-4">
-    <h2 className="text-lg font-bold">Card Title</h2>
-    <p className="text-gray-600">This is a sample card.</p>
-  </div>
-</div>
+// Fetch Spotify Track Data
+async function fetchSpotifyData(title) {
+  const response = await fetch(
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(title)}&type=track&limit=1`,
+    {
+      headers: {
+        Authorization: `Bearer ${SPOTIFY_TOKEN}`,
+      },
+    }
+  );
 
-<div class="bg-white dark:bg-gray-800 rounded-lg px-6 py-8 ring shadow-xl ring-gray-900/5">
-  <div>
-    <span class="inline-flex items-center justify-center rounded-md bg-indigo-500 p-2 shadow-lg">
-      <svg class="h-6 w-6 stroke-white">
-      </svg>
-    </span>
-  </div>
-  <h3 class="text-gray-900 dark:text-white mt-5 text-base font-medium tracking-tight ">Writes upside-down</h3>
-  <p class="text-gray-500 dark:text-gray-400 mt-2 text-sm ">
-    The Zero Gravity Pen can be used to write in any orientation, including upside-down. It even works in outer space.
-  </p>
-</div>
-    </>
-  )
+  if (!response.ok) throw new Error(`API Error: ${response.status}`);
+  const data = await response.json();
+
+  if (!data.tracks.items.length) throw new Error("No tracks found!");
+
+  const track = data.tracks.items[0];
+  console.log(track);
+  
+
+  return {
+    title: track.name,
+    url: track.album.images[0].url,
+    artists: track.artists.map((artist) => artist.name).join(", "),
+  };
 }
 
-export default App
+function App() {
+  const [trackData, setTrackData] = useState([]);
+
+  useEffect(() => {
+    // Fetch multiple tracks
+    const tracks = ["despacito", "all the stars", "HUMBLE", "Not Like Us", "perfect", "bump heads"];
+
+    const loadTracks = async () => {
+      try {
+        const trackPromises = tracks.map((title) => fetchSpotifyData(title));
+        const results = await Promise.all(trackPromises);
+        setTrackData(results);
+      } catch (error) {
+        console.error("Error fetching tracks:", error.message);
+      }
+    };
+
+    loadTracks();
+  }, []);
+
+  return (
+
+    <div>
+      <h1 className="font-heavy text-6xl dark:text-white m-2 mb-6">Hello, Vincent Adam Brown</h1>
+      <ChipSection />
+      <div className="flex flex-row flex-wrap justify-center">
+        {trackData.map((track, index) => (
+          <Card
+            key={index}
+            url={track.url}
+            title={track.title}
+            artist={track.artists}
+            spoURL={track.external_urls?.spotify || '#'}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default App;
