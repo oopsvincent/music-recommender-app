@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+/* Regular and Variations */
+@font-face {
+    font-family: 'MyCustomFont';
+    src: url('/src/assets/fonts/SFUIDisplay-Regular.otf');
+    font-weight: 400; /* Regular */
+    font-display: swap;
+  }
+  
+  @font-face {
+    font-family: 'MyCustomFont';
+    src: url('/src/assets/fonts/SFUIDisplay-Light.otf');
+    font-weight: 300; /* Light */
+    font-display: swap;
+  }
+  
+  @font-face {
+    font-family: 'MyCustomFont';
+    src: url('/src/assets/fonts/SFUIDisplay-Bold.otf');
+    font-weight: 700; /* Bold */
+    font-display: swap;
+  }
+  
+  /* Special Black Font */
+  @font-face {
+    font-family: 'AnotherFont';
+    src: url('/src/assets/fonts/SFUIDisplay-Black.otf');
+    font-weight: 900; /* Black */
+    font-display: swap;
+  }
+  
+  /* Apply Global Font */
+  :root {
+    --font-primary: 'MyCustomFont', sans-serif;
+    --font-black: 'AnotherFont', sans-serif;
+  }
+  
+  body {
+    font-family: var(--font-primary);
+  }
+  
+/* :root{
+    font-family: 'MyCustomFont';
+} */
+
+@layer components {
+    .custom-card {
+      /* @apply bg-psecondary ; */
+    }
+}
+
+.chips-container {
+    display: flex;
+    overflow-x: auto; /* Enables horizontal scrolling */
+    white-space: nowrap; /* Prevents wrapping */
+    gap: 5px;
+    /* padding: 10px; */
+    scrollbar-width: none; /* Hide scrollbar on Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar on IE/Edge */
+  }
+  
+  /* Hide scrollbar for WebKit browsers (Chrome, Safari) */
+  .chips-container::-webkit-scrollbar {
+    display: none;
+  }
+  
+  @media screen and (min-width: 1168px) {
+    .chips-container{
+        justify-content: center;
+    }
+  }
+
+  .chip {
+    padding: 8px 16px;
+    padding-top: 6px;
+    border-radius: 16px;
+  }
+  
+  .chip:hover{
+    background: rgb(39, 39, 39);
+    cursor: pointer;
+  }
+  .chip:active{
+    background: white;
+  }
+
+
+
+  .font-boldnblack{
+    font-family: 'AnotherFont';
+  }
+
+  .font-h{
+    font-family: 'MyCustomFont';
+    font-weight: 400;
+  }
