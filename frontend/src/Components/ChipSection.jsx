@@ -4,7 +4,7 @@ import '../index.css'
 
 const ChipSection = () => {
   return (
-    <div className='flex overflow-auto [&::-webkit-scrollbar]:hidden h-12 overflow-y-hidden chips-container'>
+    <div className='flex overflow-auto [&::-webkit-scrollbar]:hidden h-13 overflow-y-hidden chips-container'>
         <Chip text={"Hip Hop"}/>
         <Chip text={"Pop"}/>
         <Chip text={"Classic"}/>
