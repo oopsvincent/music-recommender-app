@@ -6,27 +6,27 @@ import SpotifyConnect from "./Components/SpotifyConnect";
 import FirstTimeLogin from "./Components/FirstTimeLogin";
 
 const SPOTIFY_TOKEN =
-  "BQC5FhiByIHNTnKzTBQ6QoTRvYyyrr6aOedAmQFzrlDeJpNgCa1kNI6-8ShZBPktGZ5Lt-7xk_DT3dq7X9h4Tyxsvoc3mtgvgSd6q10gtTQz9vm_nNAxYMWD66D9aNwLkwJkNs3hRjU";
-async function getUserPlaylists(accessToken) {
-  const response = await fetch("https://api.spotify.com/v1/me/playlists", {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-  });
+  "BQAxVLPA5rk7rV5AHBR52yjYOcIQ-WyM0gP28HE1sq1oBlRx1LMeDhPklQbHLf3IoSU7nMgIDAehboGjxq_gMfWw2ZGqD835SwgwQsT1rk-zHIfZojCRTAsn6olk5cR7oLeLY2OPoOU";
+// async function getUserPlaylists(accessToken) {
+//   const response = await fetch("https://api.spotify.com/v1/me/playlists", {
+//     method: "GET",
+//     headers: {
+//       Authorization: `Bearer ${accessToken}`,
+//       "Content-Type": "application/json",
+//     },
+//   });
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch playlists");
-  }
+//   if (!response.ok) {
+//     throw new Error("Failed to fetch playlists");
+//   }
 
-  const data = await response.json();
-  console.log(data); // List of playlists
-  console.log(data.items);
-  return data.items; // Returns an array of playlist objects
-}
+//   const data = await response.json();
+//   console.log(data); 
+//   console.log(data.items);
+//   return data.items; 
+// }
 
-getUserPlaylists(SPOTIFY_TOKEN);
+// getUserPlaylists(SPOTIFY_TOKEN);
 
 async function fetchYouTubeData(title) {
   const response = await fetch(
@@ -123,28 +123,30 @@ function App() {
   }, [userName, musicLanguage]); // Re-fetch if userName or musicLanguage changes
 
   return (
-    <div>
+    <div className="md:ml-40 md:mr-40">
       {/* Render the FirstTimeLogin component if showLogin is true */}
       {showLogin && (
-        <div className="h-dvh flex justify-center items-center">
+        <div className="h-dvh md:flex md:justify-center md:items-center">
           <FirstTimeLogin onSubmit={handleUserInfo} />
         </div>
       )}
 
       {!showLogin && (
         <>
-          <h1 className="text-4xl dark:text-white m-1 mb-4 font-h">
+        <div className="flex flex-col justify-around md:flex-row">
+          <h1 className="text-2xl dark:text-white m-1 mb-4 boldonse line-h line-clamp-3 md:text-4xl md:p-4" title={userName}>
             Hello, {userName}
           </h1>
-          <h3 className="text-white m-3">
+          <h3 className="boldonse text-xs text-white m-3 flex justify-around items-center">
             Current Music Language: {musicLanguage}
             <button
-              className="bg-white text-xs text-black p-1 ml-5 rounded-lg"
+              className="bg-white text-xs text-black p-2 ml-5 rounded-lg"
               onClick={() => setShowLogin(true)} // Show the login again when the user wants to change
             >
               Change
             </button>
           </h3>
+        </div>
           <hr className="text-white m-2" />
 
           <ChipSection />
