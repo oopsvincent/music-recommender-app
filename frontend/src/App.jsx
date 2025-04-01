@@ -6,7 +6,7 @@ import SpotifyConnect from "./Components/SpotifyConnect";
 import FirstTimeLogin from "./Components/FirstTimeLogin";
 
 const SPOTIFY_TOKEN =
-  "BQA5BtlUAAMxvnRWtxb5iL5BOqYsd7Wh0r9Lrxj_oO_1ne4kAzMu0vPImpNR39DOfUtCvOKVMUNcgwvKbCkux18DvByOpfddXgjEVnlCB467EuY9xYMQx6ZlYFWpFZtXvJ7gDP6kfYY";
+  "BQC5FhiByIHNTnKzTBQ6QoTRvYyyrr6aOedAmQFzrlDeJpNgCa1kNI6-8ShZBPktGZ5Lt-7xk_DT3dq7X9h4Tyxsvoc3mtgvgSd6q10gtTQz9vm_nNAxYMWD66D9aNwLkwJkNs3hRjU";
 async function getUserPlaylists(accessToken) {
   const response = await fetch("https://api.spotify.com/v1/me/playlists", {
     method: "GET",
