@@ -1,15 +1,35 @@
 import React from 'react'
-import { SpotifyButton, YouTubeButton} from './MusicButtons'
+import { SpotifyButton, YouTubeButton } from './MusicButtons'
 
-const Card = ({ url, title, artist, spoURL, YTURL }) => {
+const Card = ({ url, title, artist, spoURL}) => {
+  // Define truncation logic
+  let displayedTitle = title;
+  if (title.length > 30) {
+    displayedTitle = title.slice(0, 27) + '...'; // Shorten and add ellipsis
+  }
+
   return (
-    <div className='border-xl-sky-100 m-5 bg-gray-500 rounded-xl flex flex-col bg-cardBg hover:bg-pink-400 hover:scale-105 custom-card transition-all duration-300 w-xs'>
-        <img src={url} alt="" className='rounded-t-xl'/>
-        <h1 className='text-4xl font-sbold dark:text-white pt-3 pl-3 pb-0'>{title}</h1>
-        <p className='text-lg font-ultralight dark:text-white pt-0 pl-3 pb-3'>{artist}</p>
-        {/* <SpotifyButton /> */}
-        <SpotifyButton clickHandle={spoURL}/>
-        <YouTubeButton clickHandle={YTURL}/>
+    <div className='m-5 rounded-xl flex flex-col hover:scale-105 transition-all duration-300 w-3xs 
+                    bg-white/10 border border-white/30 shadow-lg'>
+
+        {/* Image */}
+        <img src={url} alt="" className='rounded-t-xl' />
+
+        {/* Content */}
+        <div className='flex flex-col flex-grow p-3'>
+          <h1 className='text-4xl font-sbold text-white 
+                         whitespace-nowrap overflow-hidden text-ellipsis max-w-full' title={title}>
+            {displayedTitle}
+          </h1>
+          <p className='text-lg font-ultralight text-gray-300'>{artist}</p>
+        </div>
+
+        {/* Buttons at the bottom */}
+        <div className='flex flex-col mt-auto p-0'>
+          <SpotifyButton clickHandle={spoURL} />
+          <YouTubeButton/>
+        </div>
+
     </div>
   )
 }

@@ -54,7 +54,7 @@
     display: flex;
     overflow-x: auto; /* Enables horizontal scrolling */
     white-space: nowrap; /* Prevents wrapping */
-    gap: 10px;
+    gap: 5px;
     /* padding: 10px; */
     scrollbar-width: none; /* Hide scrollbar on Firefox */
     -ms-overflow-style: none; /* Hide scrollbar on IE/Edge */
@@ -89,4 +89,9 @@
 
   .font-boldnblack{
     font-family: 'AnotherFont';
+  }
+
+  .font-h{
+    font-family: 'MyCustomFont';
+    font-weight: 400;
   }
