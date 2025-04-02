@@ -18,8 +18,8 @@ const Card = ({ url, title, artist, spoURL}) => {
         {/* Content */}
         <div className='flex flex-col flex-grow p-3'>
           <h1 className='text-4xl font-sbold text-white 
-                         whitespace-nowrap overflow-hidden text-ellipsis max-w-full' title={title}>
-            {displayedTitle}
+                         whitespace-nowrap overflow-scroll scrollb-none max-w-full' title={title}>
+            {title}
           </h1>
           <p className='text-lg font-ultralight text-gray-300'>{artist}</p>
         </div>

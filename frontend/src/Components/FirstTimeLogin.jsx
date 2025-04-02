@@ -36,8 +36,8 @@ const FirstTimeLogin = () => {
   };
 
   return (
-    <div className="bg-white rounded-2xl flex flex-col p-5 m-2">
-      <h1 className="text-6xl">Welcome</h1>
+    <div className="bg-white rounded-2xl flex flex-col p-5 m-2 border-2 shadow-2xl shadow-white">
+      <h1 className="text-4xl text-center boldonse mt-5 mb-5">Welcome</h1>
       
       <label htmlFor="Name" className='mt-5 text-xl'>Enter Your Name</label>
       <input
