@@ -9,19 +9,18 @@ const Card = ({ url, title, artist, spoURL}) => {
   }
 
   return (
-    <div className='m-5 rounded-xl flex flex-col hover:scale-105 transition-all duration-300 w-3xs 
-                    bg-white/10 border border-white/30 shadow-lg'>
+    <div className='m-2 rounded-xl flex flex-col hover:scale-105 transition-all duration-300 w-42 border border-white/30 glassmorpho md:w-64 md:m-4'>
 
         {/* Image */}
         <img src={url} alt="" className='rounded-t-xl' />
 
         {/* Content */}
         <div className='flex flex-col flex-grow p-3'>
-          <h1 className='text-4xl font-sbold text-white 
+          <h1 className='text-2xl font-sbold text-white 
                          whitespace-nowrap overflow-scroll scrollb-none max-w-full' title={title}>
             {title}
           </h1>
-          <p className='text-lg font-ultralight text-gray-300'>{artist}</p>
+          <p className='text-xs font-ultralight text-gray-300'>{artist}</p>
         </div>
 
         {/* Buttons at the bottom */}

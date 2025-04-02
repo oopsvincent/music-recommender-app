@@ -1,10 +1,17 @@
-import React from 'react'
-import '../index.css'
+import React from 'react';
+import '../index.css';
 
-const Chip = ({ text }) => {
+const Chip = ({ text, handleClick, isActive }) => {
   return (
-    <button className='h-10 min-w-max dark:text-white text-md border-2 bg-black rounded-lg inline-flex align-middle justify-center m-2 hover:dark:text-white-200 transition-all duration-200 hover:scale-105 active:bg-white active:text-black chip'><p>{text}</p></button>
-  )
-}
+    <button 
+      onClick={handleClick} 
+      className={`h-10 min-w-max text-md border-0 rounded-lg inline-flex align-middle justify-center m-2 transition-all duration-200 hover:scale-105 select-none chip
+        ${isActive ? 'bg-white text-black border-0 ' : 'bg-black text-white border-1'}`} // Change color if active
+    >
+      <p>{text}</p>
+    </button>
+  );
+};
 
-export default Chip
+export default Chip;
+
