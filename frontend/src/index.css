@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* *{
+    margin: 0px;
+} */
+
 /* Regular and Variations */
 @font-face {
     font-family: 'MyCustomFont';
@@ -36,6 +40,8 @@
     --font-black: 'AnotherFont', sans-serif;
   }
   
+  
+
   body {
     font-family: var(--font-primary);
   }
@@ -81,16 +87,15 @@
 
   .chip {
     padding: 8px 16px;
-    padding-top: 6px;
-    border-radius: 16px;
-  }
-  
-  .chip:hover{
-    background: rgb(39, 39, 39);
-    cursor: pointer;
-  }
+    /* padding-top: px; */
+    border-radius: 10px;
+}
+
+
   .chip:active{
     background: white;
+    color: black;
+    transform: scale(90%);
   }
 
 
@@ -120,4 +125,23 @@
     .line-hx{
         line-height: 60px;
     }
+
+    .glassmorpho{
+        background-color: transparent;
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(20px);
+        background-image: linear-gradient(
+            120deg,
+            rgba(0, 0, 0, 0.267),
+            rgba(255, 255, 255, 0.344)
+        );
+        background-size: 20px;
+    }
+    .bgf{
+    }
+}
+
+
+#root{
+    background-image: url('./assets/bg.png');
   }

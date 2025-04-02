@@ -18,7 +18,7 @@ const FirstTimeLogin = () => {
     e.preventDefault();
   // Call the onSubmit prop to save user info in localStorage
     if (name == "") {
-        localStorage.setItem('userName', "user");
+        localStorage.setItem('userName', "User");
         window.location.reload();  // Reload the window after saving info
     }
     else if (name !== "") {

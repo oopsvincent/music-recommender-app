@@ -4,9 +4,10 @@ import Card from "./Components/Card";
 import ChipSection from "./Components/ChipSection";
 import SpotifyConnect from "./Components/SpotifyConnect";
 import FirstTimeLogin from "./Components/FirstTimeLogin";
+import AppBar from "./Components/AppBar";
 
 const SPOTIFY_TOKEN =
-  "BQAxVLPA5rk7rV5AHBR52yjYOcIQ-WyM0gP28HE1sq1oBlRx1LMeDhPklQbHLf3IoSU7nMgIDAehboGjxq_gMfWw2ZGqD835SwgwQsT1rk-zHIfZojCRTAsn6olk5cR7oLeLY2OPoOU";
+  "BQDVOx4Mfc1Dz0kVat7p03OsWYWzeMeDhMu5XPHaeun99uW8TZ1Lh1_2IuEU09Nw-kJ6my5Oz3At6Vh349XdxvVK2xidyFWaQiXxmjzxfl47QbFO7FxzPrO-ukKwcHF9tdQrFmA8omo";
 // async function getUserPlaylists(accessToken) {
 //   const response = await fetch("https://api.spotify.com/v1/me/playlists", {
 //     method: "GET",
@@ -70,12 +71,13 @@ async function fetchSpotifyData(title) {
     title: track.name,
     url: track.album.images[0].url,
     artists: track.artists.map((artist) => artist.name).join(", "),
+    spoURL: track.external_urls?.spotify || "#",
   };
 }
 
 function App() {
   const [trackData, setTrackData] = useState([]);
-  const [showLogin, setShowLogin] = useState(false); // State to control the display of FirstTimeLogin
+  const [showLogin, setShowLogin] = useState(false);
   const [userName, setUserName] = useState(localStorage.getItem("userName"));
   const [musicLanguage, setMusicLanguage] = useState(
     localStorage.getItem("musicLanguage")
@@ -97,16 +99,26 @@ function App() {
 
     // Fetch multiple tracks
     const tracks = [
-      "SummerTime Sadness",
-      "Skyfall",
-      "until I found you",
-      "Sweater weather",
-      "despacito",
-      "all the stars",
-      "HUMBLE",
-      "Not Like Us",
-      "perfect",
-      "bump heads",
+    "too sweet",
+    "SummerTime Sadness",
+    "Counting Stars",
+    "End of Beginning",
+    "As it Was",
+    "Night Changes",
+    "Die With a smile",
+    "beaniw",
+    "deathbed",
+    "safe and sound",
+    "Skyfall",
+    "until I found you",
+    "Sweater weather",
+    "despacito",
+    "all the stars",
+    "HUMBLE",
+    "Not Like Us",
+    "perfect",
+    "bump heads",
+    "Havana",
     ];
 
     const loadTracks = async () => {
@@ -122,6 +134,37 @@ function App() {
     loadTracks();
   }, [userName, musicLanguage]); // Re-fetch if userName or musicLanguage changes
 
+
+    const handleChipSelect = async (chipText) => {
+      try {
+        if (chipText === "Pop") {
+            const response = await fetch("/EnglishPopSongs.json");
+      
+            if (!response.ok) {
+              throw new Error(`Failed to fetch. Status: ${response.status}`);
+            }
+      
+            const data = await response.json();
+            console.log(data);
+            
+            // Ensure 'song' exists before using it
+
+            // for (let i = 0; i < 20; i++) {
+            //     let rand = Math.floor((Math.random() * data.length + 1));
+            //     const song = data[rand];
+            //     const newTrack = await fetchSpotifyData(song);
+            //     setTrackData((prevData) => [newTrack, ...prevData]);
+            // }
+
+            // const song = data[0]; // Example: Using the first song in the array
+      
+        }
+      } catch (error) {
+        console.error("Error fetching track:", error.message);
+      }
+    };
+
+
   return (
     <div className="md:ml-40 md:mr-40">
       {/* Render the FirstTimeLogin component if showLogin is true */}
@@ -134,7 +177,7 @@ function App() {
       {!showLogin && (
         <>
         <div className="flex flex-col justify-around md:flex-row">
-          <h1 className="text-2xl dark:text-white m-1 mb-4 boldonse line-h line-clamp-3 md:text-4xl md:p-4" title={userName}>
+          <h1 className="pt-5 pl-5 text-2xl dark:text-white m-1 mb-4 boldonse line-h line-clamp-3 md:text-4xl md:p-4" title={userName}>
             Hello, {userName}
           </h1>
           <h3 className="boldonse text-xs text-white m-3 flex justify-around items-center">
@@ -149,7 +192,9 @@ function App() {
         </div>
           <hr className="text-white m-2" />
 
-          <ChipSection />
+          <ChipSection onChipSelect={handleChipSelect} />
+
+
           <div className="flex flex-row flex-wrap justify-center">
             {trackData.map((track, index) => (
               <Card
@@ -157,16 +202,17 @@ function App() {
                 url={track.url}
                 title={track.title}
                 artist={track.artists}
-                spoURL={track.external_urls?.spotify || "#"}
+                spoURL={track.spoURL}
               />
             ))}
           </div>
         </>
       )}
-
-<footer className="text-center py-4 text-gray-400">
-  © 2025 Vincent Brown. All rights reserved. Licensed under MIT License.
+<footer className="text-center py-6 px-8 text-gray-400 mb-20">
+  © 2025 Farhan Ali Reza & Soumodip Mondal. All rights reserved. Licensed under MIT License.
 </footer>
+      <AppBar />
+
 
     </div>
   );
