@@ -1,11 +1,15 @@
-const AppBar = () => {
-    return (
-      <nav className="bg-black text-white px-6 py-4 flex justify-between items-center shadow-lg fixed bottom-0 left-0 w-dvw lg:pl-70 lg:pr-70">
-        {/* Logo */}
-        {/* <div className="text-2xl font-bold tracking-wide">🎵 MusicApp</div>
-   */}
-        {/* Search Bar */}
-        <div className="relative w-32">
+import { useState } from "react";
+
+const AppBar = ({ selectedSection, setSection }) => {
+//   const [selectedSection, setSection] = useState("Music");
+
+  return (
+    <nav className="bg-black text-white px-6 py-4 flex justify-center items-center shadow-lg fixed bottom-0 left-0 w-dvw lg:pl-70 lg:pr-70">
+      {/* Logo */}
+      {/* <div className="text-2xl font-bold tracking-wide">🎵 MusicApp</div>
+       */}
+      {/* Search Bar */}
+      {/* <div className="relative w-32">
           <input
             type="text"
             placeholder="Search..."
@@ -25,17 +29,163 @@ const AppBar = () => {
               d="M21 21l-4.35-4.35M15 10a5 5 0 11-10 0 5 5 0 0110 0z"
             />
           </svg>
+        </div> */}
+
+      {/* Navigation */}
+      <div className="flex space-x-6">
+        <div
+          onClick={() => {
+            setSection("Music");
+          }}
+          className={`w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
+            selectedSection == "Music" ? "bg-white text-black rounded-lg" : ""
+          }`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-music-icon lucide-music"
+          >
+            <path d="M9 18V5l12-2v13" />
+            <circle cx="6" cy="18" r="3" />
+            <circle cx="18" cy="16" r="3" />
+          </svg>
+          <p className="text-xs">Music</p>
         </div>
-  
-        {/* Navigation */}
-        <div className="flex space-x-6">
-          <button className="hover:text-gray-400 transition-all">Music</button>
-          <button className="hover:text-gray-400 transition-all">Artists</button>
-          <button className="hover:text-gray-400 transition-all"><svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px" fill="#FFFFFF"><path d="M392.23-108.08 377-227.48q-16.58-5.41-34.67-15.35-18.1-9.94-31.46-21.02L201-217.77l-88.27-153.54 96-72.46q-1.57-8.59-2.06-17.1-.48-8.51-.48-18.75 0-7.73.73-16.94.74-9.21 2.12-21.29l-96.31-71.84L201-741.65l110.85 46.5q13.65-11.27 30.23-20.87 16.57-9.59 34.54-16.17l15.61-120.54h175.73l15.23 119.81q18.62 6.84 33.44 15.83 14.83 8.98 29.68 21.94l112.88-46.5 88.27 151.96-99.96 74.65q1.96 9.65 2.25 17.42.29 7.77.29 17.52 0 9.37-.39 17.53-.38 8.16-2.46 18.72l98.39 72.54-88.27 153.54-111-47.27q-13.73 11.54-28.54 20.35-14.81 8.8-34.58 16.8l-15.23 119.81H392.23Zm48.02-55.96h77.6l14.93-107.65q29.72-8 53.85-22.08 24.14-14.08 47.18-37.23l99.88 42.58 38.89-67.1L685-421q4.5-15.54 6.4-29.99 1.91-14.46 1.91-29.11 0-15.21-1.66-28.78-1.65-13.58-6.65-29.35l88.35-66.96-38.08-67.19-102.15 43.19q-18.16-19.85-46.2-36.31-28.04-16.46-54.61-23l-12.57-108.27h-79.12l-12.74 107.59q-31.61 7.72-55.51 21.18-23.91 13.46-48.56 37.81l-98.89-42.19-39.07 67.19 86.07 63.88q-5 15.04-7 30.05-2 15.01-2 31.11 0 15.03 1.75 29.53 1.75 14.5 6.37 30.43l-85.19 64.57 39.07 67.2 98.2-42q23.88 23.88 48.84 38 24.96 14.11 55.45 21.61l12.84 106.77Zm38.43-200q48.17 0 81.99-33.87 33.83-33.86 33.83-82.13 0-48.27-33.86-82.09-33.85-33.83-82.1-33.83-48.62 0-82.29 33.87-33.67 33.86-33.67 82.13 0 48.27 33.67 82.09 33.67 33.83 82.43 33.83Zm1.01-116.46Z"/></svg></button>
+
+        <div
+          onClick={() => {
+            setSection("Search");
+          }}
+          className={`w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
+            selectedSection === "Search" ? "bg-white text-black rounded-lg" : ""
+          }`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-search-icon lucide-search"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <p className="text-xs">Search</p>
         </div>
-      </nav>
-    );
-  };
-  
-  export default AppBar;
-  
+
+        <div
+          onClick={() => {
+            setSection("Artist");
+          }}
+          className={`w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
+            selectedSection == "Artist" ? "bg-white text-black rounded-lg" : ""
+          }`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-circle-user-round-icon lucide-circle-user-round"
+          >
+            <path d="M18 20a6 6 0 0 0-12 0" />
+            <circle cx="12" cy="10" r="4" />
+            <circle cx="12" cy="12" r="10" />
+          </svg>
+          <p className="text-xs">Account</p>
+        </div>
+
+        <div
+          onClick={() => {
+            setSection("Settings");
+          }}
+          className={`w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
+            selectedSection == "Settings"
+              ? "bg-white text-black rounded-lg"
+              : ""
+          }`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-cog-icon lucide-cog"
+          >
+            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" />
+            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
+            <path d="M12 2v2" />
+            <path d="M12 22v-2" />
+            <path d="m17 20.66-1-1.73" />
+            <path d="M11 10.27 7 3.34" />
+            <path d="m20.66 17-1.73-1" />
+            <path d="m3.34 7 1.73 1" />
+            <path d="M14 12h8" />
+            <path d="M2 12h2" />
+            <path d="m20.66 7-1.73 1" />
+            <path d="m3.34 17 1.73-1" />
+            <path d="m17 3.34-1 1.73" />
+            <path d="m11 13.73-4 6.93" />
+          </svg>
+          <p className="text-xs">Settings</p>
+        </div>
+
+        <div
+          onClick={() => {
+            setSection("Playlist");
+          }}
+          className={`w-12 inline-flex flex-col justify-around items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
+            selectedSection == "Playlist"
+              ? "bg-white text-black rounded-lg"
+              : ""
+          }`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-list-music-icon lucide-list-music"
+          >
+            <path d="M21 15V6" />
+            <path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+            <path d="M12 12H3" />
+            <path d="M16 6H3" />
+            <path d="M12 18H3" />
+          </svg>
+          <p className="text-xs">Playlist</p>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default AppBar;

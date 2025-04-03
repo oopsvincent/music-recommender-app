@@ -13,25 +13,24 @@ const FirstTimeLogin = () => {
     setLanguage(e.target.value);
   };
 
-const reloadWindow = () => {
-    setTimeout(() => {
-        window.location.reload();  // Reload the window after saving info
-    }, 500)
-}
+// function reloadWindow () {
+//     setTimeout(
+//         , 500)
+// }
 
   // Save to local storage
   const handleSubmit = (e) => {
     e.preventDefault();
   // Call the onSubmit prop to save user info in localStorage
-    if (name === "" && language) {
-        localStorage.setItem('userName', "User");
+    if (name !== "" || language) {
+        localStorage.setItem('userName', name);
         localStorage.setItem('musicLanguage', language);
-        reloadWindow();
-
+        window.location.reload()
     }
     else if (name !== "") {
-        localStorage.setItem('userName', name);
-        reloadWindow();
+        localStorage.setItem('userName', "User");
+        localStorage.setItem('musicLanguage', language);
+        window.location.reload()
     }
     else{
         console.log("passed");
