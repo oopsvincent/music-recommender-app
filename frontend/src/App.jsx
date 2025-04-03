@@ -7,27 +7,25 @@ import FirstTimeLogin from "./Components/FirstTimeLogin";
 import AppBar from "./Components/AppBar";
 
 function greetBasedOnTime() {
-    const now = new Date();
-    const hour = now.getHours();
-  
-    if (hour >= 5 && hour < 12) {
-      return ("Good Morning, ");
-    } else if (hour >= 12 && hour < 17) {
-      return ("Good Afternoon, ");
-    } else {
-      return ("Good Evening, ");
-    }
+  const now = new Date();
+  const hour = now.getHours();
+
+  if (hour >= 5 && hour < 12) {
+    return "Good Morning, ";
+  } else if (hour >= 12 && hour < 17) {
+    return "Good Afternoon, ";
+  } else {
+    return "Good Evening, ";
   }
-  
+}
 
 const SPOTIFY_TOKEN =
-  "BQBeL_WzZHNN-MO_yZTNkegpeP9woZI21o2lGA5pJd_URa0mTUuxYLwB7i98aECkXv5jqz0sAWqyIlyBTih45bcuBXYzUhmgmwMq4tD8Fvmwwpb4hl_YSY2XB6fURzNUXz1LVp7E31w";
+  "BQCgCu1Mn8A_KIROLaSgTe3nRGK2OJBXN4q8cS7Q5bnRB7xTlkb_t8dEdbyDpVpdast9rqmIOr5pElth1hPTdJPJ3dXGUWfCMZOKwW2qfJ3IPCYVzrJRRrvF4tAIvLtKAXsxDjyNsr0";
 
 function fetchYouTubeData(title) {
-    
-  return (`https://www.youtube.com/results?search_query=${encodeURIComponent(
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(
     title
-  )}`)
+  )}`;
 }
 
 // Fetch Spotify Track Data
@@ -49,8 +47,8 @@ async function fetchSpotifyData(title) {
   if (!data.tracks.items.length) throw new Error("No tracks found!");
 
   const track = data.tracks.items[0];
-//   console.log(track);
-//   console.log(track.external_urls.spotify);
+  //   console.log(track);
+  //   console.log(track.external_urls.spotify);
 
   return {
     title: track.name,
@@ -63,11 +61,14 @@ async function fetchSpotifyData(title) {
 function App() {
   const [trackData, setTrackData] = useState([]);
   const [showLogin, setShowLogin] = useState(false);
+  const [selectedSection, setSection] = useState("Music");
   const [userName, setUserName] = useState(localStorage.getItem("userName"));
   const [musicLanguage, setMusicLanguage] = useState(
     localStorage.getItem("musicLanguage")
   );
 
+
+  
   // Function to handle saving user info
   const handleUserInfo = (name, language) => {
     localStorage.setItem("userName", name);
@@ -84,26 +85,26 @@ function App() {
 
     // Fetch multiple tracks
     const tracks = [
-    "too sweet",
-    "SummerTime Sadness",
-    "Counting Stars",
-    "End of Beginning",
-    "As it Was",
-    "Night Changes",
-    "Die With a smile",
-    "beaniw",
-    "deathbed",
-    "safe and sound",
-    "Skyfall",
-    "until I found you",
-    "Sweater weather",
-    "despacito",
-    "all the stars",
-    "HUMBLE",
-    "Not Like Us",
-    "perfect",
-    "bump heads",
-    "Havana",
+      "too sweet",
+      "SummerTime Sadness",
+      "Counting Stars",
+      "End of Beginning",
+      "As it Was",
+      "Night Changes",
+      "Die With a smile",
+      "beaniw",
+      "deathbed",
+      "safe and sound",
+      "Skyfall",
+      "until I found you",
+      "Sweater weather",
+      "despacito",
+      "all the stars",
+      "HUMBLE",
+      "Not Like Us",
+      "perfect",
+      "bump heads",
+      "Havana",
     ];
 
     const loadTracks = async () => {
@@ -119,39 +120,36 @@ function App() {
     loadTracks();
   }, [userName, musicLanguage]); // Re-fetch if userName or musicLanguage changes
 
+  const handleChipSelect = async (chipText) => {
+    try {
+      if (chipText === "Pop") {
+        const response = await fetch("/EnglishPopSongs.json");
 
-    const handleChipSelect = async (chipText) => {
-      try {
-        if (chipText === "Pop") {
-            const response = await fetch("/EnglishPopSongs.json");
-      
-            if (!response.ok) {
-              throw new Error(`Failed to fetch. Status: ${response.status}`);
-            }
-      
-            const data = await response.json();
-            console.log(data);
-            
-            // Ensure 'song' exists before using it
-
-            // for (let i = 0; i < 20; i++) {
-            //     let rand = Math.floor((Math.random() * data.length + 1));
-            //     const song = data[rand];
-            //     const newTrack = await fetchSpotifyData(song);
-            //     setTrackData((prevData) => [newTrack, ...prevData]);
-            // }
-
-            // const song = data[0]; // Example: Using the first song in the array
-      
+        if (!response.ok) {
+          throw new Error(`Failed to fetch. Status: ${response.status}`);
         }
-      } catch (error) {
-        console.error("Error fetching track:", error.message);
-      }
-    };
 
+        const data = await response.json();
+        console.log(data);
+
+        // Ensure 'song' exists before using it
+
+        // for (let i = 0; i < 20; i++) {
+        //     let rand = Math.floor((Math.random() * data.length + 1));
+        //     const song = data[rand];
+        //     const newTrack = await fetchSpotifyData(song);
+        //     setTrackData((prevData) => [newTrack, ...prevData]);
+        // }
+
+        // const song = data[0]; // Example: Using the first song in the array
+      }
+    } catch (error) {
+      console.error("Error fetching track:", error.message);
+    }
+  };
 
   return (
-    <div className="md:ml-10 md:mr-10 lg:ml-40 lg:mr-40">
+    <div className="md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex flex-col justify-between">
       {/* Render the FirstTimeLogin component if showLogin is true */}
       {showLogin && (
         <div className="h-dvh md:flex md:justify-center md:items-center">
@@ -161,45 +159,56 @@ function App() {
 
       {!showLogin && (
         <>
-        <div className="flex flex-col justify-around md:flex-row">
-          <h1 className="pt-5 pl-5 text-xl dark:text-white m-1 mb-4 boldonse line-h line-clamp-3 md:text-4xl md:p-4" title={userName}>
-            {greetBasedOnTime()} {userName}
-          </h1>
-          <h3 className="boldonse text-xs text-white m-3 flex justify-around items-center">
-            Current Music Language: {musicLanguage}
-            <button
-              className="bg-white text-xs text-black p-2 ml-5 rounded-lg hover:bg-black hover:text-white focus:bg-black focus:text-white focus:border-2 transition-all duration-200"
-              onClick={() => setTimeout(()=>setShowLogin(true), 500)} // Show the login again when the user wants to change
+          {/* <div className="flex flex-col justify-around md:flex-row"> */}
+            <h1
+              className="pt-5 pl-5 text-xl dark:text-white m-1 mb-4 boldonse line-h line-clamp-3 md:text-4xl md:p-4"
+              title={userName}
             >
-              Change
-            </button>
-          </h3>
-        </div>
-          <hr className="text-white m-2" />
+              {greetBasedOnTime()} {userName}
+            </h1>
 
-          <ChipSection onChipSelect={handleChipSelect} />
+            {selectedSection === "Settings" && (
+              <>
+                <h3 className="boldonse text-xs text-white m-3 flex justify-around items-center">
+                  Current Music Language: {musicLanguage}
+                  <button
+                    className="bg-white text-xs text-black p-2 ml-5 rounded-lg hover:bg-black hover:text-white focus:bg-black focus:text-white focus:border-2 transition-all duration-200"
+                    onClick={() => setTimeout(() => setShowLogin(true), 500)} // Show the login again when the user wants to change
+                  >
+                    Change
+                  </button>
+                </h3>
+              </>
+            )}
+          {/* </div> */}
 
+          {/* <hr className="text-white m-2" /> */}
 
-          <div className="flex flex-row flex-wrap justify-center">
-            {trackData.map((track, index) => (
-              <Card
-                key={index}
-                url={track.url}
-                title={track.title}
-                artist={track.artists}
-                spoURL={track.spoURL}
-                YTURL={fetchYouTubeData(track.title + " " + track.artists)}
-              />
-            ))}
-          </div>
+          {selectedSection === "Music" && (
+            <>
+              <ChipSection onChipSelect={handleChipSelect} />
+
+              <div className="flex flex-row flex-wrap justify-center mb-5">
+                {trackData.map((track, index) => (
+                  <Card
+                    key={index}
+                    url={track.url}
+                    title={track.title}
+                    artist={track.artists}
+                    spoURL={track.spoURL}
+                    YTURL={fetchYouTubeData(track.title + " " + track.artists)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </>
       )}
-<footer className="text-center py-6 px-8 text-gray-400 mb-20">
-  © 2025 Farhan Ali Reza & Soumodip Mondal. All rights reserved. Licensed under MIT License.
-</footer>
-      <AppBar />
-
-
+      <footer className="text-center py-6 px-8 text-white mb-17 relative bottom-0">
+        © 2025 Farhan Ali Reza & Soumodip Mondal. All rights reserved. Licensed
+        under MIT License.
+      </footer>
+      <AppBar selectedSection={selectedSection} setSection={setSection} />
     </div>
   );
 }

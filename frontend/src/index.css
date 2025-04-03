@@ -137,9 +137,15 @@
         );
         background-size: 15px;   
     }
+
+    .h-at-min{
+        min-height: 100vh;
+    }
 }
 
 
 #root{
     background-image: url('./assets/bg.png');
+    background-size: 100vw;
+    background-position: center;
   }

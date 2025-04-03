@@ -13,30 +13,31 @@ const FirstTimeLogin = () => {
     setLanguage(e.target.value);
   };
 
-const reloadWindow = () => {
-    setTimeout(() => {
-        window.location.reload();  // Reload the window after saving info
-    }, 500)
-}
+// function reloadWindow () {
+//     setTimeout(
+//         , 500)
+// }
 
   // Save to local storage
-  const handleSubmit = (e) => {
+const handleSubmit = (e) => {
     e.preventDefault();
-  // Call the onSubmit prop to save user info in localStorage
-    if (name !== "" && language) {
-        localStorage.setItem('userName', "User");
-        localStorage.setItem('musicLanguage', language);
-        reloadWindow();
 
+    // Set default name if empty
+    const userName = name.trim() === "" ? "User" : name;
+
+    if (language) {
+        localStorage.setItem('userName', userName);
+        localStorage.setItem('musicLanguage', language);
+        
+        // Reload page after 500ms
+        setTimeout(() => {
+            window.location.reload();
+        }, 500);
+    } else {
+        console.log("Language is required.");
     }
-    else if (name === "" || name === " ") {
-        localStorage.setItem('userName', name);
-        reloadWindow();
-    }
-    else{
-        console.log("passed");
-    }
-  };
+};
+
 
   return (
     <div className="bg-white rounded-2xl flex flex-col p-5 m-2 border-2 shadow-2xl shadow-white">
