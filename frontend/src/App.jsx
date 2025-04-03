@@ -21,23 +21,13 @@ function greetBasedOnTime() {
   
 
 const SPOTIFY_TOKEN =
-  "BQBCb-y5ekTWWeLyF05i0nrW_IN6oFm7xqu-uK8-LA7MfjNcn__LYLQqDYo3LSMiO8eXa6eAlpGapGOPMrBTt-3eKZgnDdwfQejtwfo4TIoU3sh0RHMIVvHwWoB2ycW_Jg76gGubG1s";
+  "BQBeL_WzZHNN-MO_yZTNkegpeP9woZI21o2lGA5pJd_URa0mTUuxYLwB7i98aECkXv5jqz0sAWqyIlyBTih45bcuBXYzUhmgmwMq4tD8Fvmwwpb4hl_YSY2XB6fURzNUXz1LVp7E31w";
 
-async function fetchYouTubeData(title) {
-  const response = await fetch(
-    `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
-      title
-    )}&key=YOUR_YOUTUBE_API_KEY`
-  );
-
-  if (!response.ok) throw new Error(`API Error: ${response.status}`);
-  const data = await response.json();
-
-  if (!data.items.length) throw new Error("No videos found!");
-
-  // Get the first video URL
-  const videoId = data.items[0].id.videoId;
-  return `https://www.youtube.com/watch?v=${videoId}`;
+function fetchYouTubeData(title) {
+    
+  return (`https://www.youtube.com/results?search_query=${encodeURIComponent(
+    title
+  )}`)
 }
 
 // Fetch Spotify Track Data
@@ -59,7 +49,8 @@ async function fetchSpotifyData(title) {
   if (!data.tracks.items.length) throw new Error("No tracks found!");
 
   const track = data.tracks.items[0];
-  console.log(track);
+//   console.log(track);
+//   console.log(track.external_urls.spotify);
 
   return {
     title: track.name,
@@ -160,7 +151,7 @@ function App() {
 
 
   return (
-    <div className="md:ml-40 md:mr-40">
+    <div className="md:ml-10 md:mr-10 lg:ml-40 lg:mr-40">
       {/* Render the FirstTimeLogin component if showLogin is true */}
       {showLogin && (
         <div className="h-dvh md:flex md:justify-center md:items-center">
@@ -171,14 +162,14 @@ function App() {
       {!showLogin && (
         <>
         <div className="flex flex-col justify-around md:flex-row">
-          <h1 className="pt-5 pl-5 text-2xl dark:text-white m-1 mb-4 boldonse line-h line-clamp-3 md:text-4xl md:p-4" title={userName}>
+          <h1 className="pt-5 pl-5 text-xl dark:text-white m-1 mb-4 boldonse line-h line-clamp-3 md:text-4xl md:p-4" title={userName}>
             {greetBasedOnTime()} {userName}
           </h1>
           <h3 className="boldonse text-xs text-white m-3 flex justify-around items-center">
             Current Music Language: {musicLanguage}
             <button
-              className="bg-white text-xs text-black p-2 ml-5 rounded-lg"
-              onClick={() => setShowLogin(true)} // Show the login again when the user wants to change
+              className="bg-white text-xs text-black p-2 ml-5 rounded-lg hover:bg-black hover:text-white focus:bg-black focus:text-white focus:border-2 transition-all duration-200"
+              onClick={() => setTimeout(()=>setShowLogin(true), 500)} // Show the login again when the user wants to change
             >
               Change
             </button>
@@ -197,6 +188,7 @@ function App() {
                 title={track.title}
                 artist={track.artists}
                 spoURL={track.spoURL}
+                YTURL={fetchYouTubeData(track.title + " " + track.artists)}
               />
             ))}
           </div>
