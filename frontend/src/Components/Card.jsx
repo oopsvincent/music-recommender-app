@@ -75,7 +75,7 @@ const Card = ({ url, title, artist, spoURL, YTURL }) => {
           </button>
         </div>
         <div className="mr-3 inline-flex justify-center items-center">
-          <button onClick={() => {setSaved(true)}}>
+          <button onClick={() => {setSaved(!true)}}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
