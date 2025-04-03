@@ -4,7 +4,7 @@ const AppBar = ({ selectedSection, setSection }) => {
 //   const [selectedSection, setSection] = useState("Music");
 
   return (
-    <nav className="bg-black text-white px-6 py-4 flex justify-center items-center shadow-lg fixed bottom-0 left-0 w-dvw lg:pl-70 lg:pr-70">
+    <nav className="select-none bg-black text-white px-6 py-4 flex justify-center items-center shadow-lg fixed bottom-0 left-0 w-dvw lg:pl-70 lg:pr-70">
       {/* Logo */}
       {/* <div className="text-2xl font-bold tracking-wide">🎵 MusicApp</div>
        */}
