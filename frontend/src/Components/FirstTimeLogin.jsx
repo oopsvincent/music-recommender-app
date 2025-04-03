@@ -13,25 +13,28 @@ const FirstTimeLogin = () => {
     setLanguage(e.target.value);
   };
 
+const reloadWindow = () => {
+    setTimeout(() => {
+        window.location.reload();  // Reload the window after saving info
+    }, 500)
+}
+
   // Save to local storage
   const handleSubmit = (e) => {
     e.preventDefault();
   // Call the onSubmit prop to save user info in localStorage
-    if (name == "") {
+    if (name === "" && language) {
         localStorage.setItem('userName', "User");
-        window.location.reload();  // Reload the window after saving info
+        localStorage.setItem('musicLanguage', language);
+        reloadWindow();
+
     }
     else if (name !== "") {
         localStorage.setItem('userName', name);
-        window.location.reload();  // Reload the window after saving info
+        reloadWindow();
     }
-    if (language) {
-        // Save the name and language to localStorage
-        localStorage.setItem('musicLanguage', language);
-        alert('Your information has been saved!');
-        window.location.reload();  // Reload the window after saving info
-    } else {
-      alert('Please fill in both fields.');
+    else{
+        console.log("passed");
     }
   };
 
@@ -53,7 +56,7 @@ const FirstTimeLogin = () => {
         id="lang"
         value={language}
         onChange={handleLanguageChange}
-        className='mt-2 mb-5 outline-1 p-2 pb-2 rounded-lg pr-4'
+        className='mt-2 mb-5 outline-1 p-2 pb-2 rounded-lg pr-4 transition-all duration-200'
       >
         <option value="English">English</option>
         <option value="French">Français (French)</option>
@@ -66,8 +69,8 @@ const FirstTimeLogin = () => {
         <option value="Japanese">日本語 (Japanese)</option>
       </select>
     <p>Everything is Confidential and can be changed later</p>
-      <button onClick={handleSubmit} className="mt-4 p-2 bg-black rounded-md text-white">
-        Save Information
+      <button onClick={handleSubmit} className="mt-4 p-2 bg-black rounded-md text-white active:scale-90 transition-all duration-200">
+        Continue
       </button>
     </div>
   );
