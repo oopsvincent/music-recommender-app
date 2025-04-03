@@ -23,13 +23,13 @@ const reloadWindow = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
   // Call the onSubmit prop to save user info in localStorage
-    if (name === "" && language) {
+    if (name !== "" && language) {
         localStorage.setItem('userName', "User");
         localStorage.setItem('musicLanguage', language);
         reloadWindow();
 
     }
-    else if (name !== "") {
+    else if (name === "" || name === " ") {
         localStorage.setItem('userName', name);
         reloadWindow();
     }
