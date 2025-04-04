@@ -141,6 +141,14 @@
     .h-at-min{
         min-height: 100vh;
     }
+
+    .w-at-min{
+        min-width: 60%;
+    }
+
+    colorsed{
+        color: rgb(0, 255, 106);
+    }
 }
 
 
