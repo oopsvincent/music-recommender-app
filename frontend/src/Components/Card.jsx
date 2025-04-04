@@ -159,8 +159,6 @@ const Card = ({ url, title, artist, spoURL, YTURL }) => {
   </button>
 
 </div>
-          </button>
-        </div>
       </div>
     </div>
   );
