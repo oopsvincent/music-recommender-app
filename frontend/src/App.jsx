@@ -5,6 +5,7 @@ import ChipSection from "./Components/ChipSection";
 import SpotifyConnect from "./Components/SpotifyConnect";
 import FirstTimeLogin from "./Components/FirstTimeLogin";
 import AppBar from "./Components/AppBar";
+import Search from "./Components/Search";
 
 function greetBasedOnTime() {
   const now = new Date();
@@ -20,7 +21,7 @@ function greetBasedOnTime() {
 }
 
 const SPOTIFY_TOKEN =
-  "BQCgCu1Mn8A_KIROLaSgTe3nRGK2OJBXN4q8cS7Q5bnRB7xTlkb_t8dEdbyDpVpdast9rqmIOr5pElth1hPTdJPJ3dXGUWfCMZOKwW2qfJ3IPCYVzrJRRrvF4tAIvLtKAXsxDjyNsr0";
+  "BQB5PSPAJrGw_N43yfGHpHd7VlAJx4Gj6vvpUArnkngOZ4gvVvoBeaSDA-pHGbOJP50fS2BljcnJOPHxgkyIT9Ua45l2NK1jvBhaCvo2XsoHmvq9dvca6Ek-RFBAMFsiYct5ve_2yZ0";
 
 function fetchYouTubeData(title) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(
@@ -67,8 +68,13 @@ function App() {
     localStorage.getItem("musicLanguage")
   );
 
+  const [searchTerm, setSearchTerm] = useState("");
 
-  
+  function handleSearchChange(query) {
+    setSearchTerm(query);
+    console.log("Search Query in App:", query); // Verify that App.jsx receives the search term
+  }
+
   // Function to handle saving user info
   const handleUserInfo = (name, language) => {
     localStorage.setItem("userName", name);
@@ -149,7 +155,11 @@ function App() {
   };
 
   return (
-    <div className="md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex flex-col justify-between">
+    <div
+      className={`md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex ${
+        selectedSection === "Search" && "justify-start"
+      } flex-col justify-between`}
+    >
       {/* Render the FirstTimeLogin component if showLogin is true */}
       {showLogin && (
         <div className="h-dvh md:flex md:justify-center md:items-center">
@@ -160,32 +170,32 @@ function App() {
       {!showLogin && (
         <>
           {/* <div className="flex flex-col justify-around md:flex-row"> */}
-            <h1
-              className="pt-5 pl-5 text-xl dark:text-white m-1 mb-4 boldonse line-h line-clamp-3 md:text-4xl md:p-4"
-              title={userName}
-            >
-              {greetBasedOnTime()} {userName}
-            </h1>
 
-            {selectedSection === "Settings" && (
-              <>
-                <h3 className="boldonse text-xs text-white m-3 flex justify-around items-center">
-                  Current Music Language: {musicLanguage}
-                  <button
-                    className="bg-white text-xs text-black p-2 ml-5 rounded-lg hover:bg-black hover:text-white focus:bg-black focus:text-white focus:border-2 transition-all duration-200"
-                    onClick={() => setTimeout(() => setShowLogin(true), 500)} // Show the login again when the user wants to change
-                  >
-                    Change
-                  </button>
-                </h3>
-              </>
-            )}
+          {selectedSection === "Settings" && (
+            <>
+              <h3 className="boldonse text-xs text-white m-3 flex justify-around items-center">
+                Current Music Language: {musicLanguage}
+                <button
+                  className="bg-white text-xs text-black p-2 ml-5 rounded-lg hover:bg-black hover:text-white focus:bg-black focus:text-white focus:border-2 transition-all duration-200"
+                  onClick={() => setTimeout(() => setShowLogin(true), 500)} // Show the login again when the user wants to change
+                >
+                  Change
+                </button>
+              </h3>
+            </>
+          )}
           {/* </div> */}
 
           {/* <hr className="text-white m-2" /> */}
 
           {selectedSection === "Music" && (
             <>
+              <h1
+                className="pt-5 pl-5 text-xl dark:text-white m-1 mb-4 boldonse line-h line-clamp-3 md:text-4xl md:p-4"
+                title={userName}
+              >
+                {greetBasedOnTime()} {userName}
+              </h1>
               <ChipSection onChipSelect={handleChipSelect} />
 
               <div className="flex flex-row flex-wrap justify-center mb-5">
@@ -200,6 +210,17 @@ function App() {
                   />
                 ))}
               </div>
+            </>
+          )}
+
+          {selectedSection === "Search" && (
+            
+            <>
+                  <div>
+      <Search handleChange={handleSearchChange} />
+      <p className="text-white p-5">User is searching for: {searchTerm}</p>
+    </div>
+
             </>
           )}
         </>
