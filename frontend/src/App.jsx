@@ -6,6 +6,7 @@ import SpotifyConnect from "./Components/SpotifyConnect";
 import FirstTimeLogin from "./Components/FirstTimeLogin";
 import AppBar from "./Components/AppBar";
 import Search from "./Components/Search";
+import NotificationButton from "./Components/NotificationButton";
 
 function greetBasedOnTime() {
   const now = new Date();
@@ -21,7 +22,7 @@ function greetBasedOnTime() {
 }
 
 const SPOTIFY_TOKEN =
-  "BQB5PSPAJrGw_N43yfGHpHd7VlAJx4Gj6vvpUArnkngOZ4gvVvoBeaSDA-pHGbOJP50fS2BljcnJOPHxgkyIT9Ua45l2NK1jvBhaCvo2XsoHmvq9dvca6Ek-RFBAMFsiYct5ve_2yZ0";
+  "BQDINxZ_S8oj36NEBFNeLKm_p0rviH1mBRFB1ryH6V9D6CGxrvZ4liwzuC0iWPPURzb11h6fWchBEa5F9UMBWHtX3dgMEAcTIoU2gXm_nwaF0Lxdpv4bdpNaG_tHOq0bVztO7DfV6WQ";
 
 function fetchYouTubeData(title) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(
@@ -59,6 +60,63 @@ async function fetchSpotifyData(title) {
   };
 }
 
+async function fetchSpotifySearchResults(query) {
+    try {
+      const response = await fetch(
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=20`,
+        {
+          headers: {
+            Authorization: `Bearer ${SPOTIFY_TOKEN}`, // define this in your .env or file
+          },
+        }
+      );
+  
+      if (!response.ok) throw new Error(`Spotify Error: ${response.status}`);
+      const data = await response.json();
+  
+      if (!data.tracks.items.length) {
+        setSearchResults([]); // no results
+        return;
+      }
+  
+      const results = data.tracks.items.map((track) => ({
+        title: track.name,
+        url: track.album.images[0]?.url,
+        artists: track.artists.map((artist) => artist.name).join(", "),
+        spoURL: track.external_urls?.spotify || "#",
+      }));
+  
+      setSearchResults(results);
+    } catch (err) {
+      console.error("Error fetching search results:", err);
+      setSearchResults([]);
+    }
+  }
+  
+  Notification.requestPermission().then(function(permission) {
+    if (permission === "granted") {
+      console.log("Permission granted for notifications!");
+    } else {
+      console.log("No soup for you! (Permission denied)");
+    }
+  });
+
+  function notifyUser() {
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          sendNotification("🎧 Ready to vibe?", {
+            body: "Your daily track recommendations are here!",
+          });
+        }
+      });
+    } else {
+      sendNotification("🎧 Music time!", {
+        body: "Click to play your favorite jam.",
+      });
+    }
+  }
+
 function App() {
   const [trackData, setTrackData] = useState([]);
   const [showLogin, setShowLogin] = useState(false);
@@ -69,11 +127,19 @@ function App() {
   );
 
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [searchResults, setSearchResults] = useState([]);
+  
   function handleSearchChange(query) {
     setSearchTerm(query);
-    console.log("Search Query in App:", query); // Verify that App.jsx receives the search term
+  
+    if (query.trim() === "") {
+      setSearchResults([]); // Clear search results if input is empty
+      return;
+    }
+  
+    fetchSpotifySearchResults(query); // Custom function to get 20 results
   }
+  
 
   // Function to handle saving user info
   const handleUserInfo = (name, language) => {
@@ -91,7 +157,7 @@ function App() {
 
     // Fetch multiple tracks
     const tracks = [
-      "too sweet",
+      "too sweet hozier",
       "SummerTime Sadness",
       "Counting Stars",
       "End of Beginning",
@@ -162,9 +228,12 @@ function App() {
     >
       {/* Render the FirstTimeLogin component if showLogin is true */}
       {showLogin && (
-        <div className="h-dvh md:flex md:justify-center md:items-center">
-          <FirstTimeLogin onSubmit={handleUserInfo} />
-        </div>
+        <div className="h-dvh flex justify-center items-center">
+  <div className="max-w-[90%] w-full">
+    <FirstTimeLogin onSubmit={handleUserInfo} />
+  </div>
+</div>
+
       )}
 
       {!showLogin && (
@@ -190,12 +259,15 @@ function App() {
 
           {selectedSection === "Music" && (
             <>
+
               <h1
                 className="pt-5 pl-5 text-xl dark:text-white m-1 mb-4 boldonse line-h line-clamp-3 md:text-4xl md:p-4"
                 title={userName}
               >
                 {greetBasedOnTime()} {userName}
+
               </h1>
+              <NotificationButton />
               <ChipSection onChipSelect={handleChipSelect} />
 
               <div className="flex flex-row flex-wrap justify-center mb-5">
@@ -213,16 +285,27 @@ function App() {
             </>
           )}
 
-          {selectedSection === "Search" && (
-            
-            <>
-                  <div>
-      <Search handleChange={handleSearchChange} />
-      <p className="text-white p-5">User is searching for: {searchTerm}</p>
-    </div>
+{selectedSection === "Search" && (
+  <div>
+    <Search handleChange={handleSearchChange} />
+    <p className="text-white p-5">
+      {searchTerm ? `User is searching for: ${searchTerm}` : "Start typing to search for tracks"}
+    </p>
 
-            </>
-          )}
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-5">
+      {searchResults.map((track, i) => (
+        <Card
+          key={i}
+          title={track.title}
+          image={track.url}
+          artist={track.artists}
+          link={track.spoURL}
+        />
+      ))}
+    </div>
+  </div>
+)}
+
         </>
       )}
       <footer className="text-center py-6 px-8 text-white mb-17 relative bottom-0">

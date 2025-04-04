@@ -48,10 +48,10 @@ const AppBar = ({ selectedSection, setSection }) => {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-music-icon lucide-music"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-music-icon lucide-music"
           >
             <path d="M9 18V5l12-2v13" />
             <circle cx="6" cy="18" r="3" />
@@ -75,10 +75,10 @@ const AppBar = ({ selectedSection, setSection }) => {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-search-icon lucide-search"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-search-icon lucide-search"
           >
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.3-4.3" />
@@ -101,10 +101,10 @@ const AppBar = ({ selectedSection, setSection }) => {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-circle-user-round-icon lucide-circle-user-round"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-circle-user-round-icon lucide-circle-user-round"
           >
             <path d="M18 20a6 6 0 0 0-12 0" />
             <circle cx="12" cy="10" r="4" />
@@ -130,10 +130,10 @@ const AppBar = ({ selectedSection, setSection }) => {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-cog-icon lucide-cog"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-cog-icon lucide-cog"
           >
             <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" />
             <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
@@ -170,10 +170,10 @@ const AppBar = ({ selectedSection, setSection }) => {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-list-music-icon lucide-list-music"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-list-music-icon lucide-list-music"
           >
             <path d="M21 15V6" />
             <path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
