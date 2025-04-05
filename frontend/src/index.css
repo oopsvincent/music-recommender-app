@@ -147,8 +147,17 @@
         min-width: 60%;
     }
 
-    colorsed{
+    .colorsed{
         color: rgb(0, 255, 106);
+    }
+
+    .blck:active{
+        background: #6d6565d0;
+        color: white;
+    }
+
+    .blck:hover{
+        color: var(--color-gray-400)
     }
 }
 

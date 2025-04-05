@@ -1,4 +1,5 @@
 import { useState } from "react";
+import '../index.css'
 
 const AppBar = ({ selectedSection, setSection }) => {
 //   const [selectedSection, setSection] = useState("Music");
@@ -37,7 +38,7 @@ const AppBar = ({ selectedSection, setSection }) => {
           onClick={() => {
             setSection("Music");
           }}
-          className={`w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
+          className={`w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 blck transition-all duration-400 ${
             selectedSection == "Music" ? "bg-white text-black rounded-lg" : ""
           }`}
         >
@@ -64,7 +65,7 @@ const AppBar = ({ selectedSection, setSection }) => {
           onClick={() => {
             setSection("Search");
           }}
-          className={`w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
+          className={`blck w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
             selectedSection === "Search" ? "bg-white text-black rounded-lg" : ""
           }`}
         >
@@ -90,7 +91,7 @@ const AppBar = ({ selectedSection, setSection }) => {
           onClick={() => {
             setSection("Artist");
           }}
-          className={`w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
+          className={`blck w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
             selectedSection == "Artist" ? "bg-white text-black rounded-lg" : ""
           }`}
         >
@@ -117,7 +118,7 @@ const AppBar = ({ selectedSection, setSection }) => {
           onClick={() => {
             setSection("Settings");
           }}
-          className={`w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
+          className={`blck w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
             selectedSection == "Settings"
               ? "bg-white text-black rounded-lg"
               : ""
@@ -157,7 +158,7 @@ const AppBar = ({ selectedSection, setSection }) => {
           onClick={() => {
             setSection("Playlist");
           }}
-          className={`w-12 inline-flex flex-col justify-around items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
+          className={`blck w-12 inline-flex flex-col justify-around items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
             selectedSection == "Playlist"
               ? "bg-white text-black rounded-lg"
               : ""
