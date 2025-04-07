@@ -128,15 +128,15 @@
 
     .glassmorpho{
         background-color: transparent;
-        backdrop-filter: blur(70px);
-        -webkit-backdrop-filter: blur(70px);
+        -webkit-backdrop-filter: blur(40px);
+        backdrop-filter: blur(40px);
         background-image: linear-gradient(
             120deg,
             rgba(111, 0, 185, 0.199),
             rgba(255, 255, 255, 0.511)
             /* rgba(0, 255, 213, 0.368) */
         );
-        background-size: 15px;   
+        background-size: 20px;   
     }
 
     .h-at-min{
@@ -156,9 +156,6 @@
         color: white;
     }
 
-    .blck:hover{
-        color: var(--color-gray-400)
-    }
 }
 
 

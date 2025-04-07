@@ -22,7 +22,7 @@ function greetBasedOnTime() {
 }
 
 const SPOTIFY_TOKEN =
-  "BQDINxZ_S8oj36NEBFNeLKm_p0rviH1mBRFB1ryH6V9D6CGxrvZ4liwzuC0iWPPURzb11h6fWchBEa5F9UMBWHtX3dgMEAcTIoU2gXm_nwaF0Lxdpv4bdpNaG_tHOq0bVztO7DfV6WQ";
+  "BQCxPFhLgGzLCIwHVynYA5cLjb0jgqMfJykLf8GG_lbXbiPomKMeayJUn96qRA6JKYrNmBtNS_3V7Tj3aO2I6pFNkBhabZfKCAytPkegkeP1QJw0t01SyB3rlsL6TFO80bg4-zDpBtU";
 
 function fetchYouTubeData(title) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(
@@ -92,30 +92,6 @@ async function fetchSpotifySearchResults(query) {
       setSearchResults([]);
     }
   }
-  
-  Notification.requestPermission().then(function(permission) {
-    if (permission === "granted") {
-      console.log("Permission granted for notifications!");
-    } else {
-      console.log("No soup for you! (Permission denied)");
-    }
-  });
-
-  function notifyUser() {
-    if (Notification.permission !== "granted") {
-      Notification.requestPermission().then((permission) => {
-        if (permission === "granted") {
-          sendNotification("🎧 Ready to vibe?", {
-            body: "Your daily track recommendations are here!",
-          });
-        }
-      });
-    } else {
-      sendNotification("🎧 Music time!", {
-        body: "Click to play your favorite jam.",
-      });
-    }
-  }
 
 function App() {
   const [trackData, setTrackData] = useState([]);
@@ -147,7 +123,7 @@ function App() {
     localStorage.setItem("musicLanguage", language);
     setUserName(name);
     setMusicLanguage(language);
-    setShowLogin(false); // Hide the FirstTimeLogin component after saving info
+    setShowLogin(false);
   };
 
   useEffect(() => {
@@ -155,7 +131,6 @@ function App() {
       setShowLogin(true); // Show login if no user info in localStorage
     }
 
-    // Fetch multiple tracks
     const tracks = [
       "too sweet hozier",
       "SummerTime Sadness",
@@ -195,7 +170,7 @@ function App() {
   const handleChipSelect = async (chipText) => {
     try {
       if (chipText === "Pop") {
-        const response = await fetch("/EnglishPopSongs.json");
+        const response = await fetch("https://flask-app-practice-api.onrender.com/songs/pop_music");
 
         if (!response.ok) {
           throw new Error(`Failed to fetch. Status: ${response.status}`);
@@ -204,6 +179,7 @@ function App() {
         const data = await response.json();
         console.log(data);
 
+        
         // Ensure 'song' exists before using it
 
         // for (let i = 0; i < 20; i++) {
@@ -267,7 +243,6 @@ function App() {
                 {greetBasedOnTime()} {userName}
 
               </h1>
-              <NotificationButton />
               <ChipSection onChipSelect={handleChipSelect} />
 
               <div className="flex flex-row flex-wrap justify-center mb-5">
