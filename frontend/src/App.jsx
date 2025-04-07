@@ -22,7 +22,7 @@ function greetBasedOnTime() {
 }
 
 const SPOTIFY_TOKEN =
-  "BQCxPFhLgGzLCIwHVynYA5cLjb0jgqMfJykLf8GG_lbXbiPomKMeayJUn96qRA6JKYrNmBtNS_3V7Tj3aO2I6pFNkBhabZfKCAytPkegkeP1QJw0t01SyB3rlsL6TFO80bg4-zDpBtU";
+  "BQBV8x-At1oc8AqXKl15PWGirSJ5KXggNCq_m219db5GlOhg1cuBq4D3HAiebqX8AIqpNCw2cTXADAd8gYTusk_aQKc2aCR5_Ho0IAWvCL3uR9QvpRwZxrK-Xbsv5iZIIxyEr_rTHjM";
 
 function fetchYouTubeData(title) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(
@@ -51,12 +51,14 @@ async function fetchSpotifyData(title) {
   const track = data.tracks.items[0];
   //   console.log(track);
   //   console.log(track.external_urls.spotify);
-
+  console.log(track);
+  
   return {
     title: track.name,
     url: track.album.images[0].url,
     artists: track.artists.map((artist) => artist.name).join(", "),
     spoURL: track.external_urls?.spotify || "#",
+    popularity: track.popularity,
   };
 }
 
@@ -95,6 +97,7 @@ function App() {
         url: track.album.images[0].url,
         artists: track.artists.map((artist) => artist.name).join(", "),
         spoURL: track.external_urls?.spotify || "#",
+        popularity: track.popularity,
       }));
       console.log(results);
       
@@ -134,13 +137,14 @@ function App() {
     }
 
     const tracks = [
+        "Die With a smile",
       "too sweet hozier",
       "SummerTime Sadness",
+      "thats so true",
       "Counting Stars",
       "End of Beginning",
       "As it Was",
       "Night Changes",
-      "Die With a smile",
       "beaniw",
       "deathbed",
       "safe and sound",
@@ -257,6 +261,7 @@ function App() {
                     artist={track.artists}
                     spoURL={track.spoURL}
                     YTURL={fetchYouTubeData(track.title + " " + track.artists)}
+                    popularity={track.popularity}
                   />
                 ))}
               </div>
@@ -280,6 +285,7 @@ function App() {
           artist={track.artists}
           link={track.spoURL}
           YTURL={fetchYouTubeData(track.title + " " + track.artists)}
+          popularity={track.popularity}
         />
       ))}
     </div>
