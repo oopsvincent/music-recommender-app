@@ -6,7 +6,7 @@
 import React, { useState } from "react";
 import { SpotifyButton, YouTubeButton } from "./MusicButtons";
 
-const Card = ({ url, title, artist, spoURL, YTURL }) => {
+const Card = ({ url, title, artist, spoURL, YTURL, popularity }) => {
   const [saved, setSaved] = useState(false);
   const [like, saveLike] = useState(0);
 
@@ -39,7 +39,7 @@ const Card = ({ url, title, artist, spoURL, YTURL }) => {
         <YouTubeButton clickHandle={() => handleClick(YTURL)} />
       </div>
       <div className="flex justify-between items-center pb-2">
-        <div className="inline-flex justify-center items-center ml-3">
+        {/* <div className="inline-flex justify-center items-center ml-3">
           <button className="p-2" onClick={() => saveLike(1)}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -74,7 +74,9 @@ const Card = ({ url, title, artist, spoURL, YTURL }) => {
               <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z" />
             </svg>
           </button>
-        </div>
+        </div> */}
+        <div className="ml-1 text-md text-gray inline-flex justify-center items-center md:text-lg md:items-end">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-award-icon lucide-award"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></svg><p>Popularity: {popularity}</p></div>
         <div className="mr-3 inline-flex justify-center items-center transition-all duration-1000">
           <button
             onClick={() => {
