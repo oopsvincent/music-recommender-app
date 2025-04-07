@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import "./App.css";
 import Card from "./Components/Card";
 import ChipSection from "./Components/ChipSection";
@@ -6,7 +6,7 @@ import SpotifyConnect from "./Components/SpotifyConnect";
 import FirstTimeLogin from "./Components/FirstTimeLogin";
 import AppBar from "./Components/AppBar";
 import Search from "./Components/Search";
-import NotificationButton from "./Components/NotificationButton";
+import debounce from "lodash.debounce";
 
 function greetBasedOnTime() {
   const now = new Date();
@@ -60,7 +60,18 @@ async function fetchSpotifyData(title) {
   };
 }
 
-async function fetchSpotifySearchResults(query) {
+function App() {
+  const [trackData, setTrackData] = useState([]);
+  const [showLogin, setShowLogin] = useState(false);
+  const [selectedSection, setSection] = useState("Music");
+  const [userName, setUserName] = useState(localStorage.getItem("userName"));
+  const [musicLanguage, setMusicLanguage] = useState(
+    localStorage.getItem("musicLanguage")
+  );
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  
+  async function fetchSpotifySearchResults(query) {
     try {
       const response = await fetch(
         `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=20`,
@@ -81,10 +92,12 @@ async function fetchSpotifySearchResults(query) {
   
       const results = data.tracks.items.map((track) => ({
         title: track.name,
-        url: track.album.images[0]?.url,
+        url: track.album.images[0].url,
         artists: track.artists.map((artist) => artist.name).join(", "),
         spoURL: track.external_urls?.spotify || "#",
       }));
+      console.log(results);
+      
   
       setSearchResults(results);
     } catch (err) {
@@ -93,27 +106,16 @@ async function fetchSpotifySearchResults(query) {
     }
   }
 
-function App() {
-  const [trackData, setTrackData] = useState([]);
-  const [showLogin, setShowLogin] = useState(false);
-  const [selectedSection, setSection] = useState("Music");
-  const [userName, setUserName] = useState(localStorage.getItem("userName"));
-  const [musicLanguage, setMusicLanguage] = useState(
-    localStorage.getItem("musicLanguage")
-  );
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  
+  const debouncedSearch = useMemo(() => debounce(fetchSpotifySearchResults, 1000), []);
+
   function handleSearchChange(query) {
     setSearchTerm(query);
-  
     if (query.trim() === "") {
-      setSearchResults([]); // Clear search results if input is empty
+      setSearchResults([]);
       return;
     }
-  
-    fetchSpotifySearchResults(query); // Custom function to get 20 results
+    debouncedSearch(query);
   }
   
 
@@ -179,7 +181,7 @@ function App() {
         const data = await response.json();
         console.log(data);
 
-        
+
         // Ensure 'song' exists before using it
 
         // for (let i = 0; i < 20; i++) {
@@ -195,6 +197,7 @@ function App() {
       console.error("Error fetching track:", error.message);
     }
   };
+
 
   return (
     <div
@@ -267,14 +270,16 @@ function App() {
       {searchTerm ? `User is searching for: ${searchTerm}` : "Start typing to search for tracks"}
     </p>
 
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-5">
+    <div className="flex flex-row flex-wrap justify-center mb-5">
       {searchResults.map((track, i) => (
         <Card
           key={i}
+          url={track.url}
           title={track.title}
           image={track.url}
           artist={track.artists}
           link={track.spoURL}
+          YTURL={fetchYouTubeData(track.title + " " + track.artists)}
         />
       ))}
     </div>
