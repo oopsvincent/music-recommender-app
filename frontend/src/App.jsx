@@ -51,7 +51,19 @@ function greetBasedOnTime() {
   }
 }
 
-const SPOTIFY_TOKEN = "BQBf1J1ty7SLALtAd34GUWpFi6v7CsWZoV9VKNAaW2g4N3RQMJrb8eeGYOugrrf7lXoCI0rTSOsZH3powh--uWmw56EpNiQ500tZ7KaJYspucOSQBTAnWz6Oduoz77YvBUE30F5TRLg";
+async function getSpotifyToken() {
+    try {
+      const response = await fetch('https://flask-app-practice-api.onrender.com/token');
+      const data = await response.json();
+      return data.access_token;
+    } catch (error) {
+      console.error("Failed to fetch Spotify token:", error);
+      return null;
+    }
+  }
+  
+
+const SPOTIFY_TOKEN = await getSpotifyToken();
 
 function fetchYouTubeData(title) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(
