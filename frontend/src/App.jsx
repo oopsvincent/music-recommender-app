@@ -63,7 +63,7 @@ async function getSpotifyToken() {
   }
   
 
-const SPOTIFY_TOKEN = await getSpotifyToken();
+const SPOTIFY_TOKEN = getSpotifyToken();
 
 function fetchYouTubeData(title) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(
