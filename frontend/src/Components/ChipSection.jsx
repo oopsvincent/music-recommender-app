@@ -16,7 +16,7 @@ const ChipSection = ({ onChipSelect }) => {
     ],
     "Editor's Choice": [
       "Trending", "New Releases", "Top 10", "Hidden Gems",
-      "Underground Hits", "Fan Favorites"
+      "Underground Hits", "Fan Favorites", "Developer's Choice"
     ]
   };
 
@@ -46,11 +46,20 @@ const ChipSection = ({ onChipSelect }) => {
 
       {/* Chips Section */}
       <div className='pl-2 pr-2 flex overflow-auto [&::-webkit-scrollbar]:hidden h-13 overflow-y-hidden chips-container mt-4'>
+        <Chip
+        text={"Daily Mix"}
+        key={-1}
+        isActive={true}
+        handleClick={() => {
+            handleChipClick(this);
+            onChipSelect(this);
+        }}
+        />
         {categories[selectedCategory].map((element, index) => (
           <Chip 
             text={element} 
             key={index} 
-            isActive={activeChip === element} 
+            isActive={activeChip === element}
             handleClick={() => {
                 handleChipClick(element);
                 onChipSelect(element);

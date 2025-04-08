@@ -8,6 +8,36 @@ import AppBar from "./Components/AppBar";
 import Search from "./Components/Search";
 import debounce from "lodash.debounce";
 
+const tracksDaily = [
+    "Die With a smile",
+    "thats so true",
+    "Not Like Us",
+    "apt.",
+    "sailor's song",
+    "luther",
+    "Sweater weather",
+    "all the stars",
+    "take on me",
+    "sunflower",
+    "Circles",
+  "too sweet hozier",
+  "SummerTime Sadness",
+  "Counting Stars",
+  "End of Beginning",
+  "As it Was",
+  "Night Changes",
+  "beaniw",
+  "deathbed",
+  "safe and sound",
+  "Skyfall",
+  "until I found you",
+  "despacito",
+  "HUMBLE",
+  "perfect",
+  "bump heads",
+  "Havana",
+];
+
 function greetBasedOnTime() {
   const now = new Date();
   const hour = now.getHours();
@@ -21,8 +51,7 @@ function greetBasedOnTime() {
   }
 }
 
-const SPOTIFY_TOKEN =
-  "BQBV8x-At1oc8AqXKl15PWGirSJ5KXggNCq_m219db5GlOhg1cuBq4D3HAiebqX8AIqpNCw2cTXADAd8gYTusk_aQKc2aCR5_Ho0IAWvCL3uR9QvpRwZxrK-Xbsv5iZIIxyEr_rTHjM";
+const SPOTIFY_TOKEN = "BQBf1J1ty7SLALtAd34GUWpFi6v7CsWZoV9VKNAaW2g4N3RQMJrb8eeGYOugrrf7lXoCI0rTSOsZH3powh--uWmw56EpNiQ500tZ7KaJYspucOSQBTAnWz6Oduoz77YvBUE30F5TRLg";
 
 function fetchYouTubeData(title) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(
@@ -46,12 +75,7 @@ async function fetchSpotifyData(title) {
   if (!response.ok) throw new Error(`API Error: ${response.status}`);
   const data = await response.json();
 
-  if (!data.tracks.items.length) throw new Error("No tracks found!");
-
   const track = data.tracks.items[0];
-  //   console.log(track);
-  //   console.log(track.external_urls.spotify);
-  console.log(track);
   
   return {
     title: track.name,
@@ -72,11 +96,22 @@ function App() {
   );
   const [searchResults, setSearchResults] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const loadTracks = async (tracks) => {
+    try {
+        const trackPromises = await tracks.map((title) => fetchSpotifyData(title));
+        const results = await Promise.all(trackPromises);
+        setTrackData(results);
+    } catch (error) {
+        console.log(error);
+        
+    }
+};
   
   async function fetchSpotifySearchResults(query) {
     try {
       const response = await fetch(
-        `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=20`,
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=28`,
         {
           headers: {
             Authorization: `Bearer ${SPOTIFY_TOKEN}`, // define this in your .env or file
@@ -120,7 +155,6 @@ function App() {
     }
     debouncedSearch(query);
   }
-  
 
   // Function to handle saving user info
   const handleUserInfo = (name, language) => {
@@ -136,66 +170,55 @@ function App() {
       setShowLogin(true); // Show login if no user info in localStorage
     }
 
-    const tracks = [
-        "Die With a smile",
-      "too sweet hozier",
-      "SummerTime Sadness",
-      "thats so true",
-      "Counting Stars",
-      "End of Beginning",
-      "As it Was",
-      "Night Changes",
-      "beaniw",
-      "deathbed",
-      "safe and sound",
-      "Skyfall",
-      "until I found you",
-      "Sweater weather",
-      "despacito",
-      "all the stars",
-      "HUMBLE",
-      "Not Like Us",
-      "perfect",
-      "bump heads",
-      "Havana",
-    ];
-
-    const loadTracks = async () => {
-      try {
-        const trackPromises = tracks.map((title) => fetchSpotifyData(title));
-        const results = await Promise.all(trackPromises);
-        setTrackData(results);
-      } catch (error) {
-        console.error("Error fetching tracks:", error.message);
-      }
-    };
-
-    loadTracks();
+    loadTracks(tracksDaily);
   }, [userName, musicLanguage]); // Re-fetch if userName or musicLanguage changes
 
   const handleChipSelect = async (chipText) => {
     try {
-      if (chipText === "Pop") {
-        const response = await fetch("https://flask-app-practice-api.onrender.com/songs/pop_music");
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch. Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log(data);
-
-
-        // Ensure 'song' exists before using it
-
-        // for (let i = 0; i < 20; i++) {
-        //     let rand = Math.floor((Math.random() * data.length + 1));
-        //     const song = data[rand];
-        //     const newTrack = await fetchSpotifyData(song);
-        //     setTrackData((prevData) => [newTrack, ...prevData]);
-        // }
-
-        // const song = data[0]; // Example: Using the first song in the array
+        if (chipText === "Hip Hop") {
+            const response = await fetch("https://flask-app-practice-api.onrender.com/songs/rap_music");
+            const data = await response.json();
+            const tracks = data.rap_music || [];
+            await loadTracks(tracks);
+          } 
+          else if (chipText === "Pop") {
+            const response = await fetch("https://flask-app-practice-api.onrender.com/songs/pop_music");
+            const data = await response.json();
+            const tracks = data.pop_music || [];
+            await loadTracks(tracks);
+          }
+          else if (chipText === "Rock") {
+            const response = await fetch("https://flask-app-practice-api.onrender.com/songs/rock_music");
+            const data = await response.json();
+            const tracks = data.rock_music || [];
+            await loadTracks(tracks);
+          }
+          else if (chipText === "Classical") {
+            const response = await fetch("https://flask-app-practice-api.onrender.com/songs/classical_music");
+            const data = await response.json();
+            const tracks = data.classical_music || [];
+            await loadTracks(tracks);
+          }
+          else if (chipText === "Country") {
+            const response = await fetch("https://flask-app-practice-api.onrender.com/songs/native_music");
+            const data = await response.json();
+            const tracks = data.native_music || [];
+            await loadTracks(tracks);
+          }
+          else if (chipText === "Happy") {
+            const response = await fetch("https://flask-app-practice-api.onrender.com/songs/happy_music");
+            const data = await response.json();
+            const tracks = data.happy_music || [];
+            await loadTracks(tracks);
+          }
+          else if (chipText === "Sad") {
+            const response = await fetch("https://flask-app-practice-api.onrender.com/songs/sad_music");
+            const data = await response.json();
+            const tracks = data.sad_music || [];
+            await loadTracks(tracks);
+          }
+           else {
+        await loadTracks(tracksDaily);
       }
     } catch (error) {
       console.error("Error fetching track:", error.message);
@@ -241,6 +264,7 @@ function App() {
           {/* <hr className="text-white m-2" /> */}
 
           {selectedSection === "Music" && (
+            
             <>
 
               <h1
