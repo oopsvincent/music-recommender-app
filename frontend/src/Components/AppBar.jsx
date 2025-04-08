@@ -84,7 +84,7 @@ const AppBar = ({ selectedSection, setSection }) => {
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.3-4.3" />
           </svg>
-          <p className="text-xs">Search</p>
+          <p className="text-xs">Explore</p>
         </div>
 
         <div
