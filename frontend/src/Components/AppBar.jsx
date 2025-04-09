@@ -89,10 +89,10 @@ const AppBar = ({ selectedSection, setSection }) => {
 
         <div
           onClick={() => {
-            setSection("Artist");
+            setSection("Account");
           }}
           className={`blck w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
-            selectedSection == "Artist" ? "bg-white text-black rounded-lg" : ""
+            selectedSection == "Account" ? "bg-white text-black rounded-lg" : ""
           }`}
         >
           <svg
