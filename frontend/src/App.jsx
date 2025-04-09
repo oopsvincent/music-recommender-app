@@ -70,9 +70,9 @@ async function getSpotifyToken() {
   }
 }
 
-const SPOTIFY_TOKEN = getSpotifyToken().then(token => {
-  SPOTIFY_TOKEN = token
-});
+// const SPOTIFY_TOKEN = getSpotifyToken().then(token => {
+//   SPOTIFY_TOKEN = token
+// });
 
 function fetchYouTubeData(title) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(
@@ -126,6 +126,37 @@ function App() {
   );
   const [searchResults, setSearchResults] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault(); // block auto-prompt
+      setDeferredPrompt(e);
+      setShowInstallButton(true); // show custom "Install" button
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") {
+        console.log("User accepted the install prompt");
+      } else {
+        console.log("User dismissed the install prompt");
+      }
+      setDeferredPrompt(null);
+      setShowInstallButton(false);
+    }
+  };
+
 
   const loadTracks = async (tracks, token) => {
     try {
@@ -324,7 +355,11 @@ function App() {
       </div>
     ),
     Account: (
-        <><Account src={"https://placehold.co/120"} username={userName} email={`${userName}@example.com`} followers={Math.floor(Math.random() * Math.random() * 1000)}/></>
+        <><Account src={"https://placehold.co/120"} username={userName} email={`${userName}@example.com`} followers={Math.floor(Math.random() * Math.random() * 1000)}/>              {showInstallButton && (
+            <button onClick={handleInstallClick} className="install-btn bg-black p-5 text-2xl text-white">
+              Install this fire app
+            </button>
+          )}</>
     ),
   };
 
