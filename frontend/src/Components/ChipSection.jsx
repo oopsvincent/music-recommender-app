@@ -6,17 +6,16 @@ import '../index.css';
 const ChipSection = ({ onChipSelect }) => {
   const categories = {
     Moods: [
-      "Happy", "Sad", "Romantic", "Melancholy", "Upbeat",
+      "Happy", "Sad", "Romantic", "Melancholy",
       "Focus", "Calm", "Workout", "Motivational",
-      "Instrumental", "Feel-Good", "Gothic"
+      "Instrumental", "Feel-Good"
     ],
     Genres: [
       "Pop", "Hip Hop", "Electronic", "Rock", "R & B",
       "K-Pop", "Jazz", "Classical", "Blues", "Country"
     ],
     "Editor's Choice": [
-      "Trending", "New Releases", "Top 10", "Hidden Gems",
-      "Underground Hits", "Fan Favorites", "Developer's Choice"
+      "Trending", "New Releases", "Top 10", "Hidden Gems", "Fan Favorites", "Developer's Choice"
     ]
   };
 

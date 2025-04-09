@@ -40,8 +40,8 @@ const Card = ({ url, title, artist, spoURL, YTURL, popularity }) => {
       </div>
       <div className="flex justify-between items-center pb-2">
         <div
-          className={`ml-1 mb-1 text-xs inline-flex justify-center items-center md:text-lg md:items-end ${
-            popularity < 80 ? "text-yellow-400" : "text-lime-500"
+          className={`ml-1 mb-1 text-xs inline-flex justify-center items-center md:text-lg ${
+            popularity < 80 ? "text-yellow-400" : "text-lime-400"
           }`}
         >
           <svg
@@ -51,10 +51,10 @@ const Card = ({ url, title, artist, spoURL, YTURL, popularity }) => {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-award-icon lucide-award"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-award-icon lucide-award"
           >
             <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" />
             <circle cx="12" cy="8" r="6" />
