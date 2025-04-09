@@ -322,7 +322,7 @@ function App() {
       </div>
     ),
     Account: (
-        <><Account src={"https://placehold.co/120"} username={userName} email={`${userName.trim(" ")}@nigga.com`} followers={Math.floor(Math.random() * Math.random() * 1000)}/></>
+        <><Account src={"https://placehold.co/120"} username={userName} email={`${userName}@example.com`} followers={Math.floor(Math.random() * Math.random() * 1000)}/></>
     ),
   };
 
