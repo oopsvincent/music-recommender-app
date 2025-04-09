@@ -53,8 +53,8 @@ function greetBasedOnTime() {
 }
 
 function removeData() {
-    localStorage.clear();
-    window.location.reload();
+  localStorage.clear();
+  window.location.reload();
 }
 
 async function getSpotifyToken() {
@@ -139,7 +139,10 @@ function App() {
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
     };
   }, []);
 
@@ -156,7 +159,6 @@ function App() {
       setShowInstallButton(false);
     }
   };
-
 
   const loadTracks = async (tracks, token) => {
     try {
@@ -256,12 +258,12 @@ function App() {
 
   const getDataFromDB = async (key) => {
     const response = await fetch(
-        `https://flask-app-practice-api.onrender.com/songs/${key}`
-      );
-      const data = await response.json();
-      const tracks = data[key] || [];
-      await loadTracks(tracks, spotifyToken);
-  }
+      `https://flask-app-practice-api.onrender.com/songs/${key}`
+    );
+    const data = await response.json();
+    const tracks = data[key] || [];
+    await loadTracks(tracks, spotifyToken);
+  };
 
   const handleChipSelect = async (chipText) => {
     try {
@@ -279,6 +281,12 @@ function App() {
         getDataFromDB("happy_music");
       } else if (chipText === "Sad") {
         getDataFromDB("sad_music");
+      } else if (chipText === "Jazz") {
+        getDataFromDB("jazz_music");
+      } else if (chipText === "R & B") {
+        getDataFromDB("rnb_music");
+      } else if (chipText === "Electronic") {
+        getDataFromDB("party_music");
       } else {
         await loadTracks(tracksDaily, spotifyToken);
       }
@@ -349,17 +357,34 @@ function App() {
             Change
           </button>
         </h3>
-        <h3 className="font-h text-2xl text-white m-3 flex justify-around items-center">Delete Your Information
-            <button onClick={() => setTimeout(() => removeData(), 1500)} className="bg-black p-3 text-red-500 border-2 rounded-2xl hover:rounded-md hover:border-0 hover:bg-red-500 hover:text-black active:bg-red-400 active:text-white transition-all duration-200">Delete Account</button>
+        <h3 className="font-h text-2xl text-white m-3 flex justify-around items-center">
+          Delete Your Information
+          <button
+            onClick={() => setTimeout(() => removeData(), 1500)}
+            className="bg-black p-3 text-red-500 border-2 rounded-2xl hover:rounded-md hover:border-0 hover:bg-red-500 hover:text-black active:bg-red-400 active:text-white transition-all duration-200"
+          >
+            Delete Account
+          </button>
         </h3>
       </div>
     ),
     Account: (
-        <><Account src={"https://placehold.co/120"} username={userName} email={`${userName}@example.com`} followers={Math.floor(Math.random() * Math.random() * 1000)}/>              {showInstallButton && (
-            <button onClick={handleInstallClick} className="install-btn bg-black p-5 text-2xl text-white">
-              Install this fire app
-            </button>
-          )}</>
+      <>
+        <Account
+          src={"https://placehold.co/120"}
+          username={userName}
+          email={`${userName}@example.com`}
+          followers={Math.floor(Math.random() * Math.random() * 1000)}
+        />{" "}
+        {showInstallButton && (
+          <button
+            onClick={handleInstallClick}
+            className="install-btn bg-black p-5 text-2xl text-white"
+          >
+            Install this fire app
+          </button>
+        )}
+      </>
     ),
   };
 
@@ -393,7 +418,7 @@ function App() {
         under MIT License.
       </footer>
       {!showLogin && (
-      <AppBar selectedSection={selectedSection} setSection={setSection} />
+        <AppBar selectedSection={selectedSection} setSection={setSection} />
       )}
     </div>
   );

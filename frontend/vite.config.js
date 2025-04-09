@@ -10,11 +10,11 @@ export default defineConfig({
           registerType: 'autoUpdate',
           includeAssets: ['favicon.svg', 'robots.txt', 'apple-touch-icon.png'],
           manifest: {
-            name: 'My Awesome App',
-            short_name: 'AwesomeApp',
-            description: 'A dope app that plays music and changes lives',
+            name: 'GrooveEstrella: Music Recommender',
+            short_name: 'GrooveEstrella',
+            description: 'An app that provides music recommendation and other features too',
             theme_color: '#ffffff',
-            background_color: '#000000',
+            background_color: '#D40000',
             display: 'standalone',
             start_url: '/',
             icons: [
