@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import { Search } from "lucide-react";
 
-const Search = ({ handleChange }) => {
+const SearchComp = ({ handleChange }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [searchType, setSearchType] = useState("track");
     const [isSearching, setIsSearching] = useState(false);
@@ -79,4 +80,4 @@ const Search = ({ handleChange }) => {
     );
 };
 
-export default Search;
+export default SearchComp;
