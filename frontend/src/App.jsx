@@ -5,9 +5,11 @@ import ChipSection from "./Components/ChipSection";
 import SpotifyConnect from "./Components/SpotifyConnect";
 import FirstTimeLogin from "./Components/FirstTimeLogin";
 import AppBar from "./Components/AppBar";
-import Search from "./Components/Search";
+import SearchComp from "./Components/Search";
 import debounce from "lodash.debounce";
 import Account from "./Components/Account";
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 const tracksDaily = [
     "Die With a smile",
@@ -401,7 +403,7 @@ function App() {
         ),
         Search: (
             <div>
-                <Search handleChange={handleSearchChange} />
+                <SearchComp handleChange={handleSearchChange} />
                 <p className="text-white p-5">
                     {searchTerm
                         ? `User is searching for: ${searchTerm}`
@@ -496,7 +498,7 @@ function App() {
                     {selectedSection === "Search" && sections[selectedSection]}
 
                     {selectedSection === "Account" && sections[selectedSection]}
-                    {loading && <p className="text-white text-3xl">Loading</p>}
+                    {loading && <Skeleton containerClassName="flex flex-row flex-wrap gap-1 m-5" width={170} height={250} count={10} />}
                 </>
             )}
             <footer className="text-center py-6 px-8 text-white mb-17 relative bottom-0">
