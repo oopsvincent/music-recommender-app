@@ -112,6 +112,8 @@ async function fetchSpotifyData(title, token) {
     artists: track.artists.map((artist) => artist.name).join(", "),
     spoURL: track.external_urls?.spotify || "#",
     popularity: track.popularity,
+    type: "track",
+    explicit: track.explicit,
   };
 }
 
@@ -126,8 +128,12 @@ function App() {
   );
   const [searchResults, setSearchResults] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+//   const [searchQuery, setSearchQuery] = useState("");
+const [searchType, setSearchType] = useState("track");
+
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -169,66 +175,137 @@ function App() {
       setTrackData(results);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  async function fetchSpotifySearchResults(query) {
+  async function fetchSpotifySearchResults(query, type) {
     try {
       if (!spotifyToken) return;
-
-      const response = await fetch(
+  
+    const response = await fetch(
         `https://api.spotify.com/v1/search?q=${encodeURIComponent(
           query
-        )}&type=track&limit=28`,
+        )}&type=${type}&limit=20`,
         {
           headers: {
             Authorization: `Bearer ${spotifyToken}`,
           },
-        }
-      );
-
-      // rest of it stays same...
-
-      if (!response.ok) throw new Error(`Spotify Error: ${response.status}`);
+      });
+  
       const data = await response.json();
-
-      if (!data.tracks.items.length) {
-        setSearchResults([]); // no results
+      console.log("API Response:", data);
+      
+      const resultsArray = data[type + "s"]?.items || [];
+  
+      if (!resultsArray.length) {
+        setSearchResults([]);
         return;
       }
-
-      const results = data.tracks.items.map((track) => ({
-        title: track.name,
-        url: track.album.images[0].url,
-        artists: track.artists.map((artist) => artist.name).join(", "),
-        spoURL: track.external_urls?.spotify || "#",
-        popularity: track.popularity,
-      }));
-      console.log(results);
-
+      console.log(searchResults);
+      
+    //   console.log(data[type + "s"].items[0].external_urls.spotify);
+    // const validPlaylists = data.playlists.items.filter(p => p !== null);
+    // setSearchResults(validPlaylists);
+    
+      // You can later switch logic per type
+      const results = resultsArray.map((item) => {
+        if (type === "track") {
+          return {
+            title: item.name,
+            url: item.album.images[0]?.url,
+            artists: item.artists.map((artist) => artist.name).join(", "),
+            SPOurl: item.external_urls?.spotify,
+            popularity: item.popularity,
+            type: "track",
+            explicit: item.explicit,
+          };
+        } else if (type === "artist") {
+          return {
+            title: item.name,
+            url: item.images?.[0]?.url,
+            SPOurl: item.external_urls?.spotify,
+            popularity: item.popularity,
+            followers: item.followers.total,
+            type: "artist",
+            explicit: item.explicit,
+          };
+        }
+         else if (type === "album") {
+            return {
+                title: item.name,
+                url: item.images?.[0]?.url,
+                artists: item.artists.map((artist) => artist.name).join(", "),
+                SPOurl: item.external_urls?.spotify,
+                description: item.album_type + ", tracks: " + item.total_tracks,
+                popularity: item.release_date,
+                type: "album",
+                explicit: item.explicit,
+            }
+        }
+         else if (type === "playlist") {
+            return{
+                title: item?.name || "#",
+                url: item?.images?.[0]?.url || "#",
+                artists: item?.type,
+                SPOurl: item?.external_urls?.spotify || "#",
+                // description: item.album_type + ", tracks: " + item.total_tracks,
+                popularity: item?.owner?.display_name,
+                type: "playlist",
+                // explicit: item.explicit,
+            }
+         } else if (type === "show") {
+            return {
+                title: item.name,
+                url: item.images?.[0]?.url,
+                artists: item.publisher + item.languages,
+                SPOurl: item.external_urls?.spotify,
+                description: item.description,
+                type: "show",
+                explicit: item.explicit,
+            }
+        } else if (type === "episode") {
+            return {
+                title: item.name,
+                url: item.images?.[0]?.url,
+                artists: item.type + ", " + item.languages,
+                SPOurl: item.external_urls?.spotify,
+                description: item.description,
+                type: "episode",
+                explicit: item.explicit,
+            }
+        }
+      });
+  
       setSearchResults(results);
     } catch (err) {
       console.error("Error fetching search results:", err);
       setSearchResults([]);
+    } finally {
+      setLoading(false);
     }
   }
-
+  
   const debouncedSearch = useMemo(() => {
-    return debounce((query) => {
+    return debounce((query, type) => {
       if (spotifyToken) {
-        fetchSpotifySearchResults(query, spotifyToken, setSearchResults);
+        fetchSpotifySearchResults(query, type);
       }
     }, 1000);
   }, [spotifyToken]);
+  
 
-  function handleSearchChange(query) {
+  function handleSearchChange(query, type) {
     setSearchTerm(query);
+    setSearchType(type);
     if (query.trim() === "") {
       setSearchResults([]);
       return;
     }
-    debouncedSearch(query);
+    debouncedSearch(query, type); // ✅ Correct
   }
+  
 
   // Function to handle saving user info
   const handleUserInfo = (name, language) => {
@@ -292,6 +369,8 @@ function App() {
       }
     } catch (error) {
       console.error("Error fetching track:", error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -299,7 +378,7 @@ function App() {
     Music: (
       <>
         <h1
-          className="pt-5 pl-5 text-xl dark:text-white m-1 mb-4 boldonse line-h line-clamp-3 md:text-4xl md:p-4"
+          className="text-white pt-5 pl-5 text-xl dark:text-white m-1 mb-4 boldonse line-h line-clamp-3 md:text-4xl md:p-4"
           title={userName}
         >
           {greetBasedOnTime()} {userName}
@@ -316,6 +395,8 @@ function App() {
               spoURL={track.spoURL}
               YTURL={fetchYouTubeData(track.title + " " + track.artists)}
               popularity={track.popularity}
+              type={track.type}
+              explicit={track.explicit}
             />
           ))}
         </div>
@@ -338,9 +419,14 @@ function App() {
               title={track.title}
               image={track.url}
               artist={track.artists}
-              link={track.spoURL}
-              YTURL={fetchYouTubeData(track.title + " " + track.artists)}
+              link={track.url}
+              spoURL={track.SPOurl}
+              YTURL={searchType !== 'track' ? fetchYouTubeData(track.title) : fetchYouTubeData(track.title + " " + track.artists)}
               popularity={track.popularity}
+              type={track.type}
+              followers={track.followers}
+              description={track.description}
+              explicit={track.explicit}
             />
           ))}
         </div>
@@ -411,6 +497,7 @@ function App() {
           {selectedSection === "Search" && sections[selectedSection]}
 
           {selectedSection === "Account" && sections[selectedSection]}
+          {loading && <p className="text-white text-3xl">Loading</p>}
         </>
       )}
       <footer className="text-center py-6 px-8 text-white mb-17 relative bottom-0">

@@ -13,7 +13,7 @@ export default defineConfig({
             name: 'GrooveEstrella: Music Recommender',
             short_name: 'GrooveEstrella',
             description: 'An app that provides music recommendation and other features too',
-            theme_color: '#ffffff',
+            theme_color: '#D40000',
             background_color: '#D40000',
             display: 'standalone',
             start_url: '/',
