@@ -1,21 +1,33 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, redirect ,request ,session, url_for  
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from dotenv import load_dotenv
+from urllib.parse import urlencode
+from spotify import spotify  # This imports the blueprint
 import os
 import time
 import requests
-
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+ 
+#Blueprint For Spotify
+app.register_blueprint(spotify)
 
 # Database Configuration
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# Soptify Configuration
+# Spotify Token Gen SEC
+CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+
+#API KEY
+app.secret_key = os.getenv("FLASK_SECRET_KEY") 
 
 # Initialize Database
 db = SQLAlchemy(app)
@@ -91,6 +103,8 @@ def get_songs():
 
 
 # Route to fetch songs by genre
+from flask import request, url_for
+
 @app.route("/songs/<genre>", methods=["GET"])
 def get_songs_by_genre(genre):
     allowed_genres = [
@@ -124,57 +138,42 @@ def get_songs_by_genre(genre):
     if genre not in allowed_genres:
         return jsonify({"error": "Invalid genre"}), 400
 
+    offset = int(request.args.get("offset", 0))
+    limit = int(request.args.get("limit", 10))
+
+    genre_column = getattr(Music, genre)
+    total_items = Music.query.filter(genre_column.isnot(None)).count()
+
     songs = (
-        Music.query.with_entities(getattr(Music, genre))
-        .filter(getattr(Music, genre).isnot(None))
+        Music.query.with_entities(genre_column)
+        .filter(genre_column.isnot(None))
+        .offset(offset)
+        .limit(limit)
         .all()
     )
-    return jsonify({genre: [song[0] for song in songs]})
 
+    results = [song[0] for song in songs]
 
-# Spotify Token Gen SEC
-CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
-CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+    next_offset = offset + limit
+    prev_offset = max(0, offset - limit)
 
-# Globals for caching token
-access_token = None
-expires_at = 0
+    # Create full URLs for next and previous
+    base_url = request.base_url
+    next_url = f"{base_url}?offset={next_offset}&limit={limit}" if next_offset < total_items else None
+    prev_url = f"{base_url}?offset={prev_offset}&limit={limit}" if offset > 0 else None
 
-
-def refresh_token():
-    global access_token, expires_at
-    print("Refreshing token...")
-
-    auth_response = requests.post(
-        "https://accounts.spotify.com/api/token",
-        data={"grant_type": "client_credentials"},
-        headers={
-            "Authorization": "Basic "
-            + (f"{CLIENT_ID}:{CLIENT_SECRET}").encode("ascii").decode("latin1")
-        },
-        auth=(CLIENT_ID, CLIENT_SECRET),
-    )
-
-    if auth_response.status_code != 200:
-        raise Exception("Failed to get token: " + auth_response.text)
-
-    token_data = auth_response.json()
-    access_token = token_data["access_token"]
-    expires_in = token_data["expires_in"]  # Usually 3600 seconds
-    expires_at = time.time() + expires_in - 60  # Refresh 1 minute before expiry
-
-    print(f"New token: {access_token[:20]}...")
-
-
-@app.route("/token")
-def get_token():
-    global access_token, expires_at
-    if not access_token or time.time() > expires_at:
-        refresh_token()
-    return jsonify({"access_token": access_token})
+    return jsonify({
+        "results": results,
+        "next_offset": next_offset,
+        "total_items": total_items,
+        "has_more": next_offset < total_items,
+        "length": len(results),
+        "next": next_url,
+        "prev": prev_url
+    })
 
 
 # Run the Flask app
 if __name__ == "__main__":
     print("Flask app is starting...")
-    app.run(debug=True)
+    app.run(debug=True)  
