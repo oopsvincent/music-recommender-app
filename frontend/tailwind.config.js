@@ -3,15 +3,15 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-              primary: ['var(--font-primary)', 'sans-serif'], // Main Font
-              black: ['var(--font-black)', 'sans-serif'], // Special Black Font
+              primary: ['MyCustomFont', 'sans-serif'],
+              blacky: ['AnotherFont', 'sans-serif'],
+              secondary: ['MyBoldFont', 'sans-serif'],
             },
             fontWeight: {
-              slight: '300',
-              snormal: '400',
-              smedium: '500',
-              sbold: '700',
-              sblack: '900',
+              light: 300,
+              normal: 400,
+              bold: 700,
+              black: 900
             },
             colors: {
                 pprimary: "#00D8FF", // Neon Blue
