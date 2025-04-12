@@ -17,6 +17,12 @@ import PWAInstallPrompt from "./Components/PWAInstallPrompt";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons'
 
+fetch("/me")
+  .then((res) => res.json())
+  .then((data) => {
+    console.log("Your Spotify Data:", data);
+  })
+  .catch((err) => console.error("Error fetching from /me:", err));
 
 
 const tracksDaily = [
