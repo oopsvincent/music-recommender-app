@@ -10,6 +10,14 @@ import debounce from "lodash.debounce";
 import Account from "./Components/Account";
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
+import { getSpotifyToken, fetchSpotifyData, fetchSpotifySearchResults } from './hooks/useSpotify';
+import loadTracks from "./hooks/useTrackLoader";
+import useDebouncedSearch from "./hooks/useDebouncedSearch";
+import PWAInstallPrompt from "./Components/PWAInstallPrompt";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpotify } from '@fortawesome/free-brands-svg-icons'
+
+
 
 const tracksDaily = [
     "Die With a smile",
@@ -59,18 +67,7 @@ function removeData() {
     window.location.reload();
 }
 
-async function getSpotifyToken() {
-    try {
-        const response = await fetch(
-            "https://music-recommender-api.onrender.com/token"
-        );
-        const data = await response.json();
-        return data.access_token;
-    } catch (error) {
-        console.error("Failed to fetch Spotify token:", error);
-        return null;
-    }
-}
+
 
 function fetchYouTubeData(title) {
     return `https://www.youtube.com/results?search_query=${encodeURIComponent(
@@ -78,42 +75,7 @@ function fetchYouTubeData(title) {
     )}`;
 }
 
-// Fetch Spotify Track Data
-async function fetchSpotifyData(title, token) {
-    const response = await fetch(
-        `https://api.spotify.com/v1/search?q=${encodeURIComponent(
-            title
-        )}&type=track&limit=1`,
-        {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        }
-    );
 
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    const data = await response.json();
-
-    const track = data.tracks.items[0];
-    if (!track)
-        return {
-            title,
-            url: "https://placehold.co/300x300?text=No+Image",
-            artists: "Unknown",
-            spoURL: "#",
-            popularity: 0,
-        };
-
-    return {
-        title: track.name,
-        url: track.album.images[0].url,
-        artists: track.artists.map((artist) => artist.name).join(", "),
-        spoURL: track.external_urls?.spotify || "#",
-        popularity: track.popularity,
-        type: "track",
-        explicit: track.explicit,
-    };
-}
 
 function App() {
     const [spotifyToken, setSpotifyToken] = useState(null);
@@ -132,167 +94,13 @@ function App() {
     const [deferredPrompt, setDeferredPrompt] = useState(null);
     const [showInstallButton, setShowInstallButton] = useState(false);
     const [loading, setLoading] = useState(true);
+    // useEffect(() => {
+    //     // pretend you're fetching
+    //     fetch().then(() => setLoading(false));
+    //   }, []);
 
-    useEffect(() => {
-        const handleBeforeInstallPrompt = (e) => {
-            e.preventDefault(); // block auto-prompt
-            setDeferredPrompt(e);
-            setShowInstallButton(true); // show custom "Install" button
-        };
 
-        window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-
-        return () => {
-            window.removeEventListener(
-                "beforeinstallprompt",
-                handleBeforeInstallPrompt
-            );
-        };
-    }, []);
-
-    const handleInstallClick = async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === "accepted") {
-                console.log("User accepted the install prompt");
-            } else {
-                console.log("User dismissed the install prompt");
-            }
-            setDeferredPrompt(null);
-            setShowInstallButton(false);
-        }
-    };
-
-    const loadTracks = async (tracks, token) => {
-        try {
-            const trackPromises = tracks.map((title) =>
-                fetchSpotifyData(title, token)
-            );
-            const results = await Promise.all(trackPromises);
-            setTrackData(results);
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    async function fetchSpotifySearchResults(query, type) {
-        try {
-            if (!spotifyToken) return;
-
-            const response = await fetch(
-                `https://api.spotify.com/v1/search?q=${encodeURIComponent(
-                    query
-                )}&type=${type}&limit=20`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${spotifyToken}`,
-                    },
-                });
-
-            const data = await response.json();
-            console.log("API Response:", data);
-
-            const resultsArray = data[type + "s"]?.items || [];
-
-            if (!resultsArray.length) {
-                setSearchResults([]);
-                return;
-            }
-            console.log(searchResults);
-
-            //   console.log(data[type + "s"].items[0].external_urls.spotify);
-            // const validPlaylists = data.playlists.items.filter(p => p !== null);
-            // setSearchResults(validPlaylists);
-
-            // You can later switch logic per type
-            const results = resultsArray.map((item) => {
-                if (type === "track") {
-                    return {
-                        title: item.name,
-                        url: item.album.images[0]?.url,
-                        artists: item.artists.map((artist) => artist.name).join(", "),
-                        SPOurl: item.external_urls?.spotify,
-                        popularity: item.popularity,
-                        type: "track",
-                        explicit: item.explicit,
-                    };
-                } else if (type === "artist") {
-                    return {
-                        title: item.name,
-                        url: item.images?.[0]?.url,
-                        SPOurl: item.external_urls?.spotify,
-                        popularity: item.popularity,
-                        followers: item.followers.total,
-                        type: "artist",
-                        explicit: item.explicit,
-                    };
-                }
-                else if (type === "album") {
-                    return {
-                        title: item.name,
-                        url: item.images?.[0]?.url,
-                        artists: item.artists.map((artist) => artist.name).join(", "),
-                        SPOurl: item.external_urls?.spotify,
-                        description: item.album_type + ", tracks: " + item.total_tracks,
-                        popularity: item.release_date,
-                        type: "album",
-                        explicit: item.explicit,
-                    }
-                }
-                else if (type === "playlist") {
-                    return {
-                        title: item?.name || "#",
-                        url: item?.images?.[0]?.url || "#",
-                        artists: item?.type,
-                        SPOurl: item?.external_urls?.spotify || "#",
-                        // description: item.album_type + ", tracks: " + item.total_tracks,
-                        popularity: item?.owner?.display_name,
-                        type: "playlist",
-                        // explicit: item.explicit,
-                    }
-                } else if (type === "show") {
-                    return {
-                        title: item.name,
-                        url: item.images?.[0]?.url,
-                        artists: item.publisher + item.languages,
-                        SPOurl: item.external_urls?.spotify,
-                        description: item.description,
-                        type: "show",
-                        explicit: item.explicit,
-                    }
-                } else if (type === "episode") {
-                    return {
-                        title: item.name,
-                        url: item.images?.[0]?.url,
-                        artists: item.type + ", " + item.languages,
-                        SPOurl: item.external_urls?.spotify,
-                        description: item.description,
-                        type: "episode",
-                        explicit: item.explicit,
-                    }
-                }
-            });
-
-            setSearchResults(results);
-        } catch (err) {
-            console.error("Error fetching search results:", err);
-            setSearchResults([]);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    const debouncedSearch = useMemo(() => {
-        return debounce((query, type) => {
-            if (spotifyToken) {
-                fetchSpotifySearchResults(query, type);
-            }
-        }, 1000);
-    }, [spotifyToken]);
-
+    const debouncedSearch = useDebouncedSearch(searchTerm, searchType, setLoading, setSearchResults);
 
     function handleSearchChange(query, type) {
         setSearchTerm(query);
@@ -320,7 +128,8 @@ function App() {
             setSpotifyToken(token); // Store token in state
 
             if (userName && musicLanguage) {
-                await loadTracks(tracksDaily, token);
+                await loadTracks(tracksDaily, token, setTrackData, setLoading);
+
             }
         };
 
@@ -332,13 +141,14 @@ function App() {
     }, [userName, musicLanguage]);
 
     const getDataFromDB = async (key) => {
+        setLoading(true);
         const response = await fetch(
             `https://music-recommender-api.onrender.com/songs/${key}?offset=0&limit=20`
-        );
+        ).then(setLoading(false));
         const data = await response.json();
-        const next = data.next_offset;         
+        const next = data.next_offset;
         const tracks = data["results"] || [];
-        await loadTracks(tracks, spotifyToken);
+        await loadTracks(tracks, spotifyToken, setTrackData, setLoading);
     };
 
     const handleChipSelect = async (chipText) => {
@@ -364,7 +174,7 @@ function App() {
             } else if (chipText === "Electronic") {
                 getDataFromDB("party_music");
             } else {
-                await loadTracks(tracksDaily, spotifyToken);
+                await loadTracks(tracksDaily, spotifyToken, setTrackData, setLoading);
             }
         } catch (error) {
             console.error("Error fetching track:", error.message);
@@ -385,19 +195,30 @@ function App() {
                 <ChipSection onChipSelect={handleChipSelect} />
 
                 <div className="flex flex-row flex-wrap justify-center mb-5">
-                    {trackData.map((track, index) => (
-                        <Card
-                            key={index}
-                            url={track.url}
-                            title={track.title}
-                            artist={track.artists}
-                            spoURL={track.spoURL}
-                            YTURL={fetchYouTubeData(track.title + " " + track.artists)}
-                            popularity={track.popularity}
-                            type={track.type}
-                            explicit={track.explicit}
-                        />
-                    ))}
+                {loading ? (
+                        Array.from({ length: 20 }).map((_, index) => (
+                            <div key={index} className="p-4">
+                                <Skeleton height={200} width={150} />
+                                <Skeleton height={30} width={`80%`} style={{ marginTop: 10 }} />
+                                <Skeleton height={20} width={`60%`} style={{ marginTop: 5 }} />
+                                <Skeleton height={20} width={`100%`} style={{ marginTop: 5 }} />
+                            </div>
+                        ))
+                    ) : (
+                        trackData.map((track, index) => (
+                            <Card
+                                key={index}
+                                url={track.url}
+                                title={track.title}
+                                artist={track.artists}
+                                spoURL={track.spoURL}
+                                YTURL={fetchYouTubeData(track.title + " " + track.artists)}
+                                popularity={track.popularity}
+                                type={track.type}
+                                explicit={track.explicit}
+                            />
+                        ))
+                    )}
                 </div>
             </>
         ),
@@ -411,23 +232,31 @@ function App() {
                 </p>
 
                 <div className="flex flex-row flex-wrap justify-center mb-5">
-                    {searchResults.map((track, i) => (
-                        <Card
-                            key={i}
-                            url={track.url}
-                            title={track.title}
-                            image={track.url}
-                            artist={track.artists}
-                            link={track.url}
-                            spoURL={track.SPOurl}
-                            YTURL={searchType !== 'track' ? fetchYouTubeData(track.title) : fetchYouTubeData(track.title + " " + track.artists)}
-                            popularity={track.popularity}
-                            type={track.type}
+                    {loading ? (
+                        Array.from({ length: 20 }).map((_, index) => (
+                            <div key={index} className="p-4">
+                                <Skeleton height={200} width={200} />
+                                <Skeleton height={30} width={`80%`} style={{ marginTop: 10 } } />
+                                <Skeleton height={20} width={`60%`} style={{ marginTop: 5 }} />
+                            </div>
+                        ))
+                    ) : (
+                        (searchTerm ? searchResults : trackData).map((track, index) => (                          
+                            <Card
                             followers={track.followers}
-                            description={track.description}
-                            explicit={track.explicit}
-                        />
-                    ))}
+                                key={index}
+                                url={track.url}
+                                title={track.title}
+                                artist={track.artists}
+                                spoURL={track.spoURL}
+                                YTURL={fetchYouTubeData(track.title + " " + track.artists)}
+                                popularity={track.popularity}
+                                type={track.type}
+                                explicit={track.explicit}
+                            />
+                        ))
+                    )}
+
                 </div>
             </div>
         ),
@@ -462,15 +291,13 @@ function App() {
                     followers={Math.floor(Math.random() * Math.random() * 1000)}
                 />{" "}
 
-                <button className="p-3 bg-green-500 text-xl m-auto" onClick={()=> window.open('https://music-recommender-api.onrender.com/login')}>Login With Spotify</button>
+        <button onClick={() => window.open('https://music-recommender-api.onrender.com/login')} className='inline-flex justify-center items-center px-5 py-2 m-5 bg-green-500 text-white text-xl gap-5 hover:text-black hover:scale-110 active:text-black active:scale-90 transition-all duration-200 rounded-2xl'>
+            Login with Spotify
+            <FontAwesomeIcon icon={faSpotify} className="text-4xl" />
+        </button>
 
                 {showInstallButton && (
-                    <button
-                        onClick={handleInstallClick}
-                        className="install-btn bg-black p-5 text-2xl text-white"
-                    >
-                        Install this fire app
-                    </button>
+                    <PWAInstallPrompt />
                 )}
             </>
         ),
@@ -498,7 +325,7 @@ function App() {
                     {selectedSection === "Search" && sections[selectedSection]}
 
                     {selectedSection === "Account" && sections[selectedSection]}
-                    {loading && <Skeleton containerClassName="flex flex-row flex-wrap gap-1 m-5" width={170} height={250} count={10} />}
+                    {/*loading && <Skeleton containerClassName="flex flex-row flex-wrap gap-1 m-5" width={170} height={250} count={10} />*/}
                 </>
             )}
             <footer className="text-center py-6 px-8 text-white mb-17 relative bottom-0">

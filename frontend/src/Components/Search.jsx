@@ -34,6 +34,7 @@ const SearchComp = ({ handleChange }) => {
                     placeholder="Search any music"
                     value={searchQuery}
                     onChange={handleSearch}
+                    id="searchBar"
                 />
                 <button onClick={isSearching ? clearSearch : null}>
                     {isSearching ? (
