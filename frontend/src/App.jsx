@@ -99,7 +99,7 @@ function App() {
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        const accessToken = params.get("access_token");
+        const accessToken = params.get("code");
 
         if (accessToken) {
             localStorage.setItem("spotify_token", accessToken);
@@ -167,7 +167,6 @@ function App() {
         console.log(userProfile, userPlaylists);
 
     }, []);
-
     const debouncedSearch = useDebouncedSearch(searchTerm, searchType, setLoading, setSearchResults);
 
     function handleSearchChange(query, type) {
