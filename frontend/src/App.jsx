@@ -17,14 +17,6 @@ import PWAInstallPrompt from "./Components/PWAInstallPrompt";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons'
 
-fetch("/me")
-  .then((res) => res.json())
-  .then((data) => {
-    console.log("Your Spotify Data:", data);
-  })
-  .catch((err) => console.error("Error fetching from /me:", err));
-
-
 const tracksDaily = [
     "Die With a smile",
     "thats so true",
@@ -100,11 +92,81 @@ function App() {
     const [deferredPrompt, setDeferredPrompt] = useState(null);
     const [showInstallButton, setShowInstallButton] = useState(false);
     const [loading, setLoading] = useState(true);
-    // useEffect(() => {
-    //     // pretend you're fetching
-    //     fetch().then(() => setLoading(false));
-    //   }, []);
+    const [userProfile, setUserProfile] = useState('');
+    const [userPlaylists, setPlaylists] = useState('');
+    const [userData, setUserData] = useState(null);
 
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const accessToken = params.get("access_token");
+
+        if (accessToken) {
+            localStorage.setItem("spotify_token", accessToken);
+            const token = localStorage.getItem("spotify_token");
+
+            // Define the async function and call it
+            const getUserData = async () => {
+                try {
+                    const resource = await fetch("https://api.spotify.com/v1/me", {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+
+                    if (!resource.ok) {
+                        throw new Error("Failed to fetch user data");
+                    }
+
+                    const data = await resource.json();
+                    setUserData({
+                        display_name: data.display_name,
+                        email: data.email,
+                        followers: data.followers.total,
+                        images: data.images,
+                    });
+                    console.log(data);
+                    
+                } catch (error) {
+                    console.error(error);
+                }
+            };
+
+            // Call the async function to fetch user data
+            getUserData();
+        }
+    }, []);
+
+
+    useEffect(() => {
+        const isReturningFromSpotify = window.location.search.includes("loggedin=true");
+
+        if (isReturningFromSpotify) {
+            // Clean URL
+            window.history.replaceState({}, document.title, "/");
+
+            // Get profile data now that login is done
+            const token = localStorage.getItem("spotify_token");
+
+            fetch("https://api.spotify.com/v1/me", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data);
+
+                })
+                .catch(err => {
+                    console.error("Error fetching Spotify data", err);
+                });
+        }
+
+        console.log(userProfile, userPlaylists);
+
+    }, []);
 
     const debouncedSearch = useDebouncedSearch(searchTerm, searchType, setLoading, setSearchResults);
 
@@ -201,7 +263,7 @@ function App() {
                 <ChipSection onChipSelect={handleChipSelect} />
 
                 <div className="flex flex-row flex-wrap justify-center mb-5">
-                {loading ? (
+                    {loading ? (
                         Array.from({ length: 20 }).map((_, index) => (
                             <div key={index} className="p-4">
                                 <Skeleton height={200} width={150} />
@@ -242,14 +304,14 @@ function App() {
                         Array.from({ length: 20 }).map((_, index) => (
                             <div key={index} className="p-4">
                                 <Skeleton height={200} width={200} />
-                                <Skeleton height={30} width={`80%`} style={{ marginTop: 10 } } />
+                                <Skeleton height={30} width={`80%`} style={{ marginTop: 10 }} />
                                 <Skeleton height={20} width={`60%`} style={{ marginTop: 5 }} />
                             </div>
                         ))
                     ) : (
-                        (searchTerm ? searchResults : trackData).map((track, index) => (                          
+                        (searchTerm ? searchResults : trackData).map((track, index) => (
                             <Card
-                            followers={track.followers}
+                                followers={track.followers}
                                 key={index}
                                 url={track.url}
                                 title={track.title}
@@ -291,16 +353,20 @@ function App() {
         Account: (
             <>
                 <Account
-                    src={"https://placehold.co/120"}
-                    username={userName}
-                    email={`${userName}@example.com`}
-                    followers={Math.floor(Math.random() * Math.random() * 1000)}
+                    src={
+                        userData?.images?.length > 0 && userData.images[0]?.url
+                          ? userData.images[0].url
+                          : `https://placehold.co/200/orange/white?text=${encodeURIComponent(userData?.display_name || 'User')}`
+                      }
+                    username={userData?.display_name}
+                    email={userData?.email}
+                    followers={userData?.followers}
                 />{" "}
 
-        <button onClick={() => window.open('https://music-recommender-api.onrender.com/login')} className='inline-flex justify-center items-center px-5 py-2 m-5 bg-green-500 text-white text-xl gap-5 hover:text-black hover:scale-110 active:text-black active:scale-90 transition-all duration-200 rounded-2xl'>
-            Login with Spotify
-            <FontAwesomeIcon icon={faSpotify} className="text-4xl" />
-        </button>
+                <button onClick={() => window.open('https://music-recommender-api.onrender.com/login')} className='inline-flex justify-center items-center px-5 py-2 m-5 bg-green-500 text-white text-xl gap-5 hover:text-black hover:scale-110 active:text-black active:scale-90 transition-all duration-200 rounded-2xl'>
+                    Login with Spotify
+                    <FontAwesomeIcon icon={faSpotify} className="text-4xl" />
+                </button>
 
                 {showInstallButton && (
                     <PWAInstallPrompt />

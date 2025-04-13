@@ -17,7 +17,8 @@ spotify = Blueprint("spotify", __name__)
 
 CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
-REDIRECT_URI = "https://music-recommender-app.vercel.app/callback"
+REDIRECT_URI = "https://music-recommender-api.onrender.com/callback"
+
 
 access_token_cache = {"access_token": None, "expires_at": 0}
 
@@ -45,6 +46,7 @@ def get_token():
     ):
         refresh_token()
     return jsonify({"access_token": access_token_cache["access_token"]})
+    
 
 
 @spotify.route("/callback")
@@ -75,10 +77,13 @@ def callback():
         }), 400
 
     token_data = response.json()
-    session["access_token"] = token_data["access_token"]
-    session["refresh_token"] = token_data.get("refresh_token")
+    access_token = token_data["access_token"]
+    refresh_token = token_data.get("refresh_token")
 
-    return redirect("/me")
+    # Instead of just redirecting with ?loggedin=true
+    # do this 👇 (you can make it fancier with JWT later)
+    return redirect(f"https://music-recommender-app.vercel.app/callback?access_token={access_token}&refresh_token={refresh_token}")
+
 
 
 @spotify.route("/me")
@@ -136,8 +141,8 @@ def create_playlist():
     user_id = profile["id"]
 
     data = {
-        "name": "OopsVincent’s Fire Playlist 🔥",
-        "description": "Curated with chaotic love by Vincent",
+        "name": "Saved Music From GrooveEstrella",
+        "description": "Curated with chaotic love by Me",
         "public": False,
     }
 
@@ -151,7 +156,7 @@ def create_playlist():
 
 @spotify.route("/login")
 def login():
-    scopes = "user-read-private user-read-email playlist-read-private playlist-modify-private"
+    scopes = "user-read-private user-read-email playlist-read-private playlist-modify-private user-modify-playback-state streaming user-read-currently-playing user-library-read playlist-modify-public playlist-read-collaborative user-top-read user-modify-playback-state"
     auth_url = "https://accounts.spotify.com/authorize"
     query_params = {
         "response_type": "code",
