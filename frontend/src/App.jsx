@@ -106,6 +106,80 @@ function App() {
     //   }, []);
 
 
+<<<<<<< Updated upstream
+=======
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const accessToken = params.get("code");
+
+        if (accessToken) {
+            localStorage.setItem("spotify_token", accessToken);
+            const token = localStorage.getItem("spotify_token");
+
+            // Define the async function and call it
+            const getUserData = async () => {
+                try {
+                    const resource = await fetch("https://api.spotify.com/v1/me", {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+
+                    if (!resource.ok) {
+                        throw new Error("Failed to fetch user data");
+                    }
+
+                    const data = await resource.json();
+                    setUserData({
+                        display_name: data.display_name,
+                        email: data.email,
+                        followers: data.followers.total,
+                        images: data.images,
+                    });
+                    console.log(data);
+                    
+                } catch (error) {
+                    console.error(error);
+                }
+            };
+
+            // Call the async function to fetch user data
+            getUserData();
+        }
+    }, []);
+
+
+    useEffect(() => {
+        const isReturningFromSpotify = window.location.search.includes("loggedin=true");
+
+        if (isReturningFromSpotify) {
+            // Clean URL
+            window.history.replaceState({}, document.title, "/");
+
+            // Get profile data now that login is done
+            const token = localStorage.getItem("spotify_token");
+
+            fetch("https://api.spotify.com/v1/me", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data);
+
+                })
+                .catch(err => {
+                    console.error("Error fetching Spotify data", err);
+                });
+        }
+
+        console.log(userProfile, userPlaylists);
+
+    }, []);
+
+>>>>>>> Stashed changes
     const debouncedSearch = useDebouncedSearch(searchTerm, searchType, setLoading, setSearchResults);
 
     function handleSearchChange(query, type) {
