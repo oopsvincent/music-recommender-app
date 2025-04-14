@@ -16,10 +16,13 @@ import requests
 load_dotenv()
 
 app = Flask(__name__)
+
+# CORRECT ORDER
 CORS(app, origins=["https://music-recommender-app.vercel.app"], supports_credentials=True)
 
-#Blueprint For Spotify
+# THEN register blueprints
 app.register_blueprint(spotify)
+
 
 # Database Configuration
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI")
