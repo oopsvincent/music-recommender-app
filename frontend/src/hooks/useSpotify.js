@@ -76,6 +76,8 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
         console.log("API Response:", data);
 
         const resultsArray = data[type + "s"]?.items || [];
+        const nextResults = data?.previous;
+        const prevResults = data?.next;
 
         if (!resultsArray.length) {
             setSearchResults([]);
@@ -92,6 +94,8 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
                     popularity: item.popularity,
                     type: "track",
                     explicit: item.explicit,
+                    next: nextResults,
+                    prev: prevResults,
                 };
             } else if (type === "artist") {
                 return {
@@ -102,6 +106,8 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
                     followers: item.followers.total,
                     type: "artist",
                     explicit: item.explicit,
+                    next: nextResults,
+                    prev: prevResults,
                 };
             } else if (type === "album") {
                 return {
@@ -113,6 +119,8 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
                     popularity: item.release_date,
                     type: "album",
                     explicit: item.explicit,
+                    next: nextResults,
+                    prev: prevResults,
                 };
             } else if (type === "playlist") {
                 return {
@@ -122,6 +130,8 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
                     spoURL: item?.external_urls?.spotify || "#",
                     popularity: item?.owner?.display_name,
                     type: "playlist",
+                    next: nextResults,
+                    prev: prevResults,
                 };
             } else if (type === "show") {
                 return {
@@ -132,6 +142,8 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
                     description: item.description,
                     type: "show",
                     explicit: item.explicit,
+                    next: nextResults,
+                    prev: prevResults,
                 };
             } else if (type === "episode") {
                 return {
@@ -142,6 +154,8 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
                     description: item.description,
                     type: "episode",
                     explicit: item.explicit,
+                    next: nextResults,
+                    prev: prevResults,
                 };
             }
         });
