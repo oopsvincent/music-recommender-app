@@ -15,7 +15,10 @@ import loadTracks from "./hooks/useTrackLoader";
 import useDebouncedSearch from "./hooks/useDebouncedSearch";
 import PWAInstallPrompt from "./Components/PWAInstallPrompt";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSpotify } from '@fortawesome/free-brands-svg-icons'
+import { faSpotify } from '@fortawesome/free-brands-svg-icons';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Callback from './pages/Callback';
+
 
 const tracksDaily = [
     "Die With a smile",
@@ -95,82 +98,51 @@ function App() {
     const [userProfile, setUserProfile] = useState('');
     const [userPlaylists, setPlaylists] = useState('');
     const [userData, setUserData] = useState(null);
+  
+useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
 
+    if (accessToken) {
+        // Store tokens
+        localStorage.setItem("spotify_token", accessToken);
+        localStorage.setItem("spotify_refresh_token", refreshToken);
 
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const accessToken = params.get("access_token");
-        const refreshToken = params.get("refresh_token");
-
-
-if (accessToken) {
-    localStorage.setItem("spotify_token", accessToken);
-    localStorage.setItem("spotify_refresh_token", refreshToken); // optional but smart
-
-    const getUserData = async () => {
-        try {
-            const resource = await fetch("https://api.spotify.com/v1/me", {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            });
-
-            if (!resource.ok) {
-                throw new Error("Failed to fetch user data");
-            }
-
-            const data = await resource.json();
-            setUserData({
-                display_name: data.display_name,
-                email: data.email,
-                followers: data.followers.total,
-                images: data.images,
-            });
-            console.log(data);
-
-            // 👇 Optional: remove tokens from URL after storing
-            window.history.replaceState({}, document.title, "/");
-
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    getUserData();
-}
-
-    }, []);
-
-
-    useEffect(() => {
-        const isReturningFromSpotify = window.location.search.includes("loggedin=true");
-
-        if (isReturningFromSpotify) {
-            // Clean URL
-            window.history.replaceState({}, document.title, "/");
-
-            // Get profile data now that login is done
-            const token = localStorage.getItem("spotify_token");
-
-            fetch("https://api.spotify.com/v1/me", {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-
-                .then(res => res.json())
-                .then(data => {
-                    console.log(data);
-
-                })
-                .catch(err => {
-                    console.error("Error fetching Spotify data", err);
+        // Define and call function to get user data
+        const getUserData = async () => {
+            try {
+                const resource = await fetch("https://api.spotify.com/v1/me", {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
                 });
-        }
 
-        console.log(userProfile, userPlaylists);
+                if (!resource.ok) {
+                    throw new Error("Failed to fetch user data");
+                }
 
-    }, []);
+                const data = await resource.json();
+                setUserData({
+                    display_name: data.display_name,
+                    email: data.email,
+                    followers: data.followers.total,
+                    images: data.images,
+                });
+
+                console.log("Spotify User Data:", data);
+
+                // Optional: clean up URL
+                window.history.replaceState({}, document.title, "/");
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
+
+        getUserData();
+    }
+}, []);
+
     const debouncedSearch = useDebouncedSearch(searchTerm, searchType, setLoading, setSearchResults);
 
     function handleSearchChange(query, type) {
@@ -222,28 +194,24 @@ if (accessToken) {
         await loadTracks(tracks, spotifyToken, setTrackData, setLoading);
     };
 
+    const chipMap = {
+        "Hip Hop": "rap_music",
+        "Pop": "pop_music",
+        "Rock": "rock_music",
+        "Classical": "classical_music",
+        "Country": "native_music",
+        "Happy": "happy_music",
+        "Sad": "sad_music",
+        "Jazz": "jazz_music",
+        "R & B": "rnb_music",
+        "Electronic": "party_music"
+    };
+
     const handleChipSelect = async (chipText) => {
+        const key = chipMap[chipText];
         try {
-            if (chipText === "Hip Hop") {
-                getDataFromDB("rap_music");
-            } else if (chipText === "Pop") {
-                getDataFromDB("pop_music");
-            } else if (chipText === "Rock") {
-                getDataFromDB("rock_music");
-            } else if (chipText === "Classical") {
-                getDataFromDB("classical_music");
-            } else if (chipText === "Country") {
-                getDataFromDB("native_music");
-            } else if (chipText === "Happy") {
-                getDataFromDB("happy_music");
-            } else if (chipText === "Sad") {
-                getDataFromDB("sad_music");
-            } else if (chipText === "Jazz") {
-                getDataFromDB("jazz_music");
-            } else if (chipText === "R & B") {
-                getDataFromDB("rnb_music");
-            } else if (chipText === "Electronic") {
-                getDataFromDB("party_music");
+            if (key) {
+                await getDataFromDB(key);
             } else {
                 await loadTracks(tracksDaily, spotifyToken, setTrackData, setLoading);
             }
@@ -358,9 +326,9 @@ if (accessToken) {
                 <Account
                     src={
                         userData?.images?.length > 0 && userData.images[0]?.url
-                          ? userData.images[0].url
-                          : `https://placehold.co/200/orange/white?text=${encodeURIComponent(userData?.display_name || 'User')}`
-                      }
+                            ? userData.images[0].url
+                            : `https://placehold.co/200/orange/white?text=${encodeURIComponent(userData?.display_name || 'User')}`
+                    }
                     username={userData?.display_name}
                     email={userData?.email}
                     followers={userData?.followers}
@@ -383,6 +351,11 @@ if (accessToken) {
             className={`md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex ${selectedSection === "Search" && "justify-start"
                 } flex-col justify-between`}
         >
+            <Router>
+                <Routes>
+                    <Route path="/callback" element={<Callback />} />
+                </Routes>
+            </Router>
             {showLogin && (
                 <div className="h-dvh flex justify-center items-center">
                     <div className="max-w-[90%] w-full">
