@@ -18,7 +18,7 @@ export default function Callback() {
 
     // Talk to the backend
     fetch("https://music-recommender-api.onrender.com/callback", {
-      method: "POST",
+      method: "GET",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code }),
     })
