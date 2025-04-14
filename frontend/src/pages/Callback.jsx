@@ -17,10 +17,8 @@ export default function Callback() {
     }
 
     // Talk to the backend
-    fetch("https://music-recommender-api.onrender.com/callback", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code }),
+    fetch(`https://music-recommender-api.onrender.com/callback?${code}`, {
+      method: "GET"
     })
       .then(async (res) => {
         console.log("📡 Backend responded with status:", res.status);
