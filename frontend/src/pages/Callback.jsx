@@ -15,6 +15,7 @@ export default function Callback() {
       return;
     }
 
+    // Send code to backend to exchange it for tokens
     fetch("https://music-recommender-api.onrender.com/callback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -22,21 +23,24 @@ export default function Callback() {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.error) {
+        if (data.error || !data.access_token) {
           alert("Spotify Auth failed!");
-          console.error(data.details);
+          console.error("Error details:", data);
           return;
         }
 
+        // Store tokens
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("refresh_token", data.refresh_token);
 
         console.log("Successfully logged in with Spotify:", data);
 
-        navigate("/"); // or to your dashboard
+        // Navigate to your dashboard or home
+        navigate("/");
       })
       .catch((err) => {
         console.error("Something went wrong:", err);
+        alert("Something went wrong during Spotify login.");
       });
   }, []);
 
