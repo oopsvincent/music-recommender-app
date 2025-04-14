@@ -98,47 +98,50 @@ function App() {
     const [userProfile, setUserProfile] = useState('');
     const [userPlaylists, setPlaylists] = useState('');
     const [userData, setUserData] = useState(null);
+  
+useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
 
+    if (accessToken) {
+        // Store tokens
+        localStorage.setItem("spotify_token", accessToken);
+        localStorage.setItem("spotify_refresh_token", refreshToken);
 
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const accessToken = params.get("code");
+        // Define and call function to get user data
+        const getUserData = async () => {
+            try {
+                const resource = await fetch("https://api.spotify.com/v1/me", {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
 
-        if (accessToken) {
-            localStorage.setItem("spotify_token", accessToken);
-            const token = localStorage.getItem("spotify_token");
-
-            // Define the async function and call it
-            const getUserData = async () => {
-                try {
-                    const resource = await fetch("https://api.spotify.com/v1/me", {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-
-                    if (!resource.ok) {
-                        throw new Error("Failed to fetch user data");
-                    }
-
-                    const data = await resource.json();
-                    setUserData({
-                        display_name: data.display_name,
-                        email: data.email,
-                        followers: data.followers.total,
-                        images: data.images,
-                    });
-                    console.log(data);
-
-                } catch (error) {
-                    console.error(error);
+                if (!resource.ok) {
+                    throw new Error("Failed to fetch user data");
                 }
-            };
 
-            // Call the async function to fetch user data
-            getUserData();
-        }
-    }, []);
+                const data = await resource.json();
+                setUserData({
+                    display_name: data.display_name,
+                    email: data.email,
+                    followers: data.followers.total,
+                    images: data.images,
+                });
+
+                console.log("Spotify User Data:", data);
+
+                // Optional: clean up URL
+                window.history.replaceState({}, document.title, "/");
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
+
+        getUserData();
+    }
+}, []);
 
     const debouncedSearch = useDebouncedSearch(searchTerm, searchType, setLoading, setSearchResults);
 
