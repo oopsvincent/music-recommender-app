@@ -102,7 +102,7 @@ function App() {
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        const accessToken = params.get("code");
+        const accessToken = params.get("access_token");
 
         if (accessToken) {
             localStorage.setItem("spotify_token", accessToken);
