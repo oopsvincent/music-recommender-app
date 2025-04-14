@@ -17,7 +17,7 @@ export default function Callback() {
     }
 
     // Talk to the backend
-    fetch(`https://music-recommender-api.onrender.com/callback?${code}`, {
+    fetch(`https://music-recommender-api.onrender.com/callback?code=${code}`, {
       method: "GET"
     })
       .then(async (res) => {
