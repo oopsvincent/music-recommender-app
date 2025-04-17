@@ -47,6 +47,7 @@ const tracksDaily = [
     "HUMBLE",
     "perfect",
     "bump heads",
+    "take me to church",
     "Havana",
 ];
 
@@ -381,7 +382,7 @@ function App() {
                 </>
             )}
             <footer className="text-center py-6 px-8 text-white mb-17 relative bottom-0">
-                © 2025 Farhan Ali Reza & Soumodip Mondal. All rights reserved. Licensed
+                © 2025 GrooveEstrella Team. All rights reserved. Licensed
                 under MIT License.
             </footer>
             {!showLogin && (
