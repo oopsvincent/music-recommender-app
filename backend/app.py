@@ -64,10 +64,10 @@ class Music(db.Model):
     rap_music = db.Column(db.String(100))
     pop_music = db.Column(db.String(100))
     jazz_music = db.Column(db.String(100))
-    motivaton_music = db.Column(db.String(100))
+    motivational_music = db.Column(db.String(100))
     trending_music = db.Column(db.String(100))
     latest_music = db.Column(db.String(100))
-    top10_music = db.Column(db.String(100))
+    top_music = db.Column(db.String(100))
     hidden_gems_music = db.Column(db.String(100))
     developers_choice_music = db.Column(db.String(100))
 
@@ -93,10 +93,10 @@ class Music(db.Model):
             "rap_music": self.rap_music,
             "pop_music": self.pop_music,
             "jazz_music": self.jazz_music,
-            "motivaton_music": self.motivaton_music,
+            "motivaton_music": self.motivational_music,
             "trending_music": self.trending_music,
             "latest_music": self.latest_music,
-            "top10_music": self.top10_music,
+            "top10_music": self.top_music,
             "hidden_gems_music": self.hidden_gems_music,
             "developers_choice_music": self.developers_choice_music,
         }
@@ -134,10 +134,10 @@ def get_songs_by_genre(genre):
         "rap_music",
         "pop_music",
         "jazz_music",
-        "motivaton_music",
+        "motivational_music",
         "trending_music",
         "latest_music",
-        "top10_music",
+        "top_music",
         "hidden_gems_music",
         "developers_choice_music",
     ]
