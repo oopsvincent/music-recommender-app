@@ -21,7 +21,7 @@ import Callback from './pages/Callback';
 
 
 const tracksDaily = [
-    "Die With a smile",
+    "Bruno Mars - Die With A Smile",
     "thats so true",
     "Not Like Us",
     "apt.",
