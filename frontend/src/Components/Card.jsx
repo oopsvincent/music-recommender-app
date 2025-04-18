@@ -147,7 +147,7 @@ const Card = ({
   </span> */}
                 <h1
                     className="text-2xl font-sbold text-white 
-                         whitespace-nowrap overflow-scroll scrollb-none max-w-full"
+                         whitespace-nowrap overflow-scroll scrollb-none max-w-full font-semibold font-stretch-120%"
                     title={title}
                 >
                     {title}
