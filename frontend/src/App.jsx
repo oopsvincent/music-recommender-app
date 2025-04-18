@@ -99,40 +99,43 @@ function App() {
     const [userProfile, setUserProfile] = useState('');
     const [userPlaylists, setPlaylists] = useState('');
     const [userData, setUserData] = useState(null);
-  
-// useEffect(() => {
-//     const params = new URLSearchParams(window.location.search);
-//     const accessToken = params.get("access_token");
-//     const refreshToken = params.get("refresh_token");
+    const [nextUrl, setNextUrl] = useState(null);
+    const [prevUrl, setPrevUrl] = useState(null);
 
-//     if (accessToken) {
-//         // Store tokens
-//         localStorage.setItem("spotify_token", accessToken);
-//         localStorage.setItem("spotify_refresh_token", refreshToken);
-//         try{
-//                 if
-//                  (!resource.ok) {
-//                     throw new Error("Failed to fetch user data");
-//                 }
 
-//                 const data = await resource.json();
-//                 setUserData({
-//                     display_name: data.display_name,
-//                     email: data.email,
-//                     followers: data.followers.total,
-//                     images: data.images,
-//                 });
+    // useEffect(() => {
+    //     const params = new URLSearchParams(window.location.search);
+    //     const accessToken = params.get("access_token");
+    //     const refreshToken = params.get("refresh_token");
 
-//                 console.log("Spotify User Data:", data);
+    //     if (accessToken) {
+    //         // Store tokens
+    //         localStorage.setItem("spotify_token", accessToken);
+    //         localStorage.setItem("spotify_refresh_token", refreshToken);
+    //         try{
+    //                 if
+    //                  (!resource.ok) {
+    //                     throw new Error("Failed to fetch user data");
+    //                 }
 
-//                 // Optional: clean up URL
-//                 window.history.replaceState({}, document.title, "/");
-//             } catch (error) {
-//                 console.error("Error fetching user data:", error);
-//             }
+    //                 const data = await resource.json();
+    //                 setUserData({
+    //                     display_name: data.display_name,
+    //                     email: data.email,
+    //                     followers: data.followers.total,
+    //                     images: data.images,
+    //                 });
 
-//         getUserData();
-//     }, []);
+    //                 console.log("Spotify User Data:", data);
+
+    //                 // Optional: clean up URL
+    //                 window.history.replaceState({}, document.title, "/");
+    //             } catch (error) {
+    //                 console.error("Error fetching user data:", error);
+    //             }
+
+    //         getUserData();
+    //     }, []);
 
     const debouncedSearch = useDebouncedSearch(searchTerm, searchType, setLoading, setSearchResults);
 
@@ -174,16 +177,36 @@ function App() {
         }
     }, [userName, musicLanguage]);
 
-    const getDataFromDB = async (key) => {
-        setLoading(true);
-        const response = await fetch(
-            `https://music-recommender-api.onrender.com/songs/${key}?offset=0&limit=20`
-        ).then(setLoading(false));
-        const data = await response.json();
-        const next = data.next_offset;
-        const tracks = data["results"] || [];
-        await loadTracks(tracks, spotifyToken, setTrackData, setLoading);
+    const getDataFromDB = async (keyOrUrl) => {
+        try {
+            setLoading(true);
+            let url;
+    
+            // Determine whether it's a full URL (pagination) or a category key
+            if (keyOrUrl.startsWith("http")) {
+                url = keyOrUrl;
+            } else {
+                url = `https://music-recommender-api.onrender.com/songs/${keyOrUrl}?offset=0&limit=20`;
+            }
+    
+            const response = await fetch(url);
+            const data = await response.json();
+    
+            const next = data.next;
+            const prev = data.previous;
+            const tracks = data.results || [];
+    
+            setNextUrl(next);
+            setPrevUrl(prev);
+    
+            await loadTracks(tracks, spotifyToken, setTrackData, setLoading);
+        } catch (error) {
+            console.error("Error fetching tracks:", error.message);
+        } finally {
+            setLoading(false);
+        }
     };
+    
 
     const chipMap = {
         "Hip Hop": "rap_music",
@@ -264,6 +287,11 @@ function App() {
                         ))
                     )}
                 </div>
+                <div className="pagination-buttons flex justify-center items-center ">
+                    <button className="text-black bg-white rounded-2xl p-3 m-3" disabled={!prevUrl} onClick={() => getDataFromDB(prevUrl)}>⬅ Prev</button>
+                    <button className="text-black bg-white rounded-2xl p-3 m-3" disabled={!nextUrl} onClick={() => getDataFromDB(nextUrl)}>Next ➡</button>
+                </div>
+
             </>
         ),
         Search: (
