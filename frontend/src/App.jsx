@@ -193,7 +193,7 @@ function App() {
             const data = await response.json();
     
             const next = data.next;
-            const prev = data.previous;
+            const prev = data.prev;
             const tracks = data.results || [];
     
             setNextUrl(next);
