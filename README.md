@@ -1,5 +1,5 @@
 
-# Project Title
+# GrooveEstrella 
 
 ### 🎵 **Music Recommender Web App**  
 
@@ -19,7 +19,7 @@ The **Music Recommender App** is a web-based platform designed to suggest person
 
 ### 🛠️ **Tech Stack**  
 
-- **Frontend**: React + TypeScript (Vite), Bootstrap CSS
+- **Frontend**: React + JavaScript (Vite), Tailwind CSS
 - **Backend**: Python (Flask)  
 - **Database**: CSV & SQL  
 - **Deployment**: Vercel (frontend), Render (backend)  
@@ -48,7 +48,7 @@ A sleek and intelligent music discovery experience, tailored by **you**! 🎶
 ## Authors
 
 - [Farhan Ali Reza](https://www.github.com/oopsvincent)
-- [Soumodip Mondal](https://www.github.com/)
+- [Soumodip Mondal](https://www.github.com/soumodip-esc)
 
 ## Contributing
 
