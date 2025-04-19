@@ -101,6 +101,10 @@ function App() {
     const [userData, setUserData] = useState(null);
     const [nextUrl, setNextUrl] = useState(null);
     const [prevUrl, setPrevUrl] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const [limit, setLimit] = useState(10); // default limit
+
 
 
     // useEffect(() => {
@@ -181,32 +185,40 @@ function App() {
         try {
             setLoading(true);
             let url;
-    
-            // Determine whether it's a full URL (pagination) or a category key
+
             if (keyOrUrl.startsWith("http")) {
                 url = keyOrUrl;
             } else {
-                url = `https://music-recommender-api.onrender.com/songs/${keyOrUrl}?offset=0&limit=20`;
+                url = `https://music-recommender-api.onrender.com/songs/${keyOrUrl}?offset=0&limit=${limit}`;
             }
-    
+
             const response = await fetch(url);
             const data = await response.json();
-    
-            const next = data.next;
-            const prev = data.prev;
+
             const tracks = data.results || [];
-    
-            setNextUrl(next);
-            setPrevUrl(prev);
-    
+
+            // ✅ Important: total count is 'total_items', not 'count'
+            const totalItems = data.total_items || 0;
+
+            // ✅ Extract offset from URL to calculate current page
+            const parsedUrl = new URL(url);
+            const offset = parseInt(parsedUrl.searchParams.get("offset")) || 0;
+
+            // ✅ Set pagination states
+            setNextUrl(data.next);
+            setPrevUrl(data.prev);
+            setTotalCount(totalItems);
+            setCurrentPage(Math.floor(offset / limit) + 1);
+
             await loadTracks(tracks, spotifyToken, setTrackData, setLoading);
         } catch (error) {
-            console.error("Error fetching tracks:", error.message);
+            console.error(error.message);
         } finally {
             setLoading(false);
         }
     };
-    
+
+
 
     const chipMap = {
         "Hip Hop": "rap_music",
@@ -266,9 +278,11 @@ function App() {
                         Array.from({ length: 20 }).map((_, index) => (
                             <div key={index} className="p-4">
                                 <Skeleton height={200} width={150} />
-                                <Skeleton height={30} width={`80%`} style={{ marginTop: 10 }} />
-                                <Skeleton height={20} width={`60%`} style={{ marginTop: 5 }} />
-                                <Skeleton height={20} width={`100%`} style={{ marginTop: 5 }} />
+                                <Skeleton height={25} width={`80%`} style={{ marginTop: 10 }} />
+                                <Skeleton height={15} width={`60%`} style={{ marginTop: 5 }} />
+                                <Skeleton height={35} width={`100%`} style={{ marginTop: 40 }} />
+                                <Skeleton height={35} width={`100%`} style={{ marginTop: 5 }} />
+                                <Skeleton height={10} width={`40%`} style={{ marginTop: 5 }} />
                             </div>
                         ))
                     ) : (
@@ -287,10 +301,64 @@ function App() {
                         ))
                     )}
                 </div>
-                <div className="pagination-buttons flex justify-center items-center ">
-                    <button className="text-black bg-white rounded-2xl p-3 m-3" disabled={!prevUrl} onClick={() => getDataFromDB(prevUrl)}>⬅ Prev</button>
-                    <button className="text-black bg-white rounded-2xl p-3 m-3" disabled={!nextUrl} onClick={() => getDataFromDB(nextUrl)}>Next ➡</button>
+
+
+                <div className="pagination-wrapper flex flex-col items-center gap-3 mt-4">
+
+
+                    <div className="flex justify-center items-center mb-3">
+                        <div className="w-25 h-0.5 bg-white md:w-50 lg:w-75 xl:w-100"></div>
+                        <div className="mx-5 text-white">PAGINATION</div>
+                        <div className="w-25 h-0.5 bg-white md:w-50 lg:w-75 xl:w-100"></div>
+                    </div>
+
+                    {/* First Row: Prev - Page Info - Next */}
+                    <div className="flex items-center gap-4">
+                        <button
+                            className="text-black bg-white rounded-lg px-4 py-2 disabled:opacity-50"
+                            disabled={!prevUrl}
+                            onClick={() => getDataFromDB(prevUrl)}
+                        >
+                            ⬅ Prev
+                        </button>
+
+                        <p className="text-white text-center">
+                            Page <span className="font-bold">{currentPage}</span> of{" "}
+                            <span className="font-bold">{Math.ceil(totalCount / limit)}</span>
+                        </p>
+
+                        <button
+                            className="text-black bg-white rounded-lg px-4 py-2 disabled:opacity-50"
+                            disabled={!nextUrl}
+                            onClick={() => getDataFromDB(nextUrl)}
+                        >
+                            Next ➡
+                        </button>
+                    </div>
+
+                    {/* Second Row: Numbered Pagination Buttons */}
+                    <div className="flex flex-wrap justify-center gap-2 text-white m-5">
+                        {Array.from({ length: Math.ceil(totalCount / limit) }, (_, i) => i + 1).map((pageNum) => (
+                            <button
+                                key={pageNum}
+                                onClick={() => {
+                                    const offset = (pageNum - 1) * limit;
+                                    const url = new URL(nextUrl || prevUrl || `https://music-recommender-api.onrender.com/songs?offset=${offset}&limit=${limit}`);
+                                    url.searchParams.set("offset", offset);
+                                    url.searchParams.set("limit", limit);
+                                    getDataFromDB(url.toString());
+                                }}
+                                className={`px-3 py-1 rounded-md font-semibold transition-all duration-200 ${currentPage === pageNum
+                                        ? "bg-yellow-400 text-black"
+                                        : "bg-gray-800 text-white hover:bg-gray-600"
+                                    }`}
+                            >
+                                {pageNum}
+                            </button>
+                        ))}
+                    </div>
                 </div>
+
 
             </>
         ),
@@ -307,9 +375,12 @@ function App() {
                     {loading ? (
                         Array.from({ length: 20 }).map((_, index) => (
                             <div key={index} className="p-4">
-                                <Skeleton height={200} width={200} />
-                                <Skeleton height={30} width={`80%`} style={{ marginTop: 10 }} />
-                                <Skeleton height={20} width={`60%`} style={{ marginTop: 5 }} />
+                                <Skeleton height={200} width={150} />
+                                <Skeleton height={25} width={`80%`} style={{ marginTop: 10 }} />
+                                <Skeleton height={15} width={`60%`} style={{ marginTop: 5 }} />
+                                <Skeleton height={35} width={`100%`} style={{ marginTop: 40 }} />
+                                <Skeleton height={35} width={`100%`} style={{ marginTop: 5 }} />
+                                <Skeleton height={10} width={`40%`} style={{ marginTop: 5 }} />
                             </div>
                         ))
                     ) : (
