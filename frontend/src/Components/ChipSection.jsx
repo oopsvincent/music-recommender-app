@@ -8,14 +8,14 @@ const ChipSection = ({ onChipSelect }) => {
     Moods: [
       "Happy", "Sad", "Romantic", "Melancholy",
       "Focus", "Calm", "Workout", "Motivational",
-      "Instrumental", "Feel-Good"
+      "Instrumental",
     ],
     Genres: [
       "Pop", "Hip Hop", "Electronic", "Rock", "R & B",
       "K-Pop", "Jazz", "Classical", "Blues", "Country"
     ],
     "Editor's Choice": [
-      "Trending", "New Releases", "Top 10", "Hidden Gems", "Fan Favorites", "Developer's Choice"
+      "Trending", "New Releases", "Top 10", "Hidden Gems", "Developer's Choice"
     ]
   };
 
@@ -45,15 +45,6 @@ const ChipSection = ({ onChipSelect }) => {
 
       {/* Chips Section */}
       <div className='pl-2 pr-2 flex overflow-auto [&::-webkit-scrollbar]:hidden h-13 overflow-y-hidden chips-container mt-4'>
-        <Chip
-        text={"Daily Mix"}
-        key={-1}
-        isActive={true}
-        handleClick={() => {
-            handleChipClick(this);
-            onChipSelect(this);
-        }}
-        />
         {categories[selectedCategory].map((element, index) => (
           <Chip 
             text={element} 

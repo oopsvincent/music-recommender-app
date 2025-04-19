@@ -62,8 +62,8 @@ const SearchComp = ({ handleChange }) => {
                 </button>
             </div>
 
-            <div className="flex text-white gap-2 justify-between items-center px-5 bg-black py-3 rounded-b-3xl">
-                <h2 className="text-2xl">Sort By</h2>
+            <div className="flex text-white gap-2 justify-between items-center px-5 bg-black py-3 rounded-b-3xl md:justify-center md:items-center md:gap-5">
+                <h2 className="text-2xl">Sort by : </h2>
                 <select
                     className="bg-black border-2 text-white text-2xl rounded-2xl px-2"
                     onChange={handleTypeChange}

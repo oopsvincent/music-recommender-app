@@ -7,7 +7,7 @@ const CategorySelector = ({ selectedCategory, handleCategoryChange }) => {
     <div className="relative flex justify-around items-center">
         <h2 className='text-white text-2xl'>Filter By Category</h2>
       <select
-        className="w-35 h-10 border-2 rounded-lg bg-black text-white p-1.5 focus:outline-none"
+        className="w-25 h-auto border-2 rounded-lg bg-black text-white text-xs p-1.5 focus:outline-none md:w-40 md:text-xl"
         value={selectedCategory}
         onChange={(e) => handleCategoryChange(e.target.value)}
       >
