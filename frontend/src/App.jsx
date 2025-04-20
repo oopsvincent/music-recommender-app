@@ -97,14 +97,37 @@ function App() {
     const [showInstallButton, setShowInstallButton] = useState(false);
     const [loading, setLoading] = useState(true);
     const [userProfile, setUserProfile] = useState('');
-    const [userPlaylists, setPlaylists] = useState('');
     const [userData, setUserData] = useState(null);
     const [nextUrl, setNextUrl] = useState(null);
     const [prevUrl, setPrevUrl] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
     const [limit, setLimit] = useState(10); // default limit
-
+    const [userPlaylists, setPlaylists] = useState([]);
+    const [selectedTrack, setSelectedTrack] = useState(null); // Assuming you're selecting a track to add to the playlist
+  
+    // Function to handle saving the playlist
+    const savePlaylist = () => {
+      // Let's assume the playlist is a simple array of track objects.
+      const newPlaylist = [...userPlaylists, selectedTrack]; // Add the selected track
+      setPlaylists(newPlaylist);
+      
+      // Save to localStorage (serialize the array to a string)
+      localStorage.setItem("userPlaylists", JSON.stringify(newPlaylist));
+    };
+  
+    // Function to load the saved playlist from localStorage
+    const loadSavedPlaylists = () => {
+      const savedPlaylists = localStorage.getItem("userPlaylists");
+      if (savedPlaylists) {
+        setPlaylists(JSON.parse(savedPlaylists)); // Deserialize the saved playlist
+      }
+    };
+  
+    // Use useEffect to load playlists when the app initializes
+    useEffect(() => {
+      loadSavedPlaylists();
+    }, []);
 
 
     // useEffect(() => {
@@ -276,7 +299,7 @@ function App() {
                 <div className="flex flex-row flex-wrap justify-center mb-5">
                     {loading ? (
                         Array.from({ length: 20 }).map((_, index) => (
-                            <div key={index} className="p-4">
+                            <div key={index} className="p-2 glassmorpho m-3 rounded-xl">
                                 <Skeleton height={200} width={150} />
                                 <Skeleton height={25} width={`80%`} style={{ marginTop: 10 }} />
                                 <Skeleton height={15} width={`60%`} style={{ marginTop: 5 }} />
@@ -297,6 +320,8 @@ function App() {
                                 popularity={track.popularity}
                                 type={track.type}
                                 explicit={track.explicit}
+                                handleSave={() => {
+                                }}
                             />
                         ))
                     )}
@@ -447,6 +472,22 @@ function App() {
                     <PWAInstallPrompt />
                 )}
             </>
+        ),
+        Playlist: (
+            <div className="playlists-section">
+        <h2>Your Playlists:</h2>
+        {/* <ul>
+          {userPlaylists.length === 0 ? (
+            <li>No playlists saved yet.</li>
+          ) : (
+            userPlaylists.map((track, index) => (
+              <li key={index}>
+                {track.title} by {track.artist}
+              </li>
+            ))
+          )}
+        </ul> */}
+      </div>
         ),
     };
 
