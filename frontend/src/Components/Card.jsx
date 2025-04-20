@@ -15,8 +15,16 @@ const Card = ({
     followers,
     description,
     explicit,
+    handleSave, // Function passed from parent to handle saving
 }) => {
+
     const [saved, setSaved] = useState(false);
+
+    const [isSaved, setIsSaved] = useState(saved);
+
+    function handleSaved(){
+        return title;
+    }
 
     function handleClick(url) {
         console.log(url);
@@ -73,9 +81,10 @@ const Card = ({
         ),
         save: (
             <div className="relative w-6 h-6 mr-3 inline-flex justify-center items-center group">
-                <button
+                <button 
                     onClick={() => {
                         setSaved(!saved);
+                        handleSaved();
                     }}
                     className="relative w-full h-full hover:scale-110 transition-transform duration-300 ease-in-out"
                 >
@@ -124,7 +133,7 @@ const Card = ({
             </div>
 
         ),
-        ExplicitTag: (<div className="absolute top-55 bg-black right-0 m-2 rounded-xs" title="EXPLICIT"><svg xmlns="http://www.w3.org/2000/svg" fill="white" width="20" height="20" viewBox="0 0 24 24" id="explicit">
+        ExplicitTag: (<div className="absolute top-33 md:top-55 bg-black right-0 m-2 rounded-xs" title="EXPLICIT"><svg xmlns="http://www.w3.org/2000/svg" fill="white" width="20" height="20" viewBox="0 0 24 24" id="explicit">
             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 6h-3v2h3c.55 0 1 .45 1 1s-.45 1-1 1h-3v2h3c.55 0 1 .45 1 1s-.45 1-1 1h-4c-.55 0-1-.45-1-1V8c0-.55.45-1 1-1h4c.55 0 1 .45 1 1s-.45 1-1 1z"></path>
         </svg></div>),
     }
