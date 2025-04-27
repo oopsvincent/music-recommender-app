@@ -68,20 +68,19 @@ def callback():
         "client_secret": CLIENT_SECRET,
     }
 
-    response = requests.post("https://accounts.spotify.com/api/token", data=payload)
-    if response.status_code != 200:
-        return (
-            jsonify(
-                {"error": "Failed to obtain access token", "details": response.text}
-            ),
-            400,
-        )
+    try:
+        response = requests.post("https://accounts.spotify.com/api/token", data=payload)
+        response.raise_for_status()  # Raise an exception for HTTP errors
 
-    token_data = response.json()
-    session["access_token"] = token_data["access_token"]
-    session["refresh_token"] = token_data.get("refresh_token")
+        token_data = response.json()
+        session["access_token"] = token_data["access_token"]
+        session["refresh_token"] = token_data.get("refresh_token")
 
-    return redirect("/me")
+        return redirect("/me")
+    
+    except requests.exceptions.RequestException as e:
+        print(f"Error exchanging code for token: {e}")
+        return jsonify({"error": "Failed to obtain access token", "details": str(e)}), 500
 
 
 @spotify.route("/me")
