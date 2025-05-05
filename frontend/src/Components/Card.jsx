@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { SpotifyButton, YouTubeButton,SmallSpotifyButton, SmallYouTubeButton } from "./MusicButtons";
+import { SpotifyButton, YouTubeButton, SmallSpotifyButton, SmallYouTubeButton } from "./MusicButtons";
 import { Bookmark, BookmarkPlus, Check, CirclePlay, Award, Handshake } from "lucide-react"; // Adjust imports if needed
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
@@ -22,13 +22,39 @@ const Card = ({
 
     const [isSaved, setIsSaved] = useState(saved);
 
-    function handleSaved(){
-        return title;
+    function handleSaved() {
+        const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
+
+        // Check if already saved
+        const isAlreadySaved = savedSongs.some(song => song.title === title && song.artist === artist);
+        if (isAlreadySaved){
+            setSaved(true);
+            return;
+        }    
+
+        const newSong = {
+            title,
+            artist,
+            followers,
+            spoURL,
+            YTURL,
+            image: url,
+            description,
+            popularity,
+            explicit,
+            type,
+        };
+
+        savedSongs.push(newSong);
+
+        localStorage.setItem("savedSongs", JSON.stringify(savedSongs));
+
     }
+
 
     function handleClick(url) {
         console.log(url);
-        
+
         setTimeout(() => {
             window.open(url, "_blank");
         }, 500);
@@ -42,13 +68,13 @@ const Card = ({
     const sections = {
         Artist: (
             <div className="m-2 rounded-xl flex flex-col items-start justify-center transition-all duration-300 w-90 h-max border border-white/30 glassmorpho md:w-100 md:m-4 hover:bg-black/100 active:bg-black/100">
-                    <div className="flex items-center justify-around">
+                <div className="flex items-center justify-around">
                     <img src={url} alt="" className="w-4/12 mt-5 ml-5 rounded-2xl group active:scale-110 hover:scale-110 transition-all duration-200" />
                     <div className="mx-2 mt-5.5">
-                    <SmallSpotifyButton clickHandle={()=> handleClick(spoURL)}/>
-                    <SmallYouTubeButton clickHandle={(() => handleClick(YTURL))}/>
+                        <SmallSpotifyButton clickHandle={() => handleClick(spoURL)} />
+                        <SmallYouTubeButton clickHandle={(() => handleClick(YTURL))} />
                     </div>
-                    </div>
+                </div>
                 <div className="flex flex-col flex-grow p-3 relative">
                     <h1
                         className="text-4xl text-white 
@@ -60,13 +86,13 @@ const Card = ({
                 </div>
                 <p className="px-5 text-md font-ultralight text-gray-300">{`${followers?.toLocaleString()} Followers`}</p>
                 <div
-                className={`mx-auto mb-2 text-xs inline-flex justify-center items-center md:text-lg ${popularity < 80 ? "text-yellow-400" : "text-lime-400"
-                    }`}
-            >
-                <Award />
-                <p>{`Popularity: ${popularity}`}</p>
-                {popularity >= 80 ? <span title="Trending RIght Now 🔥">🔥</span> : <span></span>}
-            </div>
+                    className={`mx-auto mb-2 text-xs inline-flex justify-center items-center md:text-lg ${popularity < 80 ? "text-yellow-400" : "text-lime-400"
+                        }`}
+                >
+                    <Award />
+                    <p>{`Popularity: ${popularity}`}</p>
+                    {popularity >= 80 ? <span title="Trending RIght Now 🔥">🔥</span> : <span></span>}
+                </div>
             </div>
         ),
         Popularity: (
@@ -81,11 +107,19 @@ const Card = ({
         ),
         save: (
             <div className="relative w-6 h-6 mr-3 inline-flex justify-center items-center group">
-                <button 
+                <button
                     onClick={() => {
-                        setSaved(!saved);
-                        handleSaved();
+                        setSaved(prev => !prev);
+                        if (!saved) {
+                            handleSaved(); // Save only when adding, not when unsaving
+                        } else {
+                            // Optional: Remove if already saved
+                            const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
+                            const updated = savedSongs.filter(song => !(song.title === title && song.artist === artist));
+                            localStorage.setItem("savedSongs", JSON.stringify(updated));
+                        }
                     }}
+
                     className="relative w-full h-full hover:scale-110 transition-transform duration-300 ease-in-out"
                 >
 
@@ -139,11 +173,11 @@ const Card = ({
     }
 
 
-    return type === "artist" ? sections["Artist"] : 
-        <div  title={artist + " - " + title} className="h-auto m-2 rounded-xl flex flex-col transition-all duration-300 w-42 border border-white/30 glassmorpho md:w-64 md:m-4 hover:bg-black/100 active:bg-black/100">
+    return type === "artist" ? sections["Artist"] :
+        <div title={artist + " - " + title} className="h-auto m-2 rounded-xl flex flex-col transition-all duration-300 w-42 border border-white/30 glassmorpho md:w-64 md:m-4 hover:bg-black/100 active:bg-black/100">
             {explicit && sections["ExplicitTag"]}
             {/* Image */}
-            {}
+            { }
             {url ? (
                 <img src={url} alt={title} className="rounded-t-xl group" />
             ) : (

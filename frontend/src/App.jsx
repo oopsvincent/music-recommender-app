@@ -18,12 +18,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Callback from './pages/Callback';
+import PlaylistSection from "./routes/PlaylistSection";
 
 
 const tracksDaily = [
     "Bruno Mars - Die With A Smile",
-    "thats so true",
+    "take me to church",
+    "As it Was",
     "Not Like Us",
+    "too sweet hozier",
+    "thats so true",
     "apt.",
     "sailor's song",
     "luther",
@@ -32,11 +36,10 @@ const tracksDaily = [
     "take on me",
     "sunflower",
     "Circles",
-    "too sweet hozier",
+    "perfect",
     "SummerTime Sadness",
     "Counting Stars",
     "End of Beginning",
-    "As it Was",
     "Night Changes",
     "beaniw",
     "deathbed",
@@ -45,10 +48,7 @@ const tracksDaily = [
     "until I found you",
     "despacito",
     "HUMBLE",
-    "perfect",
-    "bump heads",
-    "take me to church",
-    "Havana",
+    "",
 ];
 
 function greetBasedOnTime() {
@@ -105,28 +105,33 @@ function App() {
     const [limit, setLimit] = useState(10); // default limit
     const [userPlaylists, setPlaylists] = useState([]);
     const [selectedTrack, setSelectedTrack] = useState(null); // Assuming you're selecting a track to add to the playlist
-  
+    const [isSaved, setIsSaved] = useState(false);
+
+    console.log(userPlaylists);
+    
+
     // Function to handle saving the playlist
     const savePlaylist = () => {
-      // Let's assume the playlist is a simple array of track objects.
-      const newPlaylist = [...userPlaylists, selectedTrack]; // Add the selected track
-      setPlaylists(newPlaylist);
-      
-      // Save to localStorage (serialize the array to a string)
-      localStorage.setItem("userPlaylists", JSON.stringify(newPlaylist));
+        // Let's assume the playlist is a simple array of track objects.
+        const newPlaylist = [...userPlaylists, selectedTrack]; // Add the selected track
+        setPlaylists(newPlaylist);
+
+        // Save to localStorage (serialize the array to a string)
+        localStorage.setItem("userPlaylists", JSON.stringify(newPlaylist));
     };
-  
+
     // Function to load the saved playlist from localStorage
     const loadSavedPlaylists = () => {
-      const savedPlaylists = localStorage.getItem("userPlaylists");
-      if (savedPlaylists) {
-        setPlaylists(JSON.parse(savedPlaylists)); // Deserialize the saved playlist
-      }
+        const savedPlaylists = localStorage.getItem("savedSongs");
+        if (savedPlaylists) {
+            setPlaylists(JSON.parse(savedPlaylists)); // Deserialize the saved playlist
+            setIsSaved(true);
+        }
     };
-  
+
     // Use useEffect to load playlists when the app initializes
     useEffect(() => {
-      loadSavedPlaylists();
+        loadSavedPlaylists();
     }, []);
 
 
@@ -374,8 +379,8 @@ function App() {
                                     getDataFromDB(url.toString());
                                 }}
                                 className={`px-3 py-1 rounded-md font-semibold transition-all duration-200 ${currentPage === pageNum
-                                        ? "bg-yellow-400 text-black"
-                                        : "bg-gray-800 text-white hover:bg-gray-600"
+                                    ? "bg-yellow-400 text-black"
+                                    : "bg-gray-800 text-white hover:bg-gray-600"
                                     }`}
                             >
                                 {pageNum}
@@ -468,26 +473,8 @@ function App() {
                     <FontAwesomeIcon icon={faSpotify} className="text-4xl" />
                 </button>
 
-                {showInstallButton && (
-                    <PWAInstallPrompt />
-                )}
+
             </>
-        ),
-        Playlist: (
-            <div className="playlists-section">
-        <h2>Your Playlists:</h2>
-        {/* <ul>
-          {userPlaylists.length === 0 ? (
-            <li>No playlists saved yet.</li>
-          ) : (
-            userPlaylists.map((track, index) => (
-              <li key={index}>
-                {track.title} by {track.artist}
-              </li>
-            ))
-          )}
-        </ul> */}
-      </div>
         ),
     };
 
@@ -496,11 +483,6 @@ function App() {
             className={`md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex ${selectedSection === "Search" && "justify-start"
                 } flex-col justify-between`}
         >
-            <Router>
-                <Routes>
-                    <Route path="/callback" element={<Callback />} />
-                </Routes>
-            </Router>
             {showLogin && (
                 <div className="h-dvh flex justify-center items-center">
                     <div className="max-w-[90%] w-full">
@@ -518,6 +500,10 @@ function App() {
                     {selectedSection === "Search" && sections[selectedSection]}
 
                     {selectedSection === "Account" && sections[selectedSection]}
+
+                    {selectedSection === "Playlist" && (
+                        <PlaylistSection userPlaylists={userPlaylists} />
+                    )}
                     {/*loading && <Skeleton containerClassName="flex flex-row flex-wrap gap-1 m-5" width={170} height={250} count={10} />*/}
                 </>
             )}
@@ -528,6 +514,9 @@ function App() {
             {!showLogin && (
                 <AppBar selectedSection={selectedSection} setSection={setSection} />
             )}
+                            {showInstallButton && (
+                    <PWAInstallPrompt />
+                )}
         </div>
     );
 }
