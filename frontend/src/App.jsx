@@ -48,7 +48,6 @@ const tracksDaily = [
     "until I found you",
     "despacito",
     "HUMBLE",
-    "",
 ];
 
 function greetBasedOnTime() {
@@ -106,8 +105,6 @@ function App() {
     const [userPlaylists, setPlaylists] = useState([]);
     const [selectedTrack, setSelectedTrack] = useState(null); // Assuming you're selecting a track to add to the playlist
     const [isSaved, setIsSaved] = useState(false);
-
-    console.log(userPlaylists);
     
 
     // Function to handle saving the playlist
@@ -264,7 +261,6 @@ function App() {
         "Romantic": "romantic_music",
         "Melancholy": "melancholy_music",
         "Focus": "focus_music",
-        "Calm": "calm_music",
         "Workout": "workout_music",
         "Motivational": "motivational_music",
         "Instrumental": "instrumental_music",
