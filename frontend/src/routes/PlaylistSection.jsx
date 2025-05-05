@@ -3,7 +3,7 @@ import Card from '../Components/Card'; // Assuming your Card component takes a t
 
 const PlaylistSection = ({ userPlaylists }) => {
   if (!userPlaylists || userPlaylists.length === 0) {
-    return <div className="text-center mt-10 text-gray-500">No saved songs yet, my guy 🥲</div>;
+    return <div className="text-center mt-10 text-gray-500">No saved songs yet</div>;
   }
 
   return (
@@ -14,7 +14,7 @@ const PlaylistSection = ({ userPlaylists }) => {
                             key={index}
                             url={track?.image}
                             title={track?.title}
-                            artist={track?.artists}
+                            artist={track?.artist}
                             spoURL={track?.spoURL}
                             YTURL={track?.YTURL}
                             popularity={track?.popularity}
