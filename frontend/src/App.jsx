@@ -16,9 +16,9 @@ import useDebouncedSearch from "./hooks/useDebouncedSearch";
 import PWAInstallPrompt from "./Components/PWAInstallPrompt";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
+import PlaylistSection from "./routes/PlaylistSection";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Callback from './pages/Callback';
-import PlaylistSection from "./routes/PlaylistSection";
 
 
 const tracksDaily = [
