@@ -23,7 +23,6 @@ import { motion } from "framer-motion";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 
-
 const tracksDaily = [
     "Bruno Mars - Die With A Smile",
     "take me to church",
