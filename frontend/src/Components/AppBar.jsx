@@ -1,6 +1,7 @@
 import { useState } from "react";
 import '../index.css'
 import { Search, CircleUserRound, ListMusic, Music, Cog } from "lucide-react";
+import { motion } from "framer-motion";
 
 const AppBar = ({ selectedSection, setSection }) => {
 //   const [selectedSection, setSection] = useState("Music");
@@ -50,6 +51,7 @@ const AppBar = ({ selectedSection, setSection }) => {
         <div
           onClick={() => {
             setSection("Search");
+            window.scrollTo(0,0);
           }}
           className={`blck w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
             selectedSection === "Search" ? "bg-white text-black rounded-lg" : ""
