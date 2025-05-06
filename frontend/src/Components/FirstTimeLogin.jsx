@@ -4,7 +4,7 @@ import { Info } from 'lucide-react';
 
 const FirstTimeLogin = () => {
   const [name, setName] = useState('');
-  const [language, setLanguage] = useState('English');
+//   const [language, setLanguage] = useState('English');
 
   // Handle input changes for name and language
   const handleNameChange = (e) => {
@@ -27,11 +27,9 @@ const handleSubmit = (e) => {
     // Set default name if empty
     const userName = name.trim() === "" ? "User" : name;
 
-    if (language) {
+    if (userName) {
         localStorage.setItem('userName', userName);
-        localStorage.setItem('musicLanguage', language);
         
-        // Reload page after 500ms
         setTimeout(() => {
             window.location.reload();
         }, 500);

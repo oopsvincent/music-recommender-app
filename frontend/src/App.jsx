@@ -20,6 +20,7 @@ import { faSpotify } from '@fortawesome/free-brands-svg-icons';
 import SpotifyCallbackHandler from "./Components/SpotifyCallbackHandler";
 import PlaylistSection from "./routes/PlaylistSection";
 import { motion } from "framer-motion";
+import DataNoticeModal from "./Components/DataNoticeModal";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 
@@ -79,7 +80,7 @@ function fetchYouTubeData(title) {
 }
 
 
-  
+
 
 
 
@@ -110,7 +111,7 @@ function App() {
     const [userPlaylists, setPlaylists] = useState([]);
     const [selectedTrack, setSelectedTrack] = useState(null); // Assuming you're selecting a track to add to the playlist
     const [isSaved, setIsSaved] = useState(false);
-    
+
     // Function to handle saving the playlist
     const savePlaylist = () => {
         // Let's assume the playlist is a simple array of track objects.
@@ -155,9 +156,9 @@ function App() {
     // Function to handle saving user info
     const handleUserInfo = (name, language) => {
         localStorage.setItem("userName", name);
-        localStorage.setItem("musicLanguage", language);
+        // localStorage.setItem("musicLanguage", language);
         setUserName(name);
-        setMusicLanguage(language);
+        // setMusicLanguage(language);
         setShowLogin(false);
     };
 
@@ -166,18 +167,18 @@ function App() {
             const token = await getSpotifyToken();
             setSpotifyToken(token); // Store token in state
 
-            if (userName && musicLanguage) {
+            if (userName) {
                 await loadTracks(tracksDaily, token, setTrackData, setLoading);
 
             }
         };
 
-        if (!userName || !musicLanguage) {
+        if (!userName) {
             setShowLogin(true);
         } else {
             fetchTokenAndLoadTracks();
         }
-    }, [userName, musicLanguage]);
+    }, [userName]);
 
     const getDataFromDB = async (keyOrUrl) => {
         try {
@@ -417,10 +418,23 @@ function App() {
                     Delete Your Information
                     <motion.button
                         onClick={() => setTimeout(() => removeData(), 1500)}
-                        whileTap={{scale: 0.9,}}
+                        whileTap={{ scale: 0.9, }}
                         className="bg-black p-3 text-red-500 border-2 rounded-2xl hover:rounded-md hover:border-0 hover:bg-red-500 hover:text-black active:bg-red-400 active:text-white transition-all duration-200"
                     >
                         Delete Account
+                    </motion.button>
+                </h3>
+
+                <h3 className="font-h text-2xl text-white m-3 flex justify-around items-center">
+                Clear Your Saved Music
+                    <motion.button
+                        onClick={() => setTimeout(() => {localStorage.setItem("savedSongs", null)
+                            window.location.reload();
+                        }, 1500)}
+                        whileTap={{ scale: 0.9, }}
+                        className="bg-black p-3 text-white border-2 rounded-2xl hover:rounded-md hover:border-0 hover:bg-white hover:text-black active:bg-white active:text-black transition-all duration-200"
+                    >
+                        Clear Playlist
                     </motion.button>
                 </h3>
             </div>
@@ -449,16 +463,17 @@ function App() {
     return (
         <div
             className={`md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex ${selectedSection === "Search" && "justify-start"
-                } flex-col justify-between`}
+                } ${selectedSection === "Settings" && "justify-start"}  flex-col justify-between`}
         >
+                <DataNoticeModal />
 
-              <Router>
-      <Routes>
-        <Route path="/callback" element={<SpotifyCallbackHandler />} />
-        {/* other routes */}
-      </Routes>
-    </Router>
-  );
+            <Router>
+                <Routes>
+                    <Route path="/callback" element={<SpotifyCallbackHandler />} />
+                    {/* other routes */}
+                </Routes>
+            </Router>
+            );
             {showLogin && (
                 <div className="h-dvh flex justify-center items-center">
                     <div className="max-w-[90%] w-full">
@@ -490,9 +505,9 @@ function App() {
             {!showLogin && (
                 <AppBar selectedSection={selectedSection} setSection={setSection} />
             )}
-                            {showInstallButton && (
-                    <PWAInstallPrompt />
-                )}
+            {showInstallButton && (
+                <PWAInstallPrompt />
+            )}
         </div>
     );
 }
