@@ -21,8 +21,6 @@ import SpotifyCallbackHandler from "./Components/SpotifyCallbackHandler";
 import PlaylistSection from "./routes/PlaylistSection";
 import { motion } from "framer-motion";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Callback from './pages/Callback';
-import PlaylistSection from "./routes/PlaylistSection";
 
 
 
