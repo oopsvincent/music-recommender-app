@@ -4,7 +4,6 @@ import { Bookmark, BookmarkPlus, Check, CirclePlay, Award, Handshake } from "luc
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { motion, AnimatePresence, scale } from "framer-motion";
-import { Draggable } from 'react-draggable';
  
 const Card = ({
     url,
@@ -20,42 +19,44 @@ const Card = ({
     handleSave, // Function passed from parent to handle saving
 }) => {
 
+    // Inside your component:
     const [saved, setSaved] = useState(false);
-
-useEffect(() => {
-    const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
-    const isAlreadySaved = savedSongs.some(song => song.title === title && song.artist === artist);
-    setSaved(isAlreadySaved);
-}, [title, artist]);
-
-function toggleSave() {
-    const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
-
-    if (saved) {
-        // REMOVE the song
-        const updated = savedSongs.filter(song => !(song.title === title && song.artist === artist));
-        localStorage.setItem("savedSongs", JSON.stringify(updated));
-        setSaved(false);
-    } else {
-        // ADD the song
-        const newSong = {
-            title,
-            artist,
-            followers,
-            spoURL,
-            YTURL,
-            image: url,
-            description,
-            popularity,
-            explicit,
-            type,
-        };
-        savedSongs.push(newSong);
-        localStorage.setItem("savedSongs", JSON.stringify(savedSongs));
-        setSaved(true);
+    
+    useEffect(() => {
+        const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
+        const isAlreadySaved = savedSongs.some(song => song.title === title && song.artist === artist);
+        setSaved(isAlreadySaved);
+    }, [title, artist]);
+    
+    function toggleSave() {
+        const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
+    
+        if (saved) {
+            // REMOVE the song
+            const updated = savedSongs.filter(song => !(song.title === title && song.artist === artist));
+            localStorage.setItem("savedSongs", JSON.stringify(updated));
+            setSaved(false);
+        } else {
+            // ADD the song
+            const newSong = {
+                title,
+                artist,
+                followers,
+                spoURL,
+                YTURL,
+                image: url,
+                description,
+                popularity,
+                explicit,
+                type,
+            };
+            savedSongs.push(newSong);
+            localStorage.setItem("savedSongs", JSON.stringify(savedSongs));
+            setSaved(true);
+        }
     }
-}
-    function handleClick(url) {
+    
+function handleClick(url) {
         console.log(url);
 
         setTimeout(() => {
