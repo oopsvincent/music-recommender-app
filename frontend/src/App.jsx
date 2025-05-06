@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import axios from 'axios';
 import "./App.css";
 import Card from "./Components/Card";
 import ChipSection from "./Components/ChipSection";
@@ -16,8 +17,10 @@ import useDebouncedSearch from "./hooks/useDebouncedSearch";
 import PWAInstallPrompt from "./Components/PWAInstallPrompt";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Callback from './pages/Callback';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import SpotifyCallbackHandler from "./Components/SpotifyCallbackHandler";
+import PlaylistSection from "./routes/PlaylistSection";
+import { motion } from "framer-motion";
 
 
 const tracksDaily = [
@@ -78,6 +81,9 @@ function fetchYouTubeData(title) {
 }
 
 
+  
+
+
 
 function App() {
     const [spotifyToken, setSpotifyToken] = useState(null);
@@ -105,7 +111,32 @@ function App() {
     const [limit, setLimit] = useState(10); // default limit
     const [userPlaylists, setPlaylists] = useState([]);
     const [selectedTrack, setSelectedTrack] = useState(null); // Assuming you're selecting a track to add to the playlist
+    const [isSaved, setIsSaved] = useState(false);
+    
+
+    // In your React project (any component or effect)
+useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://sdk.scdn.co/spotify-player.js";
+    script.async = true;
+    document.body.appendChild(script);
   
+    window.onSpotifyWebPlaybackSDKReady = () => {
+      const token = "<your_access_token>";
+      const player = new Spotify.Player({
+        name: "OopsVincent Player",
+        getOAuthToken: cb => { cb(token); },
+        volume: 0.5
+      });
+  
+      // Player event handlers here
+    };
+  }, []);
+
+
+    //fetch
+
+
     // Function to handle saving the playlist
     const savePlaylist = () => {
       // Let's assume the playlist is a simple array of track objects.
@@ -123,46 +154,18 @@ function App() {
         setPlaylists(JSON.parse(savedPlaylists)); // Deserialize the saved playlist
       }
     };
-  
+
+
+
     // Use useEffect to load playlists when the app initializes
     useEffect(() => {
       loadSavedPlaylists();
     }, []);
 
-
-    // useEffect(() => {
-    //     const params = new URLSearchParams(window.location.search);
-    //     const accessToken = params.get("access_token");
-    //     const refreshToken = params.get("refresh_token");
-
-    //     if (accessToken) {
-    //         // Store tokens
-    //         localStorage.setItem("spotify_token", accessToken);
-    //         localStorage.setItem("spotify_refresh_token", refreshToken);
-    //         try{
-    //                 if
-    //                  (!resource.ok) {
-    //                     throw new Error("Failed to fetch user data");
-    //                 }
-
-    //                 const data = await resource.json();
-    //                 setUserData({
-    //                     display_name: data.display_name,
-    //                     email: data.email,
-    //                     followers: data.followers.total,
-    //                     images: data.images,
-    //                 });
-
-    //                 console.log("Spotify User Data:", data);
-
-    //                 // Optional: clean up URL
-    //                 window.history.replaceState({}, document.title, "/");
-    //             } catch (error) {
-    //                 console.error("Error fetching user data:", error);
-    //             }
-
-    //         getUserData();
-    //     }, []);
+    // fetch('music-recommender-api.onrender.com/me').then(res => {
+    //     res.json()
+    //     console.log(res)
+    // }).catch(err => console.log(err));
 
     const debouncedSearch = useDebouncedSearch(searchTerm, searchType, setLoading, setSearchResults);
 
@@ -430,7 +433,7 @@ function App() {
         ),
         Settings: (
             <div>
-                <h3 className="text-2xl text-white m-3 flex justify-around items-center">
+                {/* <h3 className="text-2xl text-white m-3 flex justify-around items-center">
                     Current Music Language: {musicLanguage}
                     <button
                         className="bg-white text-black p-2 ml-5 rounded-lg hover:bg-black hover:text-white focus:bg-black focus:text-white focus:border-2 transition-all duration-200"
@@ -438,15 +441,16 @@ function App() {
                     >
                         Change
                     </button>
-                </h3>
+                </h3> */}
                 <h3 className="font-h text-2xl text-white m-3 flex justify-around items-center">
                     Delete Your Information
-                    <button
+                    <motion.button
                         onClick={() => setTimeout(() => removeData(), 1500)}
+                        whileTap={{scale: 0.9,}}
                         className="bg-black p-3 text-red-500 border-2 rounded-2xl hover:rounded-md hover:border-0 hover:bg-red-500 hover:text-black active:bg-red-400 active:text-white transition-all duration-200"
                     >
                         Delete Account
-                    </button>
+                    </motion.button>
                 </h3>
             </div>
         ),
@@ -468,9 +472,6 @@ function App() {
                     <FontAwesomeIcon icon={faSpotify} className="text-4xl" />
                 </button>
 
-                {showInstallButton && (
-                    <PWAInstallPrompt />
-                )}
             </>
         ),
         Playlist: (
@@ -496,11 +497,13 @@ function App() {
             className={`md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex ${selectedSection === "Search" && "justify-start"
                 } flex-col justify-between`}
         >
-            <Router>
-                <Routes>
-                    <Route path="/callback" element={<Callback />} />
-                </Routes>
-            </Router>
+              <Router>
+      <Routes>
+        <Route path="/callback" element={<SpotifyCallbackHandler />} />
+        {/* other routes */}
+      </Routes>
+    </Router>
+  );
             {showLogin && (
                 <div className="h-dvh flex justify-center items-center">
                     <div className="max-w-[90%] w-full">
@@ -522,7 +525,7 @@ function App() {
                 </>
             )}
             <footer className="text-center py-6 px-8 text-white mb-17 relative bottom-0">
-                © 2025 GrooveEstrella Team. All rights reserved. Licensed
+                © 2025 The CodeBreakers. All rights reserved. Licensed
                 under MIT License.
             </footer>
             {!showLogin && (
