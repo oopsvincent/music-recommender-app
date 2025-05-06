@@ -164,7 +164,7 @@ function handleClick(url) {
 
     return type === "artist" ? sections["Artist"] :
         <motion.div                 
-        initial={{ opacity: 0, scale: 0.7, translateY: 0 }}
+        initial={{ opacity: 0, scale: 0.9, translateY: 0 }}
         whileInView={{ opacity: 1, scale: 1 }}
         whileTap={{ scale: 0.95,}}
         exit={{ opacity: 0, scale: 1, translateY: 300 }}
