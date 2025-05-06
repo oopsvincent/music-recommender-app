@@ -17,16 +17,22 @@ import useDebouncedSearch from "./hooks/useDebouncedSearch";
 import PWAInstallPrompt from "./Components/PWAInstallPrompt";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SpotifyCallbackHandler from "./Components/SpotifyCallbackHandler";
 import PlaylistSection from "./routes/PlaylistSection";
 import { motion } from "framer-motion";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Callback from './pages/Callback';
+import PlaylistSection from "./routes/PlaylistSection";
+
 
 
 const tracksDaily = [
     "Bruno Mars - Die With A Smile",
-    "thats so true",
+    "take me to church",
+    "As it Was",
     "Not Like Us",
+    "too sweet hozier",
+    "thats so true",
     "apt.",
     "sailor's song",
     "luther",
@@ -35,11 +41,10 @@ const tracksDaily = [
     "take on me",
     "sunflower",
     "Circles",
-    "too sweet hozier",
+    "perfect",
     "SummerTime Sadness",
     "Counting Stars",
     "End of Beginning",
-    "As it Was",
     "Night Changes",
     "beaniw",
     "deathbed",
@@ -48,10 +53,6 @@ const tracksDaily = [
     "until I found you",
     "despacito",
     "HUMBLE",
-    "perfect",
-    "bump heads",
-    "take me to church",
-    "Havana",
 ];
 
 function greetBasedOnTime() {
@@ -113,53 +114,27 @@ function App() {
     const [selectedTrack, setSelectedTrack] = useState(null); // Assuming you're selecting a track to add to the playlist
     const [isSaved, setIsSaved] = useState(false);
     
-
-    // In your React project (any component or effect)
-useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://sdk.scdn.co/spotify-player.js";
-    script.async = true;
-    document.body.appendChild(script);
-  
-    window.onSpotifyWebPlaybackSDKReady = () => {
-      const token = "<your_access_token>";
-      const player = new Spotify.Player({
-        name: "OopsVincent Player",
-        getOAuthToken: cb => { cb(token); },
-        volume: 0.5
-      });
-  
-      // Player event handlers here
-    };
-  }, []);
-
-
-    //fetch
-
-
     // Function to handle saving the playlist
     const savePlaylist = () => {
-      // Let's assume the playlist is a simple array of track objects.
-      const newPlaylist = [...userPlaylists, selectedTrack]; // Add the selected track
-      setPlaylists(newPlaylist);
-      
-      // Save to localStorage (serialize the array to a string)
-      localStorage.setItem("userPlaylists", JSON.stringify(newPlaylist));
+        // Let's assume the playlist is a simple array of track objects.
+        const newPlaylist = [...userPlaylists, selectedTrack]; // Add the selected track
+        setPlaylists(newPlaylist);
+
+        // Save to localStorage (serialize the array to a string)
+        localStorage.setItem("userPlaylists", JSON.stringify(newPlaylist));
     };
-  
+
     // Function to load the saved playlist from localStorage
     const loadSavedPlaylists = () => {
-      const savedPlaylists = localStorage.getItem("userPlaylists");
-      if (savedPlaylists) {
-        setPlaylists(JSON.parse(savedPlaylists)); // Deserialize the saved playlist
-      }
+        const savedPlaylists = localStorage.getItem("savedSongs");
+        if (savedPlaylists) {
+            setPlaylists(JSON.parse(savedPlaylists)); // Deserialize the saved playlist
+            setIsSaved(true);
+        }
     };
-
-
-
     // Use useEffect to load playlists when the app initializes
     useEffect(() => {
-      loadSavedPlaylists();
+        loadSavedPlaylists();
     }, []);
 
     // fetch('music-recommender-api.onrender.com/me').then(res => {
@@ -262,7 +237,6 @@ useEffect(() => {
         "Romantic": "romantic_music",
         "Melancholy": "melancholy_music",
         "Focus": "focus_music",
-        "Calm": "calm_music",
         "Workout": "workout_music",
         "Motivational": "motivational_music",
         "Instrumental": "instrumental_music",
@@ -377,8 +351,8 @@ useEffect(() => {
                                     getDataFromDB(url.toString());
                                 }}
                                 className={`px-3 py-1 rounded-md font-semibold transition-all duration-200 ${currentPage === pageNum
-                                        ? "bg-yellow-400 text-black"
-                                        : "bg-gray-800 text-white hover:bg-gray-600"
+                                    ? "bg-yellow-400 text-black"
+                                    : "bg-gray-800 text-white hover:bg-gray-600"
                                     }`}
                             >
                                 {pageNum}
@@ -471,24 +445,7 @@ useEffect(() => {
                     Login with Spotify
                     <FontAwesomeIcon icon={faSpotify} className="text-4xl" />
                 </button>
-
             </>
-        ),
-        Playlist: (
-            <div className="playlists-section">
-        <h2>Your Playlists:</h2>
-        {/* <ul>
-          {userPlaylists.length === 0 ? (
-            <li>No playlists saved yet.</li>
-          ) : (
-            userPlaylists.map((track, index) => (
-              <li key={index}>
-                {track.title} by {track.artist}
-              </li>
-            ))
-          )}
-        </ul> */}
-      </div>
         ),
     };
 
@@ -497,6 +454,7 @@ useEffect(() => {
             className={`md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex ${selectedSection === "Search" && "justify-start"
                 } flex-col justify-between`}
         >
+
               <Router>
       <Routes>
         <Route path="/callback" element={<SpotifyCallbackHandler />} />
@@ -521,6 +479,10 @@ useEffect(() => {
                     {selectedSection === "Search" && sections[selectedSection]}
 
                     {selectedSection === "Account" && sections[selectedSection]}
+
+                    {selectedSection === "Playlist" && (
+                        <PlaylistSection userPlaylists={userPlaylists} />
+                    )}
                     {/*loading && <Skeleton containerClassName="flex flex-row flex-wrap gap-1 m-5" width={170} height={250} count={10} />*/}
                 </>
             )}
@@ -531,6 +493,9 @@ useEffect(() => {
             {!showLogin && (
                 <AppBar selectedSection={selectedSection} setSection={setSection} />
             )}
+                            {showInstallButton && (
+                    <PWAInstallPrompt />
+                )}
         </div>
     );
 }

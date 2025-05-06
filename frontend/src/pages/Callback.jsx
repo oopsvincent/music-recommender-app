@@ -6,55 +6,24 @@ export default function Callback() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const code = searchParams.get('code');
+  const access_token = searchParams.get('access_token');
+  const refresh_token = searchParams.get('refresh_token');
 
-    console.log("🌈 Spotify Code from URL:", code); // Log it loud
+  if (access_token && refresh_token) {
+    localStorage.setItem("access_token", access_token);
+    localStorage.setItem("refresh_token", refresh_token);
+    console.log("✅ Tokens stored from redirect!");
+    navigate("/");
+    return;
+  }
 
-    if (!code) {
-      alert("❌ No Spotify code found. Login again!");
-      navigate("/");
-      return;
-    }
+  const code = searchParams.get('code');
+  if (!code) {
+    alert("No Spotify code or token. Try again!");
+    navigate("/");
+    return;
+  }
 
-    // Talk to the backend
-    fetch(`https://music-recommender-api.onrender.com/callback?code=${code}`, {
-      method: "GET"
-    })
-      .then(async (res) => {
-        console.log("📡 Backend responded with status:", res.status);
-
-        let data;
-        try {
-          data = await res.json();
-        } catch (err) {
-          console.error("⚠️ Failed to parse JSON from backend:", err);
-          throw new Error("Bad JSON format from backend");
-        }
-
-        console.log("🧾 Backend response data:", data);
-
-        if (data.error || !data.access_token) {
-          alert("❌ Spotify Auth failed! Check console.");
-          console.error("🚨 Error details:", data);
-          return;
-        }
-
-        localStorage.setItem("access_token", data.access_token);
-        localStorage.setItem("refresh_token", data.refresh_token);
-
-        console.log("✅ Logged in successfully!", data);
-
-        navigate("/");
-      })
-      .catch((err) => {
-        console.error("🔥 FATAL ERROR during Spotify login:", err);
-        alert("Something went wrong during Spotify login.");
-      });
-  }, []);
-
-  return (
-    <div style={{ padding: "2rem" }}>
-      <h2>Logging in with Spotify... ⏳</h2>
-    </div>
-  );
+  // Do fetch fallback here if you want
+}, []);
 }
