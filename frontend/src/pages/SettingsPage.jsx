@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
+function removeData() {
+    localStorage.clear();
+    window.location.reload();
+}
 
 const SettingsPage = () => {
   return (
