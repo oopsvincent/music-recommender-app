@@ -76,7 +76,7 @@ def callback():
         session["access_token"] = token_data["access_token"]
         session["refresh_token"] = token_data.get("refresh_token")
 
-        return redirect("/me")
+        return redirect("/")
     
     except requests.exceptions.RequestException as e:
         print(f"Error exchanging code for token: {e}")
