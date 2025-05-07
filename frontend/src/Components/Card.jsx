@@ -164,11 +164,11 @@ function handleClick(url) {
 
     return type === "artist" ? sections["Artist"] :
         <motion.div                 
-        initial={{ opacity: 0, scale: 0.9, translateY: 0 }}
-        whileInView={{ opacity: 1, scale: 1 }}
+        initial={{ opacity: 0, scale: 0.8, translateY: 100, translateX: 0 }}
+        whileInView={{ opacity: 1, scale: 1, translateY: 0, translateX: 0 }}
         whileTap={{ scale: 0.95,}}
         exit={{ opacity: 0, scale: 1, translateY: 300 }}
-        transition={{ duration: 0.3 }} title={artist + " - " + title} className="h-auto m-2 rounded-xl flex flex-col transition-all duration-300 w-42 border border-white/30 glassmorpho md:w-64 md:m-4 hover:bg-black/100 active:bg-black/100">
+        transition={{ duration: 0.2 }} title={artist + " - " + title} className="h-auto m-2 rounded-xl flex flex-col transition-all duration-300 w-42 border border-white/30 glassmorpho md:w-64 md:m-4 hover:bg-black/100 active:bg-black/100">
             {explicit && sections["ExplicitTag"]}
             {/* Image */}
             { }

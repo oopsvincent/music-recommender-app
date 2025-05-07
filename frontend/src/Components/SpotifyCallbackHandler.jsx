@@ -16,7 +16,7 @@ const SpotifyCallbackHandler = () => {
       console.log("Authorization code found:", code);
 
       // Send POST request to backend
-      fetch(`http://127.0.0.1:5000/callback?code=${encodeURIComponent(code)}`, {
+      fetch(`https://music-recommender-api.onrender.com/callback?code=${encodeURIComponent(code)}`, {
         method: "GET",
         credentials: "include",  // if using cookies or auth
       })

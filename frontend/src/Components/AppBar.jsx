@@ -2,43 +2,22 @@ import { useState } from "react";
 import '../index.css'
 import { Search, CircleUserRound, ListMusic, Music, Cog } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const AppBar = ({ selectedSection, setSection }) => {
-//   const [selectedSection, setSection] = useState("Music");
+    const navigate = useNavigate();
 
   return (
-    <nav className="select-none bg-black text-white px-2 py-2.5 flex justify-center items-center shadow-lg fixed bottom-0 left-0 w-dvw lg:pl-70 lg:pr-70">
-      {/* Logo */}
-      {/* <div className="text-2xl font-bold tracking-wide">🎵 MusicApp</div>
-       */}
-      {/* Search Bar */}
-      {/* <div className="relative w-32">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="w-full px-4 py-2 bg-gray-800 text-white rounded-full outline-none focus:ring-2 focus:ring-gray-500 transition-all"
-          />
-          <svg
-            className="absolute right-3 top-3 w-5 h-5 text-gray-400"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M21 21l-4.35-4.35M15 10a5 5 0 11-10 0 5 5 0 0110 0z"
-            />
-          </svg>
-        </div> */}
+    <nav className="select-none bg-black text-white px-2 py-2.5 flex justify-center items-center shadow-lg fixed bottom-0 left-0 w-dvw lg:pl-70 lg:pr-70 z-50">
+
 
       {/* Navigation */}
       <div className="flex space-x-6">
         <div
           onClick={() => {
             setSection("Music");
+            window.scrollTo(0,0);
+            navigate('/');
           }}
           className={`w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 blck transition-all duration-400 ${
             selectedSection == "Music" ? "bg-white text-black rounded-lg" : ""
@@ -52,6 +31,7 @@ const AppBar = ({ selectedSection, setSection }) => {
           onClick={() => {
             setSection("Search");
             window.scrollTo(0,0);
+            navigate('/search');
           }}
           className={`blck w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
             selectedSection === "Search" ? "bg-white text-black rounded-lg" : ""
@@ -64,6 +44,7 @@ const AppBar = ({ selectedSection, setSection }) => {
         <div
           onClick={() => {
             setSection("Account");
+            navigate('/account');
           }}
           className={`blck w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
             selectedSection == "Account" ? "bg-white text-black rounded-lg" : ""
@@ -76,6 +57,7 @@ const AppBar = ({ selectedSection, setSection }) => {
         <div
           onClick={() => {
             setSection("Settings");
+            navigate('/settings');
           }}
           className={`blck w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
             selectedSection == "Settings"
@@ -90,6 +72,7 @@ const AppBar = ({ selectedSection, setSection }) => {
         <div
           onClick={() => {
             setSection("Playlist");
+            navigate('/playlist');
           }}
           className={`blck w-12 inline-flex flex-col justify-around items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
             selectedSection == "Playlist"
