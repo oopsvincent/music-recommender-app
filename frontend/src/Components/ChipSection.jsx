@@ -7,7 +7,7 @@ const ChipSection = ({ onChipSelect }) => {
   const categories = {
     Moods: [
       "Happy", "Sad", "Romantic", "Melancholy",
-      "Focus", "Calm", "Workout", "Motivational",
+      "Focus", "Workout", "Motivational",
       "Instrumental",
     ],
     Genres: [
