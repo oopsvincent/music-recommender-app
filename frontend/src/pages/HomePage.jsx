@@ -63,10 +63,7 @@ function greetBasedOnTime() {
     }
 }
 
-function removeData() {
-    localStorage.clear();
-    window.location.reload();
-}
+
 
 
 
@@ -324,8 +321,7 @@ function HomePage() {
 
     return (
         <div
-            className={`md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex ${selectedSection === "Search" && "justify-start"
-                } ${selectedSection === "Settings" && "justify-start"}  flex-col justify-between`}
+            className={`md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex flex-col justify-between`}
         >
             <DataNoticeModal />
 
