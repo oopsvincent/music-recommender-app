@@ -1,11 +1,13 @@
 import { useState } from "react";
 import '../index.css'
+import { Search, CircleUserRound, ListMusic, Music, Cog } from "lucide-react";
+import { motion } from "framer-motion";
 
 const AppBar = ({ selectedSection, setSection }) => {
 //   const [selectedSection, setSection] = useState("Music");
 
   return (
-    <nav className="select-none bg-black text-white px-6 py-4 flex justify-center items-center shadow-lg fixed bottom-0 left-0 w-dvw lg:pl-70 lg:pr-70">
+    <nav className="select-none bg-black text-white px-2 py-2.5 flex justify-center items-center shadow-lg fixed bottom-0 left-0 w-dvw lg:pl-70 lg:pr-70">
       {/* Logo */}
       {/* <div className="text-2xl font-bold tracking-wide">🎵 MusicApp</div>
        */}
@@ -42,48 +44,20 @@ const AppBar = ({ selectedSection, setSection }) => {
             selectedSection == "Music" ? "bg-white text-black rounded-lg" : ""
           }`}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-music-icon lucide-music"
-          >
-            <path d="M9 18V5l12-2v13" />
-            <circle cx="6" cy="18" r="3" />
-            <circle cx="18" cy="16" r="3" />
-          </svg>
+            <Music/>
           <p className="text-xs">Music</p>
         </div>
 
         <div
           onClick={() => {
             setSection("Search");
+            window.scrollTo(0,0);
           }}
           className={`blck w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
             selectedSection === "Search" ? "bg-white text-black rounded-lg" : ""
           }`}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-search-icon lucide-search"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
+            <Search/>
           <p className="text-xs">Explore</p>
         </div>
 
@@ -95,22 +69,7 @@ const AppBar = ({ selectedSection, setSection }) => {
             selectedSection == "Account" ? "bg-white text-black rounded-lg" : ""
           }`}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-circle-user-round-icon lucide-circle-user-round"
-          >
-            <path d="M18 20a6 6 0 0 0-12 0" />
-            <circle cx="12" cy="10" r="4" />
-            <circle cx="12" cy="12" r="10" />
-          </svg>
+            <CircleUserRound/>
           <p className="text-xs">Account</p>
         </div>
 
@@ -124,33 +83,7 @@ const AppBar = ({ selectedSection, setSection }) => {
               : ""
           }`}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-cog-icon lucide-cog"
-          >
-            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" />
-            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
-            <path d="M12 2v2" />
-            <path d="M12 22v-2" />
-            <path d="m17 20.66-1-1.73" />
-            <path d="M11 10.27 7 3.34" />
-            <path d="m20.66 17-1.73-1" />
-            <path d="m3.34 7 1.73 1" />
-            <path d="M14 12h8" />
-            <path d="M2 12h2" />
-            <path d="m20.66 7-1.73 1" />
-            <path d="m3.34 17 1.73-1" />
-            <path d="m17 3.34-1 1.73" />
-            <path d="m11 13.73-4 6.93" />
-          </svg>
+            <Cog/>
           <p className="text-xs">Settings</p>
         </div>
 
@@ -164,24 +97,7 @@ const AppBar = ({ selectedSection, setSection }) => {
               : ""
           }`}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-list-music-icon lucide-list-music"
-          >
-            <path d="M21 15V6" />
-            <path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
-            <path d="M12 12H3" />
-            <path d="M16 6H3" />
-            <path d="M12 18H3" />
-          </svg>
+            <ListMusic/>
           <p className="text-xs">Playlist</p>
         </div>
       </div>

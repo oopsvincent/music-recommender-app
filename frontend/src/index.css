@@ -11,6 +11,13 @@
     font-weight: 400; /* Regular */
     font-display: swap;
   }
+
+@font-face {
+    font-family: 'MyBoldFont';
+    src: url('/src/assets/fonts/SFUIDisplay-Bold.otf');
+    font-weight: 700;
+    font-display: swap;
+  }
   
   @font-face {
     font-family: 'MyCustomFont';
@@ -19,12 +26,12 @@
     font-display: swap;
   }
   
-  @font-face {
+  /* @font-face {
     font-family: 'MyCustomFont';
     src: url('/src/assets/fonts/SFUIDisplay-Bold.otf');
-    font-weight: 700; /* Bold */
+    font-weight: 700; 
     font-display: swap;
-  }
+  } */
   
   /* Special Black Font */
   @font-face {
@@ -38,12 +45,14 @@
   :root {
     --font-primary: 'MyCustomFont', sans-serif;
     --font-black: 'AnotherFont', sans-serif;
+    --font-secondary: 'MyBoldFont', sans-serif;
   }
   
   
 
   body {
     font-family: var(--font-primary);
+    user-select: none;
   }
   
 /* :root{
@@ -154,6 +163,10 @@
     .blck:active{
         background: #6d6565d0;
         color: white;
+    }
+
+    .myBoldFont{
+        font-family: 'MyBoldFont';
     }
 }
 

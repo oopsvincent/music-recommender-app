@@ -9,16 +9,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Globals for caching token
-access_token = None
-expires_at = 0
-
-
 spotify = Blueprint("spotify", __name__)
 
 CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+
 REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
+
 
 
 access_token_cache = {"access_token": None, "expires_at": 0}
@@ -52,9 +49,11 @@ def get_token():
 
 @spotify.route("/callback")
 def callback():
+
     code = request.args.get('code')
     if not code:
         return jsonify({"error": "Missing code param"}), 400
+
 
     token_url = "https://accounts.spotify.com/api/token"
     payload = {
@@ -71,6 +70,7 @@ def callback():
     }
 
     try:
+
         res = requests.post(token_url, data=payload, headers=headers)
         res.raise_for_status()  # will throw if 401
 
@@ -87,6 +87,7 @@ def callback():
         print(f"Spotify token exchange failed: {e}")
         print(f"Response content: {res.text}")
         return jsonify({"error": "Token exchange failed", "details": res.text}), 500
+
 
 
 @spotify.route("/me")
@@ -157,6 +158,7 @@ def create_playlist():
 
     return jsonify(response.json())
 
+
 @spotify.route("/login")
 def login():
     scopes = "user-read-private user-read-email playlist-read-private playlist-modify-private streaming user-read-playback-state user-modify-playback-state"
@@ -168,8 +170,7 @@ def login():
         "redirect_uri": REDIRECT_URI,
     }
 
-    query_string = "&".join(f"{k}={requests.utils.quote(v)}" for k, v in query_params.items())
+    query_string = "&".join(
+        f"{k}={requests.utils.quote(v)}" for k, v in query_params.items()
+    )
     return redirect(f"{auth_url}?{query_string}")
-     
-
-

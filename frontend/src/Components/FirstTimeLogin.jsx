@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion, scale } from 'framer-motion';
+import { Info } from 'lucide-react';
 
 const FirstTimeLogin = () => {
   const [name, setName] = useState('');
-  const [language, setLanguage] = useState('English');
+//   const [language, setLanguage] = useState('English');
 
   // Handle input changes for name and language
   const handleNameChange = (e) => {
@@ -25,11 +27,9 @@ const handleSubmit = (e) => {
     // Set default name if empty
     const userName = name.trim() === "" ? "User" : name;
 
-    if (language) {
+    if (userName) {
         localStorage.setItem('userName', userName);
-        localStorage.setItem('musicLanguage', language);
         
-        // Reload page after 500ms
         setTimeout(() => {
             window.location.reload();
         }, 500);
@@ -38,12 +38,18 @@ const handleSubmit = (e) => {
     }
 };
 
-
   return (
-    <div className="bg-white rounded-2xl flex flex-col p-5 m-2 border-2 shadow-2xl shadow-white">
+    <>
+    
+    <motion.div               
+    initial={{ opacity: 0, scale: 0.8, translateY: 0 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 1, translateY: 300 }}
+    transition={{ duration: 0.3 }}
+    className="bg-white rounded-2xl flex flex-col p-5 m-2 border-2 shadow-2xl shadow-white">
       <h1 className="text-4xl text-center boldonse mt-5 mb-5">Welcome</h1>
       
-      <label htmlFor="Name" className='mt-5 text-xl'>Enter Your Name</label>
+      <label htmlFor="Name" className='mt-5 text-xl'>Enter Your Name <p className='inline-flex text-lg text-black/40'>(optional)</p> </label>
       <input
         className="mb-5 mt-2 text-3xl outline-1 p-1 rounded-lg"
         type="text"
@@ -51,7 +57,7 @@ const handleSubmit = (e) => {
         onChange={handleNameChange}
       />
 
-      <label htmlFor="language" className='mt-5 text-xl'>Select Your Music Language *</label>
+      {/* <label htmlFor="language" className='mt-5 text-xl'>Select Your Music Language *</label>
       <select
         name="language"
         id="lang"
@@ -68,12 +74,19 @@ const handleSubmit = (e) => {
         <option value="Arabic">العربية (Arabic)</option>
         <option value="Korean">한국어 (Korean)</option>
         <option value="Japanese">日本語 (Japanese)</option>
-      </select>
-    <p>Everything is Confidential and can be changed later</p>
-      <button onClick={handleSubmit} className="mt-4 p-2 bg-black rounded-md text-white active:scale-90 transition-all duration-200">
+      </select> */}
+    <p className='inline-flex'><Info className='inline-flex w-5 mr-2'/><p>Your name is for greeting purposes. It is only stored on device</p></p>
+      <motion.button
+    initial={{ opacity: 0, scale: 0.8, translateY: 0 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 1, translateY: 300 }}
+    whileTap={{scale: 0.9,}}
+    transition={{ duration: 0.2 }}
+      onClick={handleSubmit} className="mt-4 p-2 bg-black rounded-md text-white">
         Continue
-      </button>
-    </div>
+      </motion.button>
+    </motion.div>
+    </>
   );
 };
 
