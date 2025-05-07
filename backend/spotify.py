@@ -79,8 +79,8 @@ def callback():
         # Save access_token + refresh_token into Flask session
         session["access_token"] = tokens["access_token"]
         session["refresh_token"] = tokens["refresh_token"]
-
-        return redirect("/")  # Redirect user to frontend
+        return jsonify(tokens)
+        # return redirect("/")  # Redirect user to frontend
 
     except requests.exceptions.RequestException as e:
         # Log everything for debugging
