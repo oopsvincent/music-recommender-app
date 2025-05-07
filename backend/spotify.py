@@ -4,6 +4,7 @@ from flask import Blueprint, redirect, request, session, jsonify
 import requests
 import time
 import os
+import base64 
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,7 +18,8 @@ spotify = Blueprint("spotify", __name__)
 
 CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
-REDIRECT_URI = "http://127.0.0.1:5000/callback"
+REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
+
 
 access_token_cache = {"access_token": None, "expires_at": 0}
 
@@ -47,38 +49,44 @@ def get_token():
     return jsonify({"access_token": access_token_cache["access_token"]})
 
 
+
 @spotify.route("/callback")
 def callback():
-    code = request.args.get("code") 
-
+    code = request.args.get('code')
     if not code:
-        return jsonify({
-            "error": "Missing authorization code",
-            "details": "Don't refresh this page. Start again from /login."
-        }), 400
+        return jsonify({"error": "Missing code param"}), 400
 
-    print("Authorization code:", code)
-
+    token_url = "https://accounts.spotify.com/api/token"
     payload = {
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": REDIRECT_URI,
-        "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET,
+        "redirect_uri": REDIRECT_URI
     }
 
-    response = requests.post("https://accounts.spotify.com/api/token", data=payload)
-    if response.status_code != 200:
-        return jsonify({
-            "error": "Failed to obtain access token",
-            "details": response.text
-        }), 400
+    # Spotify expects basic auth header
+    auth_header = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
+    headers = {
+        "Authorization": f"Basic {auth_header}",
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
 
-    token_data = response.json()
-    session["access_token"] = token_data["access_token"]
-    session["refresh_token"] = token_data.get("refresh_token")
+    try:
+        res = requests.post(token_url, data=payload, headers=headers)
+        res.raise_for_status()  # will throw if 401
 
-    return redirect("/me")
+        tokens = res.json()
+
+        # Save access_token + refresh_token into Flask session
+        session["access_token"] = tokens["access_token"]
+        session["refresh_token"] = tokens["refresh_token"]
+
+        return redirect("/")  # Redirect user to frontend
+
+    except requests.exceptions.RequestException as e:
+        # Log everything for debugging
+        print(f"Spotify token exchange failed: {e}")
+        print(f"Response content: {res.text}")
+        return jsonify({"error": "Token exchange failed", "details": res.text}), 500
 
 
 @spotify.route("/me")
@@ -151,7 +159,7 @@ def create_playlist():
 
 @spotify.route("/login")
 def login():
-    scopes = "user-read-private user-read-email playlist-read-private playlist-modify-private"
+    scopes = "user-read-private user-read-email playlist-read-private playlist-modify-private streaming user-read-playback-state user-modify-playback-state"
     auth_url = "https://accounts.spotify.com/authorize"
     query_params = {
         "response_type": "code",
