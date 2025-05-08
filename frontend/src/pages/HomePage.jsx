@@ -201,10 +201,24 @@ function HomePage() {
         }
     };
 
-    const sections = {
-        Music: (
-            <>
-                <h1
+    return (
+        <div
+            className={`md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex flex-col justify-between`}
+        >
+            <DataNoticeModal />
+
+            );
+            {showLogin && (
+                <div className="h-dvh flex justify-center items-center">
+                    <div className="max-w-[90%] w-full">
+                        <FirstTimeLogin onSubmit={handleUserInfo} />
+                    </div>
+                </div>
+            )}
+
+            {!showLogin && (
+                <>
+                    <h1
                     className="text-white pt-5 pl-5 text-xl dark:text-white m-1 mb-4 boldonse line-h line-clamp-3 md:text-4xl md:p-4"
                     title={userName}
                 >
@@ -300,29 +314,6 @@ function HomePage() {
                     </div>
                 </div>
 
-
-            </>
-        ),
-    };
-
-    return (
-        <div
-            className={`md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex flex-col justify-between`}
-        >
-            <DataNoticeModal />
-
-            );
-            {showLogin && (
-                <div className="h-dvh flex justify-center items-center">
-                    <div className="max-w-[90%] w-full">
-                        <FirstTimeLogin onSubmit={handleUserInfo} />
-                    </div>
-                </div>
-            )}
-
-            {!showLogin && (
-                <>
-                    {selectedSection === "Music" && sections[selectedSection]}
                 </>
             )}
 

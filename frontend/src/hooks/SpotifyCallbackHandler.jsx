@@ -1,17 +1,38 @@
-import { useAuth } from '../hooks/AuthContext';
+// // src/components/SpotifyCallbackHandler.jsx
+// import { useEffect } from "react";
+// import { useLocation, useNavigate } from "react-router-dom";
 
-const SpotifyCallbackHandler = () => {
-    const { setAuthTokens } = useAuth();
+// export default function SpotifyCallbackHandler() {
+//   const location = useLocation();
+//   const navigate = useNavigate();
 
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = params.get('access_token');
-        const refreshToken = params.get('refresh_token');
+//   useEffect(() => {
+//     const code = new URLSearchParams(location.search).get("code");
 
-        if (accessToken) {
-            setAuthTokens({ accessToken, refreshToken });
-        }
-    }, []);
+//     if (!code) {
+//       console.warn("No 'code' param found in URL.");
+//       return;
+//     }
 
-    return <Navigate to="/account" />;
-};
+//     console.log("Authorization code found:", code);
+
+//     fetch(`https://music-recommender-api.onrender.com/callback?code=${encodeURIComponent(code)}`, {
+//       method: "GET",
+//       credentials: "include",
+//     })
+//       .then((res) => {
+//         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+//         return res.json();
+//       })
+//       .then((data) => {
+//         console.log("Server response:", data);
+//         navigate(".", { replace: true });
+//       })
+//       .catch((err) => {
+//         console.error("Error during fetch:", err);
+//       });
+
+//   }, [location, navigate]);
+
+//   return null; // No UI needed
+// }
