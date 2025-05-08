@@ -46,7 +46,7 @@ const SearchPage = () => {
                 </div>
             ))
         ) : (
-            (searchTerm ? searchResults : trackData).map((track, index) => (
+            (searchTerm ? searchResults  : searchResults).map((track, index) => (
                 <Card
                     followers={track.followers}
                     key={index}
