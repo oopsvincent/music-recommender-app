@@ -1,22 +1,19 @@
 import React, { useEffect, useState, useMemo } from "react";
-import axios from 'axios';
 import '../App.css'
 import Card from "../Components/Card";
 import ChipSection from "../Components/ChipSection";
-import SpotifyConnect from "../Components/SpotifyConnect";
 import FirstTimeLogin from "../Components/FirstTimeLogin";
 import AppBar from "../Components/AppBar";
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { getSpotifyToken, fetchSpotifyData, fetchSpotifySearchResults } from '../hooks/useSpotify';
 import loadTracks from "../hooks/useTrackLoader";
-import useDebouncedSearch from "../hooks/useDebouncedSearch";
 import PWAInstallPrompt from "../Components/PWAInstallPrompt";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSpotify } from '@fortawesome/free-brands-svg-icons';
 import fetchYouTubeData from "../hooks/useYoutubeSearch";
 import { motion } from "framer-motion";
 import DataNoticeModal from "../Components/DataNoticeModal";
+import Greet from "../Components/Greet";
+// import RandomTrackButton from "../Components/RandomTrackButton";
 
 const tracksDaily = [
     "Bruno Mars - Die With A Smile",
@@ -47,40 +44,12 @@ const tracksDaily = [
     "HUMBLE",
 ];
 
-function greetBasedOnTime() {
-    const now = new Date();
-    const hour = now.getHours();
-
-    if (hour >= 5 && hour < 12) {
-        return "Good Morning, ";
-    } else if (hour >= 12 && hour < 17) {
-        return "Good Afternoon, ";
-    } else {
-        return "Good Evening, ";
-    }
-}
-
-
-
-
-
-
-
-
 function HomePage() {
     const [spotifyToken, setSpotifyToken] = useState(null);
     const [trackData, setTrackData] = useState([]);
     const [showLogin, setShowLogin] = useState(false);
     const [selectedSection, setSection] = useState("Music");
     const [userName, setUserName] = useState(localStorage.getItem("userName"));
-    const [musicLanguage, setMusicLanguage] = useState(
-        localStorage.getItem("musicLanguage")
-    );
-    const [searchResults, setSearchResults] = useState([]);
-    const [searchTerm, setSearchTerm] = useState("");
-    //   const [searchQuery, setSearchQuery] = useState("");
-    const [searchType, setSearchType] = useState("track");
-
     const [deferredPrompt, setDeferredPrompt] = useState(null);
     const [showInstallButton, setShowInstallButton] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -218,13 +187,9 @@ function HomePage() {
 
             {!showLogin && (
                 <>
-                    <h1
-                    className="text-white pt-5 pl-5 text-xl dark:text-white m-1 mb-4 boldonse line-h line-clamp-3 md:text-4xl md:p-4"
-                    title={userName}
-                >
-                    {greetBasedOnTime()} {userName}
-                </h1>
+                <Greet />
                 <ChipSection onChipSelect={handleChipSelect} />
+                {/* <RandomTrackButton categoryBaseUrl={`https://music-recommender-api.onrender.com/songs/pop_music`} /> */}
 
                 <div className="flex flex-row flex-wrap justify-center mb-5">
                     {loading ? (

@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import NotFound from './pages/NotFound';
-// import SpotifyCallbackHandler from './Components/SpotifyCallbackHandler';
 import PlaylistSection from './routes/PlaylistSection';
 import AppBar from './Components/AppBar';
 import SpotifyPlayer from './Components/SpotifyPlayer';
@@ -26,7 +25,7 @@ const AppContent = ({ selectedSection, setSection }) => {
             <AppBar selectedSection={selectedSection} setSection={setSection} />
 
             <Routes>
-                <Route path="/" element={<HomePage />} />
+                <Route path="/" element={<HomePage />}  />
                 <Route path="/callback" element={<Callback />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/account" element={<UserDashboard />} />

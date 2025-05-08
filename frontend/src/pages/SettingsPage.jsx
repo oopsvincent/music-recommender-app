@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+// import TracksDaily from '../Components/TracksDaily';
 
 function removeData() {
     localStorage.clear();
@@ -8,7 +9,8 @@ function removeData() {
 
 const SettingsPage = () => {
   return (
-    <div className='h-lvh'>
+    <div className='h-lvh flex flex-col justify-self-start items-center p-5'>
+        <h1 className='text-4xl text-white boldonse py-5'>Settings</h1>
     {/* <h3 className="text-2xl text-white m-3 flex justify-around items-center">
         Current Music Language: {musicLanguage}
         <button
@@ -42,6 +44,7 @@ const SettingsPage = () => {
             Clear Playlist
         </motion.button>
     </h3>
+    {/* <TracksDaily categoriesBaseUrls={'https://music-recommender-api.onrender.com/songs/'} /> */}
 </div>
   )
 }
