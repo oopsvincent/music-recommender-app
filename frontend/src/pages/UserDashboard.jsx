@@ -7,7 +7,7 @@ import { useAuth } from '../hooks/AuthContext';
 
 const UserDashboard = () => {
     const { authTokens } = useAuth();
-    const accessToken = authTokens?.accessToken;
+    const accessToken = localStorage.getItem('access_token');
 
     const [userData, setUserData] = useState(null);
 
