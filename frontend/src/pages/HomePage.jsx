@@ -6,9 +6,6 @@ import ChipSection from "../Components/ChipSection";
 import SpotifyConnect from "../Components/SpotifyConnect";
 import FirstTimeLogin from "../Components/FirstTimeLogin";
 import AppBar from "../Components/AppBar";
-import SearchComp from "../Components/Search";
-import debounce from "lodash.debounce";
-import Account from "../Components/Account";
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { getSpotifyToken, fetchSpotifyData, fetchSpotifySearchResults } from '../hooks/useSpotify';
@@ -306,17 +303,6 @@ function HomePage() {
 
             </>
         ),
-        Search: (
-            <div>abc</div>
-        ),
-        Settings: (
-            <div/>
-        ),
-        Account: (
-            <>
-                <div>abc</div>
-            </>
-        ),
     };
 
     return (
@@ -324,8 +310,6 @@ function HomePage() {
             className={`md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex flex-col justify-between`}
         >
             <DataNoticeModal />
-
-
 
             );
             {showLogin && (
@@ -338,18 +322,7 @@ function HomePage() {
 
             {!showLogin && (
                 <>
-                    {selectedSection === "Settings" && sections[selectedSection]}
-
                     {selectedSection === "Music" && sections[selectedSection]}
-
-                    {selectedSection === "Search" && sections[selectedSection]}
-
-                    {selectedSection === "Account" && sections[selectedSection]}
-
-                    {/* {selectedSection === "Playlist" && (
-                        navigate('/playlist')
-                    )} */}
-                    {/*loading && <Skeleton containerClassName="flex flex-row flex-wrap gap-1 m-5" width={170} height={250} count={10} />*/}
                 </>
             )}
 
