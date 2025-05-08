@@ -33,7 +33,7 @@ const PlaylistSection = () => {
 
   return (
     <>
-    <div className={`flex-row mb-5 md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex flex-nowrap justify-center h-lvh`}>
+    <div className={`flex-row mb-5 md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex flex-wrap justify-center h-lvh`}>
 
       {userPlaylists.map((track, index) => (
                             <Card
