@@ -38,7 +38,7 @@ const PlaylistSection = () => {
 
   return (
     <>
-    <div className={`flex flex-wrap justify-center p-5`}>
+    <div className={`flex flex-wrap justify-center p-1`}>
         <Greet />
 
       {userPlaylists.map((track, index) => (
