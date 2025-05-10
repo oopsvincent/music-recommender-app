@@ -107,7 +107,9 @@ function HomePage({ userName, selectedSection, setSection }) {
       <Greet />
       <ChipSection onChipSelect={handleChipSelect} />
 
-    <RandomTrackButton categoryBaseUrl={`https://music-recommender-api.onrender.com/songs/${chipKey}`}></RandomTrackButton>
+    {chipKey && (
+  <RandomTrackButton categoryBaseUrl={`https://music-recommender-api.onrender.com/songs/${chipKey}`} />
+)}
       <div className="flex flex-row flex-wrap justify-center mb-5">
         {loading ? (
           Array.from({ length: 20 }).map((_, index) => (
