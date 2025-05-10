@@ -11,7 +11,7 @@ import DataNoticeModal from "../Components/DataNoticeModal";
 import Greet from "../Components/Greet";
 import PWAInstallPrompt from "../Components/PWAInstallPrompt";
 import RandomTrackButton from "../Components/RandomTrackButton";
-import chipMap from "../modules/chiptext";
+import chipMap from "../modules/chipText";
 // import randomTracksPromise from "../modules/randomTracks";
 
 const tracksDaily = [
