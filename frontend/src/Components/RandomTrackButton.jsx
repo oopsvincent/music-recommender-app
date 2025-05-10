@@ -5,6 +5,7 @@ import Card from './Card';
 import { getSpotifyToken } from '../hooks/useSpotify';
 import loadTracks from '../hooks/useTrackLoader';
 import fetchYouTubeData from '../hooks/useYoutubeSearch';
+import { motion } from 'framer-motion';
 
 export default function RandomTrackButton({ categoryBaseUrl }) {
     const [loading, setLoading] = useState(false);
@@ -32,7 +33,7 @@ export default function RandomTrackButton({ categoryBaseUrl }) {
             const songsList = await fetchAllSongs(categoryBaseUrl);
             const randomSong = getRandomSongFromList(songsList);
             console.log(randomSong);
-            
+
 
             let enrichedTrack = [];
             await loadTracks([randomSong], spotifyToken, (data) => {
@@ -43,14 +44,10 @@ export default function RandomTrackButton({ categoryBaseUrl }) {
             const enrichedTracks = await loadTracks([randomSong], spotifyToken);
             setSelectedTrack({
                 ...enrichedTracks[0],
-                explicit: randomSong.explicit,
+                explicit: randomSong.explicit !== undefined ? randomSong.explicit : enrichedTracks[0].explicit,
+                popularity: randomSong.popularity !== undefined ? randomSong.popularity : enrichedTracks[0].popularity,
                 type: "track",
-                popularity: randomSong.popularity,
             });
-
-
-            // setSelectedTrack(enrichedWithExtras);
-
         } catch (error) {
             console.error('Error fetching random song:', error);
         }
@@ -60,25 +57,32 @@ export default function RandomTrackButton({ categoryBaseUrl }) {
     return (
         <>
 
-            <button
+            <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.05 }}
+                exit={{ opacity: 0, scale: 0.8 }}
                 onClick={handleClick}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 w-auto my-2 mt-3 mx-auto block bg-[#D40000] text-white rounded hover:bg-[] disabled:opacity-50"
                 disabled={loading}
             >
                 {loading ? 'Loading...' : 'Random Track'}
-            </button>
+            </motion.button>
 
             <ModalWrapper isOpen={!!selectedTrack} onClose={() => setSelectedTrack(null)}>
                 {selectedTrack && (
                     <Card
                         title={selectedTrack.title}
                         artist={selectedTrack.artists}
+                        explicit={selectedTrack.explicit}
+                        popularity={selectedTrack.popularity}
                         url={selectedTrack.url}
                         spoURL={selectedTrack.spoURL}
                         YTURL={fetchYouTubeData(selectedTrack.title + " " + selectedTrack.artists)}
-                        popularity={selectedTrack.popularity}
                         type={selectedTrack.type}
-                        explicit={selectedTrack.explicit}
                         handleSave={() => { }}
                     />
                 )}

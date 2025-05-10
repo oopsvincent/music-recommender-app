@@ -179,25 +179,28 @@ function handleClick(url) {
             )}
 
             {/* Content */}
-            <div className="flex flex-col flex-grow p-3 relative">
-                {/* <span className="absolute w-15 h-15 text-center bottom-full mt-1 left-1/2 -translate-x-1/2 opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-active:scale-100 transition-all duration-300 bg-black text-white px-2 py-1 rounded-4xl text-sm">
-    {<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-play-icon lucide-circle-play"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>}
-  </span> */}
-                <motion.div
-                whileTap={{ scale: 0.95 }}
-                whileHover={{ scale: 1.05, rotate: 2 }}
-                whileDrag={{scale: 1.2, }}
-                    className="text-2xl font-sbold text-white 
-                         whitespace-nowrap overflow-scroll scrollb-none max-w-full font-semibold font-stretch-120%"
-                    title={title}
-                >
-                    {title}
-                </motion.div>
-                <p className="text-md font-ultralight text-gray-300">{artist ? artist : `${followers?.toLocaleString()} Followers`}</p>
-                {type === "show" ? <div className="text-white">{displayedDesc}</div> : null}
-                {type === "album" ? <div className="text-white">{description}</div> : null}
-                {type === "episode" ? <div className="text-white">{displayedDesc}</div> : null}
-            </div>
+<div className="flex flex-col flex-grow p-3 relative">
+  <motion.div
+    whileTap={{ scale: 0.95 }}
+    whileHover={{ scale: 1.05, rotate: 2 }}
+    whileDrag={{ scale: 1.2 }}
+    className="text-2xl font-sbold text-white whitespace-nowrap overflow-scroll scrollb-none max-w-full font-semibold font-stretch-120%"
+    title={title}
+  >
+    {title}
+  </motion.div>
+
+  <p className="text-md font-ultralight text-gray-300">
+    {type === "artist"
+      ? `${followers?.toLocaleString() ?? "?"} Followers`
+      : artist || "Unknown Artist"}
+  </p>
+
+  {type === "show" && <div className="text-white">{displayedDesc}</div>}
+  {type === "album" && <div className="text-white">{description}</div>}
+  {type === "episode" && <div className="text-white">{displayedDesc}</div>}
+</div>
+
 
             {/* Buttons at the bottom */}
             <div className="flex flex-col mt-auto p-0">

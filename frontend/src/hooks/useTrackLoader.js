@@ -26,6 +26,7 @@ const loadTracks = async (tracks, token, setTrackData = null, setLoading = null)
       fetchSpotifyData(title, token)
     );
     const results = await Promise.all(trackPromises);
+    console.log(results);
 
     // If setTrackData is provided, set it
     if (typeof setTrackData === 'function') {

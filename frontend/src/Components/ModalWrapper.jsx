@@ -14,7 +14,7 @@ export default function ModalWrapper({ isOpen, onClose, children }) {
           onClick={onClose} // click outside closes
         >
           <motion.div
-            className="bg-black rounded-xl flex justify-center items-center shadow-xl p-4 max-w-md w-full mx-4 relative"
+            className="rounded-xl flex justify-center items-center shadow-xl p-4 max-w-md w-full mx-4 relative glass-bg"
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0.8 }}
