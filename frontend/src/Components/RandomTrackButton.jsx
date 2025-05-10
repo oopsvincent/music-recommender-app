@@ -44,9 +44,10 @@ export default function RandomTrackButton({ categoryBaseUrl }) {
             setSelectedTrack({
                 ...enrichedTracks[0],
                 explicit: randomSong.explicit,
-                type: randomSong.type,
+                type: "track",
                 followers: randomSong.followers,
                 description: randomSong.description,
+                popularity: randomSong.popularity
             });
 
 
