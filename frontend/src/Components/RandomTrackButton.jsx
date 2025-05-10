@@ -45,7 +45,6 @@ export default function RandomTrackButton({ categoryBaseUrl }) {
                 ...enrichedTracks[0],
                 explicit: randomSong.explicit,
                 type: "track",
-                description: randomSong.description,
                 popularity: randomSong.popularity,
             });
 
@@ -80,8 +79,6 @@ export default function RandomTrackButton({ categoryBaseUrl }) {
                         popularity={selectedTrack.popularity}
                         type={selectedTrack.type}
                         explicit={selectedTrack.explicit}
-                        popularity={selectedTrack.popularity}
-                        description={selectedTrack.description}
                         handleSave={() => { }}
                     />
                 )}
