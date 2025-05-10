@@ -3,6 +3,7 @@ import '../index.css'
 import { Search, CircleUserRound, ListMusic, Music, Cog } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { MessageSquareCode } from "lucide-react";
 
 const AppBar = ({ selectedSection, setSection }) => {
     const navigate = useNavigate();
@@ -16,8 +17,8 @@ const AppBar = ({ selectedSection, setSection }) => {
         <div
           onClick={() => {
             setSection("Music");
-            window.scrollTo(0,0);
             navigate('/');
+            window.scrollTo(0,0);
           }}
           className={`w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 blck transition-all duration-400 ${
             selectedSection == "Music" ? "bg-white text-black rounded-lg" : ""
@@ -30,8 +31,8 @@ const AppBar = ({ selectedSection, setSection }) => {
         <div
           onClick={() => {
             setSection("Search");
-            window.scrollTo(0,0);
             navigate('/search');
+            window.scrollTo(0,0);
           }}
           className={`blck w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
             selectedSection === "Search" ? "bg-white text-black rounded-lg" : ""
@@ -44,20 +45,22 @@ const AppBar = ({ selectedSection, setSection }) => {
         <div
           onClick={() => {
             setSection("Account");
-            navigate('/account');
+            navigate('/feedback');
+            window.scrollTo(0,0);
           }}
-          className={`blck w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
+          className={`blck w-14 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
             selectedSection == "Account" ? "bg-white text-black rounded-lg" : ""
           }`}
         >
-            <CircleUserRound/>
-          <p className="text-xs">Account</p>
+            <MessageSquareCode/>
+          <p className="text-xs">Feedback</p>
         </div>
 
         <div
           onClick={() => {
             setSection("Settings");
             navigate('/settings');
+            window.scrollTo(0,0);
           }}
           className={`blck w-12 inline-flex flex-col justify-between items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
             selectedSection == "Settings"
@@ -73,6 +76,7 @@ const AppBar = ({ selectedSection, setSection }) => {
           onClick={() => {
             setSection("Playlist");
             navigate('/playlist');
+            window.scrollTo(0,0);
           }}
           className={`blck w-12 inline-flex flex-col justify-around items-center hover:text-gray-400 p-2 rounded-3xl active:scale-90 transition-all duration-400 ${
             selectedSection == "Playlist"

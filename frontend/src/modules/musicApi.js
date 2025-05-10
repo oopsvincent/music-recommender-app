@@ -1,13 +1,19 @@
 // src/api/musicApi.js
 
 export async function fetchAllSongs(categoryBaseUrl) {
-    const url = `${categoryBaseUrl}?offset=0&limit=1000`; // Fetch ALL songs at once
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Network error');
-  
-    const data = await response.json();
-    return data.results; // returns full song list
+  if (!categoryBaseUrl || categoryBaseUrl.endsWith('/songs/') || categoryBaseUrl.endsWith('/songs')) {
+    console.warn('Invalid categoryBaseUrl:', categoryBaseUrl);
+    throw new Error('Invalid categoryBaseUrl — missing category key');
   }
+
+  const url = `${categoryBaseUrl}?offset=0&limit=1000`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Network error');
+
+  const data = await response.json();
+  return data.results;
+}
+
   
   export function getRandomSongFromList(songsList) {
     const randomIndex = Math.floor(Math.random() * songsList.length);
