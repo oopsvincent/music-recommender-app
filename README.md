@@ -3,7 +3,7 @@
 
 ### 🎵 **Music Recommender Web App**  
 
-The **Music Recommender App** is a web-based platform designed to suggest personalized music recommendations based on user preferences. Built using **React + TypeScript (frontend)** and **Flask (backend)**, the app collects user input via surveys and delivers curated music suggestions without relying on external APIs.  
+The **Music Recommender App** is a web-based platform designed to suggest personalized music recommendations based on user preferences. Built using **React + JavaScript (frontend)** and **Flask (backend)**, the app collects user input via surveys and delivers curated music suggestions without relying on external APIs.  
 
 ---
 
@@ -21,7 +21,7 @@ The **Music Recommender App** is a web-based platform designed to suggest person
 
 - **Frontend**: React + JavaScript (Vite), Tailwind CSS
 - **Backend**: Python (Flask)  
-- **Database**: CSV & SQL  
+- **Database**: CSV & MySQL  
 - **Deployment**: Vercel (frontend), Render (backend)  
 
 ---
@@ -92,7 +92,7 @@ Start the server
 
 
 ## 🛠 Our Skills
-- Javascript, HTML, CSS, React.js, Node.js, Bootstrap CSS
+- Javascript, HTML, CSS, React.js, Node.js, Tailwind CSS
 - Python, Flask
 
 
