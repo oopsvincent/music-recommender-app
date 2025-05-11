@@ -1,102 +1,146 @@
+// src/components/SpotifyPlayer.jsx
 import React, { useEffect, useState } from 'react';
 
-const SpotifyPlayer = () => {
+export default function SpotifyPlayer() {
   const [player, setPlayer] = useState(null);
   const [deviceId, setDeviceId] = useState(null);
+  const [isPaused, setIsPaused] = useState(true);
+  const [currentTrack, setCurrentTrack] = useState(null);
+  const [volume, setVolume] = useState(0.5);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // Replace with a **fresh valid token** (expires in 1 hour)
-  const token = localStorage.getItem('access_token') // Truncated for safety
+  const token = localStorage.getItem('access_token'); // Your valid token
 
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://sdk.scdn.co/spotify-player.js";
+    if (!token) {
+      setErrorMessage('Spotify token not found. Please authenticate.');
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://sdk.scdn.co/spotify-player.js';
     script.async = true;
     document.body.appendChild(script);
 
     window.onSpotifyWebPlaybackSDKReady = () => {
-      const player = new Spotify.Player({
-        name: "OopsVincent Player",
-        getOAuthToken: cb => { cb(token); },
+      const newPlayer = new window.Spotify.Player({
+        name: 'Harmony Web Player',
+        getOAuthToken: cb => cb(token),
         volume: 0.5
       });
 
-      // Error handling
-      player.addListener('initialization_error', ({ message }) => { console.error(message); });
-      player.addListener('authentication_error', ({ message }) => { console.error(message); });
-      player.addListener('account_error', ({ message }) => { console.error(message); });
-      player.addListener('playback_error', ({ message }) => { console.error(message); });
+      newPlayer.addListener('initialization_error', ({ message }) => console.error('Init Error:', message));
+      newPlayer.addListener('authentication_error', ({ message }) => console.error('Auth Error:', message));
+      newPlayer.addListener('account_error', ({ message }) => {
+        console.error('Account Error:', message);
+        setErrorMessage('Spotify Premium is required to use this player.');
+      });
+      newPlayer.addListener('playback_error', ({ message }) => console.error('Playback Error:', message));
 
-      // Ready
-      player.addListener('ready', ({ device_id }) => {
-        console.log('Ready with Device ID', device_id);
+      newPlayer.addListener('ready', ({ device_id }) => {
+        console.log('Ready with Device ID:', device_id);
         setDeviceId(device_id);
       });
 
-      player.addListener('not_ready', ({ device_id }) => {
-        console.log('Device ID has gone offline', device_id);
+      newPlayer.addListener('player_state_changed', state => {
+        if (!state) return;
+        const { paused, track_window } = state;
+        setIsPaused(paused);
+        const track = track_window.current_track;
+        setCurrentTrack({
+          title: track.name,
+          artists: track.artists.map(a => a.name).join(', '),
+          albumImage: track.album.images[0]?.url,
+          uri: track.uri
+        });
       });
 
-      player.connect();
-      setPlayer(player);
+      newPlayer.connect();
+      setPlayer(newPlayer);
+    };
+
+    return () => {
+      if (player) {
+        player.disconnect();
+      }
     };
   }, [token]);
 
-  const transferPlaybackAndPlay = () => {
-    if (!player || !deviceId) {
-      console.error('Player or deviceId not ready');
-      return;
-    }
-
-    // Transfer playback
-    fetch('https://api.spotify.com/v1/me/player', {
+  const transferPlayback = async () => {
+    if (!deviceId) return;
+    await fetch('https://api.spotify.com/v1/me/player', {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        device_ids: [deviceId],
-        play: false  // Do NOT auto-play here
-      }),
-    }).then(res => {
-      if (res.ok) {
-        console.log('Playback transferred!');
-
-        // Now explicitly start track
-        playTrack(token, deviceId, 'spotify:track:2plbrEY59IikOBgBGLjaoe');
-      } else {
-        console.error('Failed to transfer playback');
-      }
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ device_ids: [deviceId], play: true })
     });
   };
 
-  const playTrack = (token, deviceId, uri) => {
-    fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        uris: [uri],
-      }),
-    }).then(res => {
-      if (res.ok) {
-        console.log('Track is playing!');
-      } else {
-        console.error('Failed to start playback');
-      }
-    });
+  const handlePlayPause = () => {
+    if (!player) return;
+    player.togglePlay();
+  };
+
+  const handleVolumeChange = (e) => {
+    const vol = parseFloat(e.target.value);
+    setVolume(vol);
+    player.setVolume(vol);
   };
 
   return (
-    <div className='bg-transparent h-lvh w-lvw text-white flex justify-center items-center flex-col'>
-      <h2 className='text-4xl m-5'>Spotify Player</h2>
-      <button onClick={transferPlaybackAndPlay} disabled={!deviceId} className='bg-white rounded-2xl p-5 disabled:bg-gray text-black'>
-        Start Spotify Playback
-      </button>
+    <div className="bg-zinc-900 text-white rounded-xl p-5 w-full max-w-md mx-auto shadow-lg">
+      <h2 className="text-2xl font-semibold mb-4 text-center">🎵 Harmony Spotify Player</h2>
+
+      {errorMessage && <p className="text-red-500 text-center">{errorMessage}</p>}
+
+      {!errorMessage && (
+        <>
+          <div className="flex flex-col items-center mb-4">
+            {currentTrack ? (
+              <>
+                <img src={currentTrack.albumImage} alt="Album cover" className="w-32 h-32 rounded-lg shadow mb-2" />
+                <p className="font-bold text-lg text-center">{currentTrack.title}</p>
+                <p className="text-sm text-gray-400 text-center">{currentTrack.artists}</p>
+              </>
+            ) : (
+              <p className="italic text-gray-400">No track playing</p>
+            )}
+          </div>
+
+          <div className="flex justify-center gap-4 mb-4">
+            <button
+              onClick={transferPlayback}
+              disabled={!deviceId}
+              className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded text-black disabled:opacity-50"
+            >
+              Connect & Transfer Playback
+            </button>
+          </div>
+
+          <div className="flex justify-center gap-4 mb-4">
+            <button
+              onClick={handlePlayPause}
+              disabled={!player}
+              className="bg-white text-black px-4 py-2 rounded hover:bg-gray-300 disabled:opacity-50"
+            >
+              {isPaused ? '▶️ Play' : '⏸ Pause'}
+            </button>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <label htmlFor="volume" className="text-sm mb-1">Volume</label>
+            <input
+              type="range"
+              id="volume"
+              min="0"
+              max="1"
+              step="0.01"
+              value={volume}
+              onChange={handleVolumeChange}
+              className="w-full"
+            />
+          </div>
+        </>
+      )}
     </div>
   );
-};
-
-export default SpotifyPlayer;
+}
