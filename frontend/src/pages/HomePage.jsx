@@ -94,6 +94,7 @@ function HomePage({ userName }) {
         nextUrl={pagination.nextUrl}
         getDataFromDB={getDataFromDB}
       />
+      {/* <SpotifyPlayer /> */}
     </div>
   );
 }
