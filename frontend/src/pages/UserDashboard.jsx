@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSpotify, faCrown } from '@fortawesome/free-brands-svg-icons';
-import { faSignOutAlt, faEnvelope, faGlobe, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faSpotify } from '@fortawesome/free-brands-svg-icons';
+import { faSignOutAlt, faEnvelope, faGlobe, faUser, faCrown } from '@fortawesome/free-solid-svg-icons';
 
 export default function UserDashboard() {
   const [userData, setUserData] = useState(null);
