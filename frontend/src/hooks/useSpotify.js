@@ -47,6 +47,7 @@ async function fetchSpotifyData(title, token) {
         spoURL: track.external_urls?.spotify || "#",
         popularity: track.popularity,
         type: "track",
+        trackURI: track.uri,
         explicit: track.explicit,
     };
 }
@@ -73,7 +74,7 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
         );
 
         const data = await response.json();
-        console.log("API Response:", data);
+        // console.log("API Response:", data);
 
         const resultsArray = data[type + "s"]?.items || [];
         const nextResults = data?.previous;
@@ -96,6 +97,7 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
                     explicit: item.explicit,
                     next: nextResults,
                     prev: prevResults,
+                    trackURI: item.uri,
                 };
             } else if (type === "artist") {
                 return {

@@ -1,6 +1,6 @@
 // App.jsx
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import NotFound from './pages/NotFound';
 import PlaylistSection from './routes/PlaylistSection';
@@ -10,14 +10,15 @@ import SearchPage from './pages/SearchPage';
 import UserDashboard from './pages/UserDashboard';
 import SettingsPage from './pages/SettingsPage';
 import { AuthProvider } from './hooks/AuthContext';
-import Callback from './pages/Callback';  // ✅ Don't forget import
-import './App.css'; // Import your CSS file
-import './index.css'; // Import your CSS file
+import Callback from './pages/Callback';
+import './App.css';
+import './index.css';
 import FeedbackPage from './pages/Feedback';
-import FirstTimeLogin from './Components/FirstTimeLogin'; // Import your FirstTimeLogin component
+import FirstTimeLogin from './Components/FirstTimeLogin';
 import DataNoticeModal from './Components/DataNoticeModal';
-
-
+import { PlayerProvider } from './contexts/PlayerContext';
+import Footer from './Components/Footer';
+import CreditsPage from './pages/CreditsPages';
 
 const App = () => {
   const [selectedSection, setSection] = useState('');
@@ -31,40 +32,41 @@ const App = () => {
   };
 
   return (
+    <PlayerProvider>
       <Router>
-        <DataNoticeModal/>
-      <AuthProvider>
-        {showLogin ? (
-          <div className="h-dvh flex justify-center items-center">
-            <div className="max-w-[90%] w-full">
-              <FirstTimeLogin onSubmit={handleUserInfo} />
+        <DataNoticeModal />
+        <AuthProvider>
+          {showLogin ? (
+            <div className="h-dvh flex justify-center items-center">
+              <div className="max-w-[90%] w-full">
+                <FirstTimeLogin onSubmit={handleUserInfo} />
+              </div>
             </div>
-          </div>
-        ) : (
-          <>
-            <AppBar selectedSection={selectedSection} setSection={setSection} />
+          ) : (
+            <>
+              <AppBar selectedSection={selectedSection} setSection={setSection} />
+              <Routes>
+                <Route path="/" element={<HomePage userName={userName} selectedSection={selectedSection} setSection={setSection} />} />
+                <Route path="/callback" element={<Callback />} />
+                <Route path="/search" element={<SearchPage />} />
+                <Route path="/account" element={<UserDashboard />} />
+                <Route path="/credits" element={<CreditsPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/playlist" element={<PlaylistSection />} />
+                <Route path="/feedback" element={<FeedbackPage />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
 
-            <Routes>
-              <Route path="/" element={<HomePage userName={userName} selectedSection={selectedSection} setSection={setSection} />} />
-              <Route path="/callback" element={<Callback />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/account" element={<UserDashboard />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/playlist" element={<PlaylistSection />} />
-              <Route path='/player' element={<SpotifyPlayer />} />
-              <Route path="/feedback" element={<FeedbackPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+              {/* ✅ Globally available floating Spotify Player */}
+              <SpotifyPlayer />
 
-            <footer className="text-center py-6 px-8 text-white mb-17 relative bottom-0">
-              © 2025 The CodeBreakers. All rights reserved. Licensed under MIT License.
-            </footer>
-          </>
-        )}
-      </AuthProvider>
-    </Router>
+              <Footer />
+            </>
+          )}
+        </AuthProvider>
+      </Router>
+    </PlayerProvider>
   );
 };
-
 
 export default App;
