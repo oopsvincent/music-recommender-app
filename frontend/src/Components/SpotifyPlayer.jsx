@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, SkipBack, SkipForward, VolumeX, Volume1, Volume2, MonitorSpeaker, ChevronUp, ChevronDown } from "lucide-react";
 import { usePlayer } from '../contexts/PlayerContext';
-import { useAuth } from '../hooks/AuthContext';
 
 export default function SpotifyPlayer() {
   const [player, setPlayer] = useState(null);
@@ -16,17 +15,32 @@ export default function SpotifyPlayer() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const { authTokens, isAuthenticated } = useAuth();
   const { visiblePlayer, trackUri, isPremium } = usePlayer();
-  const token = authTokens?.access_token;
+
+  // Check if user session is active by calling backend `/me`
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const res = await fetch('https://music-recommender-api.onrender.com/me', { credentials: 'include' });
+        if (res.ok) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (err) {
+        console.error('[ERROR] Failed to verify session:', err);
+        setIsAuthenticated(false);
+      }
+    };
+    checkSession();
+  }, []);
 
   if (!visiblePlayer || !isAuthenticated) return null; // Don't show player if not logged in
 
   const fetchDevices = async () => {
-    const res = await fetch('https://api.spotify.com/v1/me/player/devices', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await fetch('https://api.spotify.com/v1/me/player/devices', { credentials: 'include' });
     const data = await res.json();
     setDevices(data.devices);
     const active = data.devices.find(d => d.is_active);
@@ -36,7 +50,8 @@ export default function SpotifyPlayer() {
   const transferPlayback = async (targetDeviceId) => {
     await fetch('https://api.spotify.com/v1/me/player', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ device_ids: [targetDeviceId], play: false })
     });
     setActiveDevice(targetDeviceId);
@@ -55,7 +70,7 @@ export default function SpotifyPlayer() {
 
   // Initialize Spotify Web Playback SDK
   useEffect(() => {
-    if (!token || !isPremium) return;
+    if (!isPremium || !isAuthenticated) return;
 
     const script = document.createElement('script');
     script.src = 'https://sdk.scdn.co/spotify-player.js';
@@ -66,7 +81,12 @@ export default function SpotifyPlayer() {
     window.onSpotifyWebPlaybackSDKReady = () => {
       localPlayer = new window.Spotify.Player({
         name: 'Harmony Web Player',
-        getOAuthToken: cb => cb(token),
+        getOAuthToken: cb => {
+          // We can't manually provide token, so NOOP — Spotify SDK fetches via cookie/session
+          fetch('https://music-recommender-api.onrender.com/refresh_access_token', { credentials: 'include' })
+            .then(res => res.json())
+            .then(data => cb(data.access_token));
+        },
         volume: 0.5
       });
 
@@ -96,7 +116,7 @@ export default function SpotifyPlayer() {
     return () => {
       if (localPlayer) localPlayer.disconnect();
     };
-  }, [token, isPremium]);
+  }, [isPremium, isAuthenticated]);
 
   // Poll position
   useEffect(() => {
@@ -115,14 +135,12 @@ export default function SpotifyPlayer() {
   // Play trackUri when ready
   useEffect(() => {
     const playTrack = async (uri) => {
-      if (!token || !deviceId || !uri || !isPremium) return;
+      if (!deviceId || !uri || !isPremium) return;
       try {
         await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ uris: [uri] })
         });
         console.log('[DEBUG] Track URI sent to player:', uri);
@@ -134,7 +152,7 @@ export default function SpotifyPlayer() {
     if (deviceId && trackUri && isPremium) {
       playTrack(trackUri);
     }
-  }, [deviceId, trackUri, token, isPremium]);
+  }, [deviceId, trackUri, isPremium]);
 
   const formatTime = (ms) => {
     const mins = Math.floor(ms / 60000);
@@ -150,7 +168,7 @@ export default function SpotifyPlayer() {
     </div>
   );
 
-  // --- Your return component here (same UI as yours, no changes needed) ---
+  // --- Same UI as yours ---
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95, y: 30 }}
@@ -170,12 +188,11 @@ export default function SpotifyPlayer() {
             {currentTrack ? (
               <>
                 <div className="flex items-center justify-center mb-3 gap-5">
-                <img src={currentTrack.albumImage} alt="Album cover" className="rounded-xl w-lwh text-center h-40 object-cover mb-3" />
-                <div className="flex flex-col">
-                {/* <p className="text-white text-lg text-center">{currentTrack.album}</p> */}
-                <p className="text-white text-xl font-bold text-left">{currentTrack.title}</p>
-                <p className="text-gray-400 text-sm text-left mb-3">{currentTrack.artists}</p>
-                </div>
+                  <img src={currentTrack.albumImage} alt="Album cover" className="rounded-xl w-lwh text-center h-40 object-cover mb-3" />
+                  <div className="flex flex-col">
+                    <p className="text-white text-xl font-bold text-left">{currentTrack.title}</p>
+                    <p className="text-gray-400 text-sm text-left mb-3">{currentTrack.artists}</p>
+                  </div>
                 </div>
                 <Waveform />
                 <p className="text-center text-gray-300 text-xs mb-1">{formatTime(position)} / {formatTime(duration)}</p>
