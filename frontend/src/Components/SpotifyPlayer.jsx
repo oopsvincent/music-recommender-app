@@ -1,7 +1,9 @@
+// SpotifyPlayer.jsx
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, SkipBack, SkipForward, VolumeX, Volume1, Volume2, MonitorSpeaker, ChevronUp, ChevronDown } from "lucide-react";
 import { usePlayer } from '../contexts/PlayerContext';
+import { useAuth } from '../hooks/AuthContext';
 
 export default function SpotifyPlayer() {
   const [player, setPlayer] = useState(null);
@@ -15,16 +17,11 @@ export default function SpotifyPlayer() {
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  const token = localStorage.getItem('access_token');
+  const { authTokens, isAuthenticated } = useAuth();
   const { visiblePlayer, trackUri, isPremium } = usePlayer();
+  const token = authTokens?.access_token;
 
-//   if (!visiblePlayer) return null;  // Always show Player UI ONLY if player activated
-
-  const formatTime = ms => {
-    const mins = Math.floor(ms / 60000);
-    const secs = Math.floor((ms % 60000) / 1000);
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
+  if (!visiblePlayer || !isAuthenticated) return null; // Don't show player if not logged in
 
   const fetchDevices = async () => {
     const res = await fetch('https://api.spotify.com/v1/me/player/devices', {
@@ -58,7 +55,7 @@ export default function SpotifyPlayer() {
 
   // Initialize Spotify Web Playback SDK
   useEffect(() => {
-    if (!token || !isPremium) return;  // Init SDK ONLY if premium
+    if (!token || !isPremium) return;
 
     const script = document.createElement('script');
     script.src = 'https://sdk.scdn.co/spotify-player.js';
@@ -101,7 +98,7 @@ export default function SpotifyPlayer() {
     };
   }, [token, isPremium]);
 
-  // Track position polling
+  // Poll position
   useEffect(() => {
     if (!player || !isPremium) return;
     const poll = setInterval(() => {
@@ -115,51 +112,45 @@ export default function SpotifyPlayer() {
     return () => clearInterval(poll);
   }, [player, isPremium]);
 
+  // Play trackUri when ready
+  useEffect(() => {
+    const playTrack = async (uri) => {
+      if (!token || !deviceId || !uri || !isPremium) return;
+      try {
+        await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ uris: [uri] })
+        });
+        console.log('[DEBUG] Track URI sent to player:', uri);
+      } catch (err) {
+        console.error('[ERROR] Failed to play track:', err);
+      }
+    };
+
+    if (deviceId && trackUri && isPremium) {
+      playTrack(trackUri);
+    }
+  }, [deviceId, trackUri, token, isPremium]);
+
+  const formatTime = (ms) => {
+    const mins = Math.floor(ms / 60000);
+    const secs = Math.floor((ms % 60000) / 1000);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
   const Waveform = () => (
     <div className="flex items-end justify-center gap-1 h-8 my-2">
       {[...Array(5)].map((_, i) => (
-        <motion.div
-          key={i}
-          animate={{ height: isPaused ? 8 : [8, 32, 8] }}
-          transition={{ duration: 0.7 + i * 0.1, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-1 bg-white rounded"
-          style={{ width: 4 }}
-        />
+        <motion.div key={i} animate={{ height: isPaused ? 8 : [8, 32, 8] }} transition={{ duration: 0.7 + i * 0.1, repeat: Infinity, ease: 'easeInOut' }} className="w-1 bg-white rounded" style={{ width: 4 }} />
       ))}
     </div>
   );
 
-
-  // This goes inside your component (SpotifyPlayer)
-
-const playTrack = async (uri) => {
-  if (!token || !deviceId || !uri || !isPremium) return;
-  try {
-    await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        uris: [uri]
-      })
-    });
-    console.log('[DEBUG] Track URI sent to player:', uri);
-  } catch (err) {
-    console.error('[ERROR] Failed to play track:', err);
-  }
-};
-
-// 👇 Call this when both deviceId & trackUri are ready
-useEffect(() => {
-  if (deviceId && trackUri && isPremium) {
-    playTrack(trackUri);
-  }
-}, [deviceId, trackUri, isPremium]);
-
-
-
+  // --- Your return component here (same UI as yours, no changes needed) ---
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95, y: 30 }}

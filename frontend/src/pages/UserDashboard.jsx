@@ -1,77 +1,61 @@
+// UserDashboard.jsx
 import React, { useEffect, useState } from 'react';
-import Account from '../Components/Account'; // FIXED IMPORT
+import { useAuth } from '../hooks/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
 
-import { useAuth } from '../hooks/AuthContext';
-
 const UserDashboard = () => {
-    const { authTokens } = useAuth();
-    const accessToken = localStorage.getItem('access_token');
+  const { authTokens, isAuthenticated, logout } = useAuth();
+  const token = authTokens?.access_token;
 
-    const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = useState(null);
 
-    useEffect(() => {
-        const fetchUserProfile = async () => {
-            if (!accessToken) {
-                console.warn('No access token provided');
-                return;
-            }
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!token) return;
 
-            try {
-                const response = await fetch('https://api.spotify.com/v1/me', {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                });
+      try {
+        const response = await fetch('https://api.spotify.com/v1/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) throw new Error('Failed to fetch user profile');
 
-                console.log('Response status:', response.status);
+        const data = await response.json();
+        setUserData(data);
+        console.log('Spotify user profile:', data);
+      } catch (error) {
+        console.error('Error fetching Spotify user data:', error);
+      }
+    };
 
-                if (response.status === 401) {
-                    console.warn('Access token expired or invalid');
-                    return;
-                }
+    fetchUserProfile();
+  }, [token]);
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch user profile');
-                }
+  const loginWithSpotify = () => {
+    window.open('https://music-recommender-api.onrender.com/login', '_self');
+  };
 
-                const data = await response.json();
-                setUserData(data);
-                console.log('Spotify user profile:', data);
-            } catch (error) {
-                console.error('Error fetching Spotify user data:', error);
-            }
-        };
+  return (
+    <div className='w-full min-h-[90vh] flex flex-col justify-center items-center text-center text-white p-6'>
+      {userData ? (
+        <div className="bg-white/5 border border-white/20 rounded-3xl p-6 max-w-md w-full shadow-lg">
+          <img src={userData?.images?.[0]?.url || `https://placehold.co/200/orange/white?text=${encodeURIComponent(userData.display_name)}`} alt="Profile" className="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg" />
+          <h2 className="text-3xl font-bold mb-1">{userData.display_name}</h2>
+          <p className="text-gray-400 mb-2">{userData.email}</p>
+          <p className="text-sm text-green-400 mb-4"><FontAwesomeIcon icon={faSpotify} className="mr-1" /> Spotify User</p>
 
-        fetchUserProfile();
-    }, [accessToken]);
-
-    const username = userData?.display_name || 'Guest';
-    const imageName = username;
-    const imageUrl = userData?.images?.[0]?.url || `https://placehold.co/200/orange/white?text=${encodeURIComponent(username)}`;
-
-    return (
-        <div className='w-full h-lvh flex flex-col justify-center items-center'>
-            {userData ? (
-                <Account
-                    src={imageUrl}
-                    username={username}
-                    email={userData.email}
-                    followers={userData.followers?.total}
-                />
-            ) : (
-                <p className="text-white text-xl">Fetching user data...</p>
-            )}
-
-            <button
-                onClick={() => window.open('https://music-recommender-api.onrender.com/login')}
-                className='inline-flex justify-center items-center px-5 py-2 m-5 bg-green-500 text-white text-xl gap-5 hover:text-black hover:scale-110 active:text-black active:scale-90 transition-all duration-200 rounded-2xl'
-            >
-                Login with Spotify
-            </button>
+          <button onClick={logout} className="bg-red-500 hover:bg-red-600 text-white py-2 px-5 rounded-xl w-full transition-all duration-200 mt-2">Logout</button>
         </div>
-    );
+      ) : (
+        <button
+          onClick={loginWithSpotify}
+          className='inline-flex justify-center items-center px-6 py-3 bg-green-500 text-white text-xl gap-3 hover:text-black hover:scale-105 active:scale-90 transition-all duration-200 rounded-2xl'
+        >
+          <FontAwesomeIcon icon={faSpotify} size="lg" /> Login with Spotify
+        </button>
+      )}
+    </div>
+  );
 };
 
 export default UserDashboard;
