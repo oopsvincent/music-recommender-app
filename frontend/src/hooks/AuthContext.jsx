@@ -1,58 +1,69 @@
 // src/hooks/AuthContext.jsx
-
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [accessToken, setAccessToken] = useState(localStorage.getItem('access_token') || null);
-  const [userProfile, setUserProfile] = useState(null);
+  const [authTokens, setAuthTokens] = useState(null);  // { access_token, refresh_token }
+  const [expiresAt, setExpiresAt] = useState(null);    // expiry timestamp (in seconds)
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Save token to both memory + localStorage
-  const saveAccessToken = (token) => {
-    setAccessToken(token);
-    localStorage.setItem('access_token', token);
-  };
-
-  // Clear token (logout)
-  const clearAccessToken = () => {
-    setAccessToken(null);
-    localStorage.removeItem('access_token');
-  };
-
-  // === Token auto-refresh ===
-  const refreshAccessToken = async () => {
+  // Helper to fetch /refresh_access_token
+  const refreshAccessToken = useCallback(async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/spotify/token`, {
-        credentials: 'include',  // include cookies for session
-      });
-      const data = await res.json();
+      const res = await axios.get('/refresh_access_token');  // Your backend route
+      const { access_token } = res.data;
 
-      if (data.access_token) {
-        console.log('[DEBUG] Token refreshed:', data.access_token);
-        saveAccessToken(data.access_token);
-      } else {
-        console.warn('[WARN] Token refresh failed. Clearing token.');
-        clearAccessToken();
-      }
-    } catch (err) {
-      console.error('[ERROR] Failed to refresh token:', err);
-      clearAccessToken();
+      // Update state with new token (only access_token refreshed)
+      setAuthTokens(prev => ({
+        ...prev,
+        access_token,
+      }));
+
+      console.log('[AuthContext] Refreshed access token');
+    } catch (error) {
+      console.error('[AuthContext] Failed to refresh token:', error);
+      logout();  // Kill session if refresh fails
     }
+  }, []);
+
+  // Function to initialize tokens (called after /callback success)
+  const login = (access_token, refresh_token, expires_in) => {
+    setAuthTokens({ access_token, refresh_token });
+    setExpiresAt(Date.now() + (expires_in * 1000) - (60 * 1000)); // expire 60 sec earlier (buffer)
+    setIsAuthenticated(true);
+    console.log('[AuthContext] User logged in');
   };
 
-  // Setup auto-refresh interval (every 55 min)
+  const logout = () => {
+    setAuthTokens(null);
+    setExpiresAt(null);
+    setIsAuthenticated(false);
+    console.log('[AuthContext] User logged out');
+  };
+
+  // Auto-refresh token when expiry nears
   useEffect(() => {
-    if (!accessToken) return;
+    if (!authTokens || !expiresAt) return;
 
-    console.log('[DEBUG] Setting auto-refresh for token (55 min)');
-    const intervalId = setInterval(refreshAccessToken, 55 * 60 * 1000);  // 55 min
+    const timeLeft = expiresAt - Date.now();
+    console.log(`[AuthContext] Token expires in ${(timeLeft / 1000).toFixed(0)}s`);
 
-    return () => clearInterval(intervalId);
-  }, [accessToken]);
+    if (timeLeft <= 0) {
+      refreshAccessToken();
+      return;
+    }
+
+    const refreshTimer = setTimeout(() => {
+      refreshAccessToken();
+    }, timeLeft);
+
+    return () => clearTimeout(refreshTimer);
+  }, [authTokens, expiresAt, refreshAccessToken]);
 
   return (
-    <AuthContext.Provider value={{ accessToken, saveAccessToken, clearAccessToken, userProfile, setUserProfile }}>
+    <AuthContext.Provider value={{ authTokens, isAuthenticated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
