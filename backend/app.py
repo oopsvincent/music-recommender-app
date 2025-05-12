@@ -35,6 +35,12 @@ CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
 #API KEY
 app.secret_key = os.getenv("FLASK_SECRET_KEY") 
+# Add just below app.secret_key
+app.config.update(
+    SESSION_COOKIE_SAMESITE='None',
+    SESSION_COOKIE_SECURE=True
+)
+
 
 # Initialize Database
 db = SQLAlchemy(app)
