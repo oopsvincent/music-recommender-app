@@ -59,7 +59,7 @@ export default function UserDashboard() {
   return (
     <div className='min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-black via-zinc-900 to-gray-900 text-white px-4'>
       {loading ? (
-        <p className='text-xl'>Loading your Parisian account…</p>
+        <p className='text-xl'>Loading your account…</p>
       ) : userData ? (
         <div className='bg-white/10 border border-white/20 backdrop-blur-md p-6 rounded-3xl shadow-2xl max-w-md w-full text-center space-y-5'>
           <img src={userData.image} alt='User avatar' className='w-32 h-32 rounded-full mx-auto border-4 border-green-500 shadow-lg' />

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import '../index.css'
-import { Search, CircleUserRound, ListMusic, Music, Cog } from "lucide-react";
+import { Search, CircleUserRound, ListMusic, Music, Cog, UserRoundIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { MessageSquareCode } from "lucide-react";
+import { UserCircleIcon } from "lucide-react";
 
 const AppBar = ({ selectedSection, setSection }) => {
     const navigate = useNavigate();
@@ -58,21 +58,21 @@ const AppBar = ({ selectedSection, setSection }) => {
                 <motion.div
                     onClick={() => {
                         setSection("Account");
-                        navigate('/feedback');
+                        navigate('/Account');
                         window.scrollTo(0, 0);
                     }}
                     initial={{ scale: 0.8 }}
                     animate={{ scale: 1 }}
                     exit={{ scale: 0.8 }}
-                    whileTap={{ scale: 0.85}}
+                    whileTap={{ scale: 0.85 }}
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.2 }}
-                    className={`w-14 inline-flex flex-col justify-between items-center p-2 rounded-3xl transition-all duration-400 ${
+                    className={`w-12 inline-flex flex-col justify-between items-center p-2 rounded-3xl transition-all duration-400 ${
                         selectedSection == "Account" ? "bg-white text-black rounded-lg" : ""
                     }`}
                 >
-                    <MessageSquareCode />
-                    <p className="text-xs">Feedback</p>
+                    <UserCircleIcon />
+                    <p className="text-xs">Account</p>
                 </motion.div>
 
                 <motion.div
