@@ -58,6 +58,7 @@ const SearchPage = () => {
                     popularity={track.popularity}
                     type={track.type}
                     explicit={track.explicit}
+                    trackURI={track.trackURI}
                 />
             ))
         )}
