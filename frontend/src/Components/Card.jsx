@@ -26,10 +26,6 @@ const Card = ({
     const { showPlayer } = usePlayer();
     const [isHolding, setIsHolding] = useState(false);
 
-
-    const holdTimeout = useRef(null);
-
-
     const holdTimeoutRef = useRef(null);
 
     const handleHoldStart = () => {

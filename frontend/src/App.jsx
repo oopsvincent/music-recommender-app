@@ -21,7 +21,7 @@ import Footer from './Components/Footer';
 import CreditsPage from './pages/CreditsPages';
 
 const App = () => {
-  const [selectedSection, setSection] = useState('');
+  const [selectedSection, setSection] = useState('Music');
   const [userName, setUserName] = useState(localStorage.getItem("userName"));
   const [showLogin, setShowLogin] = useState(!localStorage.getItem("userName"));
 

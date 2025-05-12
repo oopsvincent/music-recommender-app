@@ -58,7 +58,7 @@ export default function SpotifyPlayer() {
 
   // Initialize Spotify Web Playback SDK
   useEffect(() => {
-    // if (!token || !isPremium) return;  // Init SDK ONLY if premium
+    if (!token || !isPremium) return;  // Init SDK ONLY if premium
 
     const script = document.createElement('script');
     script.src = 'https://sdk.scdn.co/spotify-player.js';
@@ -129,27 +129,63 @@ export default function SpotifyPlayer() {
     </div>
   );
 
+
+  // This goes inside your component (SpotifyPlayer)
+
+const playTrack = async (uri) => {
+  if (!token || !deviceId || !uri || !isPremium) return;
+  try {
+    await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        uris: [uri]
+      })
+    });
+    console.log('[DEBUG] Track URI sent to player:', uri);
+  } catch (err) {
+    console.error('[ERROR] Failed to play track:', err);
+  }
+};
+
+// 👇 Call this when both deviceId & trackUri are ready
+useEffect(() => {
+  if (deviceId && trackUri && isPremium) {
+    playTrack(trackUri);
+  }
+}, [deviceId, trackUri, isPremium]);
+
+
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95, y: 30 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="fixed bottom-20 left-1/2 -translate-x-1/2 backdrop-blur-md bg-white/10 border border-white/20 rounded-3xl shadow-xl max-w-md w-[95%] z-50"
+      className="fixed bottom-20 left-1/2 -translate-x-1/2 backdrop-blur-md bg-black/10 border border-white/40 rounded-3xl shadow-xl max-w-md w-[95%] z-50"
     >
       <AnimatePresence initial={false}>
         {isExpanded ? (
-          <motion.div key="expanded" initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} transition={{ duration: 0.3 }} className="p-4">
+          <motion.div key="expanded" initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} transition={{ duration: 0.3 }} className="p-4 flex justify-center items-center flex-col">
 
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between items-center mb-2 w-full">
               <h2 className="text-white text-lg font-semibold">Now Playing</h2>
               <button onClick={() => setIsExpanded(false)}><ChevronDown className="text-white" /></button>
             </div>
 
             {currentTrack ? (
               <>
-                <img src={currentTrack.albumImage} alt="Album cover" className="rounded-xl w-full h-60 object-cover mb-3" />
-                <p className="text-white text-lg text-center">{currentTrack.title}</p>
-                <p className="text-gray-400 text-sm text-center mb-3">{currentTrack.artists}</p>
+                <div className="flex items-center justify-center mb-3 gap-5">
+                <img src={currentTrack.albumImage} alt="Album cover" className="rounded-xl w-lwh text-center h-40 object-cover mb-3" />
+                <div className="flex flex-col">
+                {/* <p className="text-white text-lg text-center">{currentTrack.album}</p> */}
+                <p className="text-white text-xl font-bold text-left">{currentTrack.title}</p>
+                <p className="text-gray-400 text-sm text-left mb-3">{currentTrack.artists}</p>
+                </div>
+                </div>
                 <Waveform />
                 <p className="text-center text-gray-300 text-xs mb-1">{formatTime(position)} / {formatTime(duration)}</p>
               </>
