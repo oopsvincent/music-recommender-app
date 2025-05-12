@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { SpotifyButton, YouTubeButton, SmallSpotifyButton, SmallYouTubeButton } from "./MusicButtons";
 import { Bookmark, BookmarkPlus, Check, CirclePlay, Award, Handshake } from "lucide-react"; // Adjust imports if needed
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { motion, AnimatePresence, scale } from "framer-motion";
- 
+import { usePlayer } from "../contexts/PlayerContext";
+
 const Card = ({
     url,
     title,
@@ -16,21 +17,48 @@ const Card = ({
     followers,
     description,
     explicit,
+    trackURI,
     handleSave, // Function passed from parent to handle saving
 }) => {
 
     // Inside your component:
     const [saved, setSaved] = useState(false);
-    
+    const { showPlayer } = usePlayer();
+    const [isHolding, setIsHolding] = useState(false);
+
+
+    const holdTimeout = useRef(null);
+
+
+    const holdTimeoutRef = useRef(null);
+
+    const handleHoldStart = () => {
+        clearTimeout(holdTimeoutRef.current); // clear previous (safety)
+        holdTimeoutRef.current = setTimeout(() => {
+            const spotifyURI = trackURI;
+            console.log('[DEBUG] Long hold detected, triggering player:', spotifyURI);
+            if (spotifyURI && spotifyURI.startsWith('spotify:')) {
+                showPlayer(spotifyURI);
+            } else {
+                console.warn('[WARN] Invalid Spotify URI:', spotifyURI);
+            }
+        }, 1000); // 1 second hold
+    };
+
+    const handleHoldEnd = () => {
+        clearTimeout(holdTimeoutRef.current);
+    };
+
+
     useEffect(() => {
         const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
         const isAlreadySaved = savedSongs.some(song => song.title === title && song.artist === artist);
         setSaved(isAlreadySaved);
     }, [title, artist]);
-    
+
     function toggleSave() {
         const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
-    
+
         if (saved) {
             // REMOVE the song
             const updated = savedSongs.filter(song => !(song.title === title && song.artist === artist));
@@ -49,14 +77,15 @@ const Card = ({
                 popularity,
                 explicit,
                 type,
+                trackURI,
             };
             savedSongs.push(newSong);
             localStorage.setItem("savedSongs", JSON.stringify(savedSongs));
             setSaved(true);
         }
     }
-    
-function handleClick(url) {
+
+    function handleClick(url) {
         console.log(url);
 
         setTimeout(() => {
@@ -131,7 +160,7 @@ function handleClick(url) {
                         <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
                         <path d="m9 12 2 2 4-4" />
                     </svg>
-        
+
                     {/* Unsaved Icon */}
                     <svg
                         className={`absolute inset-0 transition-all duration-500 ease-in-out ${saved ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}`}
@@ -149,7 +178,7 @@ function handleClick(url) {
                         <line x1="12" x2="12" y1="8" y2="16" />
                         <line x1="8" x2="16" y1="12" y2="12" />
                     </svg>
-        
+
                     <span className="absolute bottom-full mt-1 left-1/2 w-20 -translate-x-1/2 opacity-0 scale-95 group-hover:opacity-100 group-active:scale-100 group-active:opacity-100 group-hover:scale-100 transition-all duration-300 bg-black text-white px-2 py-1 rounded text-sm">
                         {saved ? "Saved!" : "Save it bro"}
                     </span>
@@ -163,12 +192,20 @@ function handleClick(url) {
 
 
     return type === "artist" ? sections["Artist"] :
-        <motion.div                 
-        initial={{ opacity: 0, scale: 0.8, translateY: 100, translateX: 0 }}
-        whileInView={{ opacity: 1, scale: 1, translateY: 0, translateX: 0 }}
-        whileTap={{ scale: 0.95,}}
-        exit={{ opacity: 0, scale: 1, translateY: 300 }}
-        transition={{ duration: 0.2 }} title={artist + " - " + title} className="h-auto m-2 rounded-xl flex flex-col transition-all duration-300 w-42 border border-white/30 glassmorpho md:w-64 md:m-4 hover:bg-black/100 active:bg-black/100">
+        <motion.div
+            onMouseDown={handleHoldStart}
+            onMouseUp={handleHoldEnd}
+            onMouseLeave={handleHoldEnd}
+            onTouchStart={handleHoldStart}
+            onTouchEnd={handleHoldEnd}
+            animate={{ scale: isHolding ? 1.05 : 1 }}
+            transition={{ duration: 0.2 }}
+
+            initial={{ opacity: 0, scale: 0.8, translateY: 100, translateX: 0 }}
+            whileInView={{ opacity: 1, scale: 1, translateY: 0, translateX: 0 }}
+            whileTap={{ scale: 0.95, }}
+            exit={{ opacity: 0, scale: 1, translateY: 300 }}
+            title={artist + " - " + title} className="h-auto m-1 rounded-xl flex flex-col transition-all duration-300 w-42 border border-white/30 glassmorpho md:w-64 md:m-4 hover:bg-black/100 active:bg-black/100">
             {explicit && sections["ExplicitTag"]}
             {/* Image */}
             { }
@@ -179,27 +216,27 @@ function handleClick(url) {
             )}
 
             {/* Content */}
-<div className="flex flex-col flex-grow p-3 relative">
-  <motion.div
-    whileTap={{ scale: 0.95 }}
-    whileHover={{ scale: 1.05, rotate: 2 }}
-    whileDrag={{ scale: 1.2 }}
-    className="text-2xl font-sbold text-white whitespace-nowrap overflow-scroll scrollb-none max-w-full font-semibold font-stretch-120%"
-    title={title}
-  >
-    {title}
-  </motion.div>
+            <div className="flex flex-col flex-grow p-3 relative">
+                <motion.div
+                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.05, rotate: 2 }}
+                    whileDrag={{ scale: 1.2 }}
+                    className="text-2xl font-sbold text-white whitespace-nowrap overflow-scroll scrollb-none max-w-full font-semibold font-stretch-120%"
+                    title={title}
+                >
+                    {title}
+                </motion.div>
 
-  <p className="text-md font-ultralight text-gray-300">
-    {type === "artist"
-      ? `${followers?.toLocaleString() ?? "?"} Followers`
-      : artist || "Unknown Artist"}
-  </p>
+                <p title={artist} className="text-md font-ultralight text-gray-300">
+                    {type === "artist"
+                        ? `${followers?.toLocaleString() ?? "?"} Followers`
+                        : artist || "Unknown Artist"}
+                </p>
 
-  {type === "show" && <div className="text-white">{displayedDesc}</div>}
-  {type === "album" && <div className="text-white">{description}</div>}
-  {type === "episode" && <div className="text-white">{displayedDesc}</div>}
-</div>
+                {type === "show" && <div className="text-white">{displayedDesc}</div>}
+                {type === "album" && <div className="text-white">{description}</div>}
+                {type === "episode" && <div className="text-white">{displayedDesc}</div>}
+            </div>
 
 
             {/* Buttons at the bottom */}
@@ -214,6 +251,8 @@ function handleClick(url) {
                 {type === "playlist" && <p className="text-white pl-3 pr-3">Owner: {popularity}</p>}
 
                 {type === "track" && sections["save"]}
+                {type === "playlist" && sections["save"]}
+                {type === "album" && sections["save"]}
 
             </div>
         </motion.div>

@@ -15,6 +15,7 @@ import chipMap from "../modules/chipText";
 import { handleChipSelect } from "../modules/chipSelector";
 import { fetchTracksFromDB } from "../modules/trackFetcher";
 import dailyTracks from "../modules/dailyTracks";
+// import SpotifyPlayer from "../Components/SpotifyPlayer";
 
 function HomePage({ userName }) {
   const [spotifyToken, setSpotifyToken] = useState(null);
@@ -44,7 +45,7 @@ function HomePage({ userName }) {
       setPaginationStates: setPagination,
       setLoading,
     });
-
+    
   return (
     <div className="md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex flex-col justify-between">
       <DataNoticeModal />
@@ -77,6 +78,7 @@ function HomePage({ userName }) {
       popularity={track.popularity}
       type={track.type}
       explicit={track.explicit}
+      trackURI={track.trackURI}
       // Only pass followers for artists
       {...(isArtist && { followers: track.followers })}
       handleSave={() => {}}

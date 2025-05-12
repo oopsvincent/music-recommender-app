@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Card from '../Components/Card'; // Assuming your Card component takes a track prop
 import Greet from '../Components/Greet';
+import PlaylistCard from '../Components/PlaylistCard';
 
 const PlaylistSection = () => {
             const [userPlaylists, setPlaylists] = useState([]);
@@ -54,6 +55,7 @@ const PlaylistSection = () => {
                             type={track?.type || "music"}
                         />
       ))}
+      <PlaylistCard></PlaylistCard>
     </div>
     </>
   );

@@ -9,7 +9,7 @@ const AppBar = ({ selectedSection, setSection }) => {
     const navigate = useNavigate();
 
     return (
-        <nav className="select-none bg-black text-white px-2 py-2.5 flex justify-center items-center shadow-lg fixed bottom-0 left-0 w-dvw lg:pl-70 lg:pr-70 z-50">
+        <nav className="z-100 select-none bg-black text-white px-2 py-2.5 flex justify-center items-center shadow-lg fixed bottom-0 left-0 w-dvw lg:pl-70 lg:pr-70">
 
 
             {/* Navigation */}
