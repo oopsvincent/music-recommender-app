@@ -89,6 +89,40 @@ def callback():
         return jsonify({"error": "Token exchange failed", "details": res.text}), 500
 
 
+@spotify.route("/refresh_access_token")
+def refresh_access_token():
+    refresh_token = session.get('refresh_token')
+    if not refresh_token:
+        return jsonify({"error": "No refresh token found"}), 400
+
+    token_url = "https://accounts.spotify.com/api/token"
+    payload = {
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token,
+    }
+
+    auth_header = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
+    headers = {
+        "Authorization": f"Basic {auth_header}",
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+
+    try:
+        res = requests.post(token_url, data=payload, headers=headers)
+        res.raise_for_status()
+        tokens = res.json()
+
+        # Update only the access_token (refresh_token usually does not change)
+        session["access_token"] = tokens["access_token"]
+
+        return jsonify({"access_token": tokens["access_token"]})
+
+    except requests.exceptions.RequestException as e:
+        print(f"[ERROR] Failed to refresh token: {e}")
+        print(f"[RESPONSE] {res.text}")
+        return jsonify({"error": "Failed to refresh token", "details": res.text}), 500
+
+
 
 @spotify.route("/me")
 def get_profile():
