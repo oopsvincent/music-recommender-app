@@ -37,7 +37,7 @@ export default function SpotifyPlayer() {
     checkSession();
   }, []);
 
-  if (!visiblePlayer || !isAuthenticated) return null; // Don't show player if not logged in
+//   if (!visiblePlayer || !isAuthenticated) return null; // Don't show player if not logged in
 
   const fetchDevices = async () => {
     const res = await fetch('https://api.spotify.com/v1/me/player/devices', { credentials: 'include' });
