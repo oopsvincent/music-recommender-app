@@ -207,3 +207,43 @@ def logout():
     session.clear()
     return jsonify({"message": "Logged out successfully"}), 200
 
+@spotify.route("/player/devices")
+def get_player_devices():
+    token = session.get("access_token")
+    if not token:
+        return jsonify({"error": "No access token in session"}), 401
+
+    headers = {"Authorization": f"Bearer {token}"}
+    res = requests.get("https://api.spotify.com/v1/me/player/devices", headers=headers)
+
+    if res.status_code != 200:
+        return jsonify({"error": "Failed to fetch devices", "details": res.text}), 400
+
+    return jsonify(res.json())
+
+
+from flask import request
+
+@spotify.route("/player/play", methods=["PUT"])
+def play_track():
+    token = session.get("access_token")
+    if not token:
+        return jsonify({"error": "No access token in session"}), 401
+
+    data = request.json
+    device_id = data.get("device_id")
+    uris = data.get("uris")
+
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    payload = {"uris": uris} if uris else {}
+
+    res = requests.put(
+        f"https://api.spotify.com/v1/me/player/play?device_id={device_id}",
+        headers=headers,
+        json=payload
+    )
+
+    if res.status_code != 204:
+        return jsonify({"error": "Failed to play track", "details": res.text}), 400
+
+    return jsonify({"status": "playing"})
