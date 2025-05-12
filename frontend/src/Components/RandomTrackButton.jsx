@@ -83,6 +83,7 @@ export default function RandomTrackButton({ categoryBaseUrl }) {
                         spoURL={selectedTrack.spoURL}
                         YTURL={fetchYouTubeData(selectedTrack.title + " " + selectedTrack.artists)}
                         type={selectedTrack.type}
+                        trackURI={selectedTrack.trackURI}
                         handleSave={() => { }}
                     />
                 )}
