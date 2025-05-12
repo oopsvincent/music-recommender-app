@@ -7,26 +7,28 @@ export const PlayerProvider = ({ children }) => {
   const [visiblePlayer, setVisiblePlayer] = useState(false);
   const [trackUri, setTrackUri] = useState(null);
   const [isPremium, setIsPremium] = useState(false);
-  const token = localStorage.getItem('access_token');
 
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (!token) return;
       try {
-        const res = await fetch('https://api.spotify.com/v1/me', {
-          headers: { Authorization: `Bearer ${token}` },
+        const res = await fetch('https://music-recommender-api.onrender.com/me', {
+          credentials: 'include'
         });
         if (!res.ok) throw new Error('Failed to fetch user profile');
         const data = await res.json();
-        setIsPremium(data.product === "premium");
-        console.log(`[DEBUG] Spotify account type: ${data.product}`);
+
+        // Backend already returns profile object
+        const productType = data.profile?.product || 'unknown';
+        setIsPremium(productType === "premium");
+        console.log(`[DEBUG] Spotify account type: ${productType}`);
       } catch (error) {
         console.error("[DEBUG] Error fetching user profile:", error);
         setIsPremium(false);
       }
     };
+
     fetchUserProfile();
-  }, [token]);
+  }, []);
 
   const showPlayer = (uri) => {
     if (!uri || !uri.startsWith('spotify:')) {
