@@ -124,24 +124,56 @@ def refresh_access_token():
 
 
 
+def refresh_access_token_if_expired():
+    refresh_token = session.get("refresh_token")
+    if not refresh_token:
+        return False
+
+    token_url = "https://accounts.spotify.com/api/token"
+    payload = {
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token,
+    }
+
+    auth_header = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
+    headers = {
+        "Authorization": f"Basic {auth_header}",
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+
+    res = requests.post(token_url, data=payload, headers=headers)
+    if res.status_code != 200:
+        print("[ERROR] Failed token refresh:", res.text)
+        return False
+
+    tokens = res.json()
+    session["access_token"] = tokens["access_token"]  # update
+
+    return True
+
+
 @spotify.route("/me")
 def get_profile():
     token = session.get("access_token")
     if not token:
         return jsonify({"error": "No access token in session"}), 401
 
+    # Refresh token silently before call
+    refresh_access_token_if_expired()
+
+    token = session.get("access_token")
     headers = {"Authorization": f"Bearer {token}"}
 
-    try:
-        # Fetch user profile
-        profile_response = requests.get("https://api.spotify.com/v1/me", headers=headers)
-        profile_response.raise_for_status()
-        profile = profile_response.json()
+    profile_response = requests.get("https://api.spotify.com/v1/me", headers=headers)
+    if profile_response.status_code != 200:
+        return jsonify({"error": "Failed to fetch profile", "details": profile_response.text}), 400
 
-        # Fetch playlists
-        playlists_response = requests.get("https://api.spotify.com/v1/me/playlists", headers=headers)
-        playlists_response.raise_for_status()
-        playlists = playlists_response.json()
+    playlists_response = requests.get("https://api.spotify.com/v1/me/playlists", headers=headers)
+    if playlists_response.status_code != 200:
+        return jsonify({"error": "Failed to fetch playlists", "details": playlists_response.text}), 400
+
+    profile = profile_response.json()
+    playlists = playlists_response.json()
 
         # Build clean JSON response
         return jsonify({
