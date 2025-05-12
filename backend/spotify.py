@@ -132,42 +132,33 @@ def get_profile():
 
     headers = {"Authorization": f"Bearer {token}"}
 
-    profile_response = requests.get("https://api.spotify.com/v1/me", headers=headers)
-    if profile_response.status_code != 200:
-        return (
-            jsonify(
-                {"error": "Failed to fetch profile", "details": profile_response.text}
-            ),
-            400,
-        )
+    try:
+        # Fetch user profile
+        profile_response = requests.get("https://api.spotify.com/v1/me", headers=headers)
+        profile_response.raise_for_status()
+        profile = profile_response.json()
 
-    playlists_response = requests.get(
-        "https://api.spotify.com/v1/me/playlists", headers=headers
-    )
-    if playlists_response.status_code != 200:
-        return (
-            jsonify(
-                {
-                    "error": "Failed to fetch playlists",
-                    "details": playlists_response.text,
-                }
-            ),
-            400,
-        )
+        # Fetch playlists
+        playlists_response = requests.get("https://api.spotify.com/v1/me/playlists", headers=headers)
+        playlists_response.raise_for_status()
+        playlists = playlists_response.json()
 
-    profile = profile_response.json()
-    playlists = playlists_response.json()
-
-    return jsonify(
-        {
+        # Build clean JSON response
+        return jsonify({
             "profile": {
                 "display_name": profile.get("display_name"),
                 "email": profile.get("email"),
                 "image": profile["images"][0]["url"] if profile.get("images") else None,
+                "country": profile.get("country"),
+                "product": profile.get("product"),  # "premium", "free", etc.
+                "id": profile.get("id")
             },
-            "playlists": playlists,
-        }
-    )
+            "playlists": playlists
+        })
+
+    except requests.exceptions.RequestException as e:
+        print(f"[ERROR] Failed to fetch Spotify profile/playlists: {e}")
+        return jsonify({"error": "Failed to fetch user data", "details": str(e)}), 400
 
 
 @spotify.route("/create_playlist", methods=["POST"])
