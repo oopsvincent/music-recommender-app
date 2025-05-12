@@ -199,3 +199,11 @@ def login():
         f"{k}={requests.utils.quote(v)}" for k, v in query_params.items()
     )
     return redirect(f"{auth_url}?{query_string}")
+
+
+@spotify.route("/logout")
+def logout():
+    """Clear the Spotify session cookies and logout user."""
+    session.clear()
+    return jsonify({"message": "Logged out successfully"}), 200
+
