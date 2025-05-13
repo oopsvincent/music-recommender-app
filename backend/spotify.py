@@ -218,8 +218,12 @@ def create_playlist():
 
 @spotify.route("/login")
 def login():
-    scopes = "user-read-private user-read-email playlist-read-private playlist-modify-private streaming user-read-playback-state user-modify-playback-state"
-    auth_url = "https://accounts.spotify.com/authorize"
+    scopes = (
+    "user-read-private user-read-email "
+    "playlist-read-private playlist-modify-private playlist-modify-public playlist-read-collaborative "
+    "streaming user-read-playback-state user-modify-playback-state user-read-currently-playing "
+    "user-library-read user-library-modify user-read-recently-played"
+)
     query_params = {
         "response_type": "code",
         "client_id": CLIENT_ID,
@@ -241,6 +245,11 @@ def logout():
 
 @spotify.route("/player/devices")
 def get_player_devices():
+
+    if not refresh_access_token_if_expired():
+        return jsonify({"error": "Failed to refresh token"}), 401
+
+    token = session.get("access_token")
     token = session.get("access_token")
     if not token:
         return jsonify({"error": "No access token in session"}), 401
@@ -279,3 +288,19 @@ def play_track():
         return jsonify({"error": "Failed to play track", "details": res.text}), 400
 
     return jsonify({"status": "playing"})
+
+
+@spotify.route("/player/state")
+def get_current_playback():
+    if not refresh_access_token_if_expired():
+        return jsonify({"error": "Unauthorized"}), 401
+
+    token = session.get("access_token")
+    headers = {"Authorization": f"Bearer {token}"}
+    res = requests.get("https://api.spotify.com/v1/me/player", headers=headers)
+
+    if res.status_code != 200:
+        return jsonify({"error": "Failed to fetch playback state", "details": res.text}), 400
+
+    return jsonify(res.json())
+
