@@ -47,7 +47,7 @@ function HomePage({ userName }) {
     });
     
   return (
-    <div className="md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex flex-col justify-between">
+    <div className="md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex flex-col justify-between select-none">
       <DataNoticeModal />
       <Greet />
       <ChipSection onChipSelect={(chipText) => handleChipSelect({

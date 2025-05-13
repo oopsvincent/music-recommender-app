@@ -12,6 +12,11 @@ export default function UserDashboard() {
 
   const fetchUserProfile = async () => {
     try {
+      // Try refreshing access token before making call
+      await fetch('https://music-recommender-api.onrender.com/refresh_access_token', {
+        credentials: 'include',
+      });
+
       const response = await fetch('https://music-recommender-api.onrender.com/me', {
         credentials: 'include',
       });
@@ -37,11 +42,14 @@ export default function UserDashboard() {
 
   useEffect(() => {
     fetchUserProfile();
+    const interval = setInterval(fetchUserProfile, 1000 * 60 * 10); // refresh every 10 minutes
+    return () => clearInterval(interval);
   }, []);
 
   const handleLogout = async () => {
     try {
       await fetch('https://music-recommender-api.onrender.com/logout', { credentials: 'include' });
+      localStorage.clear();
       navigate('/');
       window.location.reload();
     } catch (err) {
@@ -56,6 +64,10 @@ export default function UserDashboard() {
     </div>
   );
 
+  if (userData) {
+    localStorage.setItem('userName', userData.display_name);
+  }
+
   return (
     <div className='min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-black via-zinc-900 to-gray-900 text-white px-4'>
       {loading ? (
@@ -63,13 +75,13 @@ export default function UserDashboard() {
       ) : userData ? (
         <div className='bg-white/10 border border-white/20 backdrop-blur-md p-6 rounded-3xl shadow-2xl max-w-md w-full text-center space-y-5'>
           <img src={userData.image} alt='User avatar' className='w-32 h-32 rounded-full mx-auto border-4 border-green-500 shadow-lg' />
-          <h2 className='text-2xl font-bold text-white'>{userData.display_name}</h2>
+          <h2 className='text-3xl font-black text-white tracking-wide'>{userData.display_name}</h2>
 
-          <div className='flex justify-center gap-2 items-center text-sm'>
+          <div className='inline-flex justify-center items-center gap-2 text-xs'>
             <FontAwesomeIcon icon={faSpotify} className='text-green-500' />
             <span className='uppercase tracking-wider'>{userData.product}</span>
             {userData.product === 'premium' && (
-              <FontAwesomeIcon icon={faCrown} className='text-yellow-400 ml-2' title='Premium User' />
+              <FontAwesomeIcon icon={faCrown} className='text-yellow-400' title='Premium User' />
             )}
           </div>
 
