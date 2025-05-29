@@ -14,7 +14,7 @@ import requests
 
 # Load environment variables
 load_dotenv()
-print(os.getenv("SQLALCHEMY_DATABASE_URI")) 
+
 
 app = Flask(__name__)
 
@@ -100,7 +100,7 @@ class Music(db.Model):
             "rap_music": self.rap_music,
             "pop_music": self.pop_music,
             "jazz_music": self.jazz_music,
-            "motivaton_music": self.motivational_music,
+            "motivational_music": self.motivational_music,
             "trending_music": self.trending_music,
             "latest_music": self.latest_music,
             "top10_music": self.top_music,
