@@ -14,6 +14,7 @@ import requests
 
 # Load environment variables
 load_dotenv()
+print(os.getenv("SQLALCHEMY_DATABASE_URI")) 
 
 app = Flask(__name__)
 
