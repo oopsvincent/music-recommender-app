@@ -121,7 +121,8 @@ def refresh_access_token_if_expired():
     if not session.get("refresh_token"):
         return False
     try:
-        return refresh_access_token().status_code == 200
+        response = refresh_access_token()
+        return response.status_code == 200
     except Exception as e:
         print("[ERROR] Auto-refresh failed:", e)
         return False
@@ -168,22 +169,17 @@ def create_playlist():
         return jsonify({"error": "Unauthorized"}), 401
 
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    profile = requests.get("https://api.spotify.com/v1/me", headers=headers).json()
+    
+    # FIX: Add error handling
+    profile_response = requests.get("https://api.spotify.com/v1/me", headers=headers)
+    if profile_response.status_code != 200:
+        return jsonify({"error": "Failed to fetch profile"}), 400
+        
+    profile = profile_response.json()
     user_id = profile.get("id")
-
-    data = {
-        "name": "OopsVincent’s Fire Playlist 🔥",
-        "description": "Curated with chaotic love by Vincent",
-        "public": False,
-    }
-
-    response = requests.post(
-        f"https://api.spotify.com/v1/users/{user_id}/playlists",
-        headers=headers,
-        json=data,
-    )
-    return jsonify(response.json())
-
+    
+    if not user_id:
+        return jsonify({"error": "Could not get user ID"}), 400
 @spotify.route("/logout")
 def logout():
     session.clear()
