@@ -184,6 +184,7 @@ def get_saved_albums():
 def create_playlist():
     token = session.get("access_token")
     if not token:
+
         return jsonify({"error": "Unauthorized"}), 401
 
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
