@@ -9,7 +9,30 @@ const PlaylistSection = () => {
     const [playlists, setPlaylists] = useState([]);
     const [selectedPlaylist, setSelectedPlaylist] = useState(null);
     const [localSaved, setLocalSaved] = useState([]);
-    const { showPlayer } = usePlayer();
+    const { showPlayer, queueTracks } = usePlayer();
+    const [albums, setAlbums] = useState([]);
+
+    const fetchAlbums = async () => {
+        try {
+            const res = await fetch('https://music-recommender-api.onrender.com/me/albums', { credentials: 'include' });
+            const data = await res.json();
+            setAlbums(data.items);
+        } catch (err) {
+            console.error('[ERROR] Failed to fetch albums:', err);
+        }
+    };
+
+    useEffect(() => {
+        fetchPlaylists();
+        fetchAlbums();
+        loadLocalSaved();
+    }, []);
+
+
+    useEffect(() => {
+        fetchPlaylists();
+        loadLocalSaved();
+    }, []);
 
     const fetchPlaylists = async () => {
         try {
@@ -45,32 +68,30 @@ const PlaylistSection = () => {
         if (saved) setLocalSaved(JSON.parse(saved));
     };
 
-    useEffect(() => {
-        fetchPlaylists();
-        loadLocalSaved();
-    }, []);
+const handlePlayAll = () => {
+    if (!selectedPlaylist) return;
+    const uris = selectedPlaylist.tracks.map(item => item.track.uri);
+    if (uris.length > 0) showPlayer(uris);
+};
 
-    const handlePlayAll = () => {
-        if (!selectedPlaylist) return;
-        const first = selectedPlaylist.tracks?.[0]?.track?.uri;
-        if (first) showPlayer(first);
-    };
 
     return (
-        <div className="flex flex-col justify-center items-center min-h-screen text-white p-4">
+        <div className="flex flex-col items-center min-h-screen px-4 py-8 bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white">
             <Greet />
+
             {selectedPlaylist ? (
-                <div className="max-w-4xl mx-auto">
-                    <div className="flex justify-between items-center mb-4 w-full">
-                        <button onClick={() => setSelectedPlaylist(null)} className="text-sm text-gray-300 hover:text-white underline inline-flex justify-center items-center gap-2 bg-green-500 p-2 rounded-xl">
-                            <ChevronLeft />
+                <div className="w-full max-w-6xl">
+                    <div className="flex justify-between items-center mb-6">
+                        <button onClick={() => setSelectedPlaylist(null)} className="flex items-center gap-2 text-gray-300 hover:text-white text-sm">
+                            <ChevronLeft className="w-5 h-5" /> Back
                         </button>
-                        <h2 className="text-2xl font-bold">Playlist</h2>
-                        <button onClick={handlePlayAll} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl flex items-center gap-2">
+                        <h2 className="text-3xl font-bold">Playlist</h2>
+                        <button onClick={handlePlayAll} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl">
                             <Play size={18} /> Play All
                         </button>
                     </div>
-                    <div className="flex flex-row flex-wrap justify-center items-center gap-2">
+
+                    <div className="flex flex-row flex-wrap justify-center">
                         {selectedPlaylist.tracks.map((item, idx) => (
                             <Card
                                 key={idx}
@@ -79,7 +100,7 @@ const PlaylistSection = () => {
                                 artist={item.track.artists.map(a => a.name).join(', ')}
                                 popularity={item.track.popularity}
                                 explicit={item.track.explicit}
-                                trackURI={item.uri}
+                                trackURI={item.track.uri}
                                 YTURL={`https://www.youtube.com/results?search_query=${item.track.name} ${item.track.artists.map(a => a.name).join(', ')}`}
                                 spoURL={item.track.external_urls.spotify}
                                 type="track"
@@ -88,25 +109,47 @@ const PlaylistSection = () => {
                     </div>
                 </div>
             ) : (
-                <>
-                    <h2 className="text-xl font-semibold mb-4">Your Spotify Playlists</h2>
-                    <div className="flex flex-row flex-wrap justify-start items-center gap-1">
+                <div className="w-full max-w-6xl">
+                    <h2 className="text-2xl font-bold mb-6">Your Spotify Playlists</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {playlists.map((pl) => (
-                            <div key={pl.id} onClick={() => fetchPlaylistTracks(pl.id)} className="cursor-pointer bg-white/5 p-4 rounded-xl hover:bg-white/10 transition">
-                                <img src={pl.images[0]?.url} alt={pl.name} className="rounded-xl mb-3 w-full h-40 object-cover" />
-                                <p className="text-white font-semibold text-lg">{pl.name}</p>
+                            <div
+                                key={pl.id}
+                                onClick={() => fetchPlaylistTracks(pl.id)}
+                                className="cursor-pointer bg-white/5 p-4 rounded-xl hover:bg-white/10 transition shadow-md"
+                            >
+                                <img
+                                    src={pl.images[0]?.url}
+                                    alt={pl.name}
+                                    className="rounded-xl mb-3 w-full h-40 object-cover"
+                                />
+                                <p className="text-white font-semibold text-lg truncate">{pl.name}</p>
                                 <p className="text-sm text-gray-400">{pl.tracks.total} songs</p>
                             </div>
                         ))}
                     </div>
+                    <h2 className="text-xl font-semibold mt-10 mb-3">Your Saved Albums</h2>
+                    <div className="flex flex-row flex-wrap justify-start items-center gap-1">
+                        {albums.map((albumItem) => {
+                            const album = albumItem.album;
+                            return (
+                                <div key={album.id} className="cursor-pointer bg-white/5 p-4 rounded-xl hover:bg-white/10 transition">
+                                    <img src={album.images[0]?.url} alt={album.name} className="rounded-xl mb-3 w-full h-40 object-cover" />
+                                    <p className="text-white font-semibold text-lg">{album.name}</p>
+                                    <p className="text-sm text-gray-400">{album.artists.map(a => a.name).join(', ')}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
 
-                    <h2 className="text-xl font-semibold mt-10 mb-3">Locally Saved Songs</h2>
+
+                    <h2 className="text-2xl font-bold mt-12 mb-4 pl-3">Locally Saved Songs</h2>
                     {localSaved.length === 0 ? (
                         <p className="text-gray-400">No local songs saved.</p>
                     ) : (
-                        <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 rounded-xl border border-white/10 shadow-lg w-full max-w-6xl">
-                            <h3 className="text-white text-lg font-semibold mb-3">Saved Locally</h3>
-                            <div className="flex flex-row flex-wrap justify-center items-center gap-2">
+                        <div className="bg-white/5 p-2 rounded-xl border border-white/10 shadow-md">
+                            <h3 className="text-xl font-semibold mb-4 pl-3">Saved Locally</h3>
+                            <div className="flex flex-row flex-wrap justify-center">
                                 {localSaved.map((track, index) => (
                                     <Card
                                         key={index}
@@ -124,7 +167,7 @@ const PlaylistSection = () => {
                             </div>
                         </div>
                     )}
-                </>
+                </div>
             )}
         </div>
     );

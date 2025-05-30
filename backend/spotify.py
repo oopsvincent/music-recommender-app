@@ -162,10 +162,29 @@ def get_profile():
     except requests.exceptions.RequestException as e:
         return jsonify({"error": "Failed to fetch user data", "details": str(e)}), 400
 
+@spotify.route("/me/albums")
+def get_saved_albums():
+    token = session.get("access_token")
+    if not token:
+        return jsonify({"error": "No access token in session"}), 401
+
+    refresh_access_token_if_expired()
+    token = session.get("access_token")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    albums_response = requests.get("https://api.spotify.com/v1/me/albums", headers=headers)
+    if albums_response.status_code != 200:
+        return jsonify({"error": "Failed to fetch albums", "details": albums_response.text}), 400
+
+    albums = albums_response.json()
+    return jsonify(albums)
+
+
 @spotify.route("/create_playlist", methods=["POST"])
 def create_playlist():
     token = session.get("access_token")
     if not token:
+
         return jsonify({"error": "Unauthorized"}), 401
 
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
