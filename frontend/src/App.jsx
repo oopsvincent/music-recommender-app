@@ -19,6 +19,7 @@ import DataNoticeModal from './Components/DataNoticeModal';
 import { PlayerProvider } from './contexts/PlayerContext';
 import Footer from './Components/Footer';
 import CreditsPage from './pages/CreditsPages';
+import Redirect from './pages/redirect';
 
 const App = () => {
   const [selectedSection, setSection] = useState('');
@@ -54,6 +55,7 @@ const App = () => {
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/playlist" element={<PlaylistSection />} />
                 <Route path="/feedback" element={<FeedbackPage />} />
+                <Route path='redirect' element={<Redirect />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
 
