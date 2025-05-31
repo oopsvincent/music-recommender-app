@@ -29,6 +29,31 @@ export default function SpotifyPlayer() {
 
 
 
+    const [devices, setDevices] = useState([]);
+
+const fetchPlayerState = async () => {
+  try {
+    const res = await fetch('https://music-recommender-api.onrender.com/player/state', {
+      credentials: 'include'
+    });
+
+    if (!res.ok) throw new Error('Failed to fetch player state');
+    const data = await res.json();
+
+    if (data?.devices) {
+      setDevices(data.devices);
+    }
+
+    // Log current devices
+    console.log("[DEBUG] Devices fetched:", data.devices);
+
+  } catch (err) {
+    console.error("[DEBUG] Error fetching player state:", err);
+  }
+};
+
+
+
     useEffect(() => {
         const checkSession = async () => {
             try {
@@ -173,13 +198,29 @@ export default function SpotifyPlayer() {
         if (isPremium) {
             // Fetch initial state
             fetchPlayerState();
-
-            // Polling every 5 seconds instead of every 1 second
-            const intervalId = setInterval(fetchPlayerState, 5000);
-
-            return () => clearInterval(intervalId); // Cleanup interval on component unmount
+            
         }
     }, [isPremium]); // run again if isPremium changes
+    useEffect(() => {
+        if (!player || !isPremium) return;
+    
+        const poll = setInterval(async () => {
+            const state = await player.getCurrentState();
+            if (state) {
+                const track = state.track_window.current_track;
+                setIsPaused(state.paused);
+                setPosition(state.position);
+                setDuration(state.duration);
+                setCurrentTrack({
+                    title: track.name,
+                    artists: track.artists.map((a) => a.name).join(', '),
+                    albumImage: track.album.images[0]?.url,
+                });
+            }
+        }, 1000);
+    
+        return () => clearInterval(poll);
+    }, [player, isPremium]);
 
 
 
@@ -188,150 +229,153 @@ export default function SpotifyPlayer() {
     if (!visiblePlayer || !isAuthenticated) return null;
 
     return (
+<AnimatePresence mode="wait">
+    {isExpanded ? (
         <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 30, height: 'auto' }}
-            animate={{ opacity: 1, scale: 1, y: 0, height: 'auto' }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="fixed bottom-20 left-1/2 -translate-x-1/2 backdrop-blur-md bg-black/10 border border-white/40 rounded-3xl shadow-xl max-w-md w-[95%] z-50 "
+            key="expanded"
+            initial={{ opacity: 0, scale: 0.95, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 30 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="fixed bottom-20 left-1/2 -translate-x-1/2 backdrop-blur-md bg-black/10 border border-white/40 rounded-3xl shadow-xl max-w-md w-[95%] z-50"
         >
-            <AnimatePresence initial={false}>
-                {isExpanded ? (
-                    <motion.div
-                        key="expanded"
-                        initial={{ scale: 1, translateY: 500 }}
-                        animate={{ scale: 1, translateY: 0 }}
-                        exit={{ scale: 1, translateY: 500 }}
-                        transition={{ duration: 0.25 }}
-                        className="p-4 flex justify-center items-center flex-col w-full h-full"
-                    >
-                        <div className="flex justify-between items-center mb-2 w-full h-full">
-                            <h2 className="text-white text-lg font-semibold">Now Playing</h2>
-                            <button onClick={() => setIsExpanded(false)}>
-                                <ChevronDown className="text-white" />
-                            </button>
-                        </div>
+            <div className="p-4 flex justify-center items-center flex-col w-full h-full">
+                <div className="flex justify-between items-center mb-2 w-full h-full">
+                    <h2 className="text-white text-lg font-semibold">Now Playing</h2>
+                    <button onClick={() => setIsExpanded(false)}>
+                        <ChevronDown className="text-white" />
+                    </button>
+                </div>
 
-                        {currentTrack && (
-                            <>
-                                <motion.div className="flex items-center justify-center mb-3 gap-5">
-                                    <img
-                                        src={currentTrack.albumImage}
-                                        alt="Album cover"
-                                        className="rounded-xl w-40 h-40 object-cover mb-3"
-                                    />
-                                    <div className="flex flex-col text-left">
-                                        <p className="text-white text-xl font-bold">
-                                            {currentTrack.title}
-                                        </p>
-                                        <p className="text-gray-400 text-sm mb-3">
-                                            {currentTrack.artists}
-                                        </p>
-                                    </div>
-                                </motion.div>
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max={duration}
-                                    value={position}
-                                    onChange={handleSeek}
-                                    disabled={!isPremium}
-                                    className="w-full accent-[#D50000] disabled:opacity-50 mb-2"
-                                />
-                                <p className="text-center text-gray-300 text-xs mb-1">
-                                    {formatTime(position)} / {formatTime(duration)}
+                {currentTrack && (
+                    <>
+                        <div className="flex items-center justify-center mb-3 gap-5">
+                            <img
+                                src={currentTrack.albumImage}
+                                alt="Album cover"
+                                className="rounded-xl w-40 h-40 object-cover mb-3"
+                            />
+                            <div className="flex flex-col text-left">
+                                <p className="text-white text-xl font-bold">
+                                    {currentTrack.title}
                                 </p>
+                                <p className="text-gray-400 text-sm mb-3">
+                                    {currentTrack.artists}
+                                </p>
+                            </div>
+                        </div>
+                        <input
+                            type="range"
+                            min="0"
+                            max={duration}
+                            value={position}
+                            onChange={handleSeek}
+                            disabled={!isPremium}
+                            className="w-full accent-[#D50000] disabled:opacity-50 mb-2"
+                        />
+                        <p className="text-center text-gray-300 text-xs mb-1">
+                            {formatTime(position)} / {formatTime(duration)}
+                        </p>
 
-                                <div className="flex items-center justify-center gap-6 my-4">
-                                    <button
-                                        disabled={!isPremium}
-                                        onClick={() => player?.previousTrack()}
-                                        className={`rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition ${!isPremium ? 'bg-gray-600' : 'bg-white text-black hover:scale-105 active:scale-90'}`}
-                                    >
-                                        <SkipBack fill="#000" stroke="#000" />
-                                    </button>
-                                    <button
-                                        disabled={!isPremium}
-                                        onClick={togglePlay}
-                                        className={`rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition ${!isPremium ? 'bg-gray-600' : 'bg-white text-black hover:scale-105 active:scale-90'}`}
-                                    >
-                                        {isPaused ? <Play /> : <Pause />}
-                                    </button>
-                                    <button
-                                        disabled={!isPremium}
-                                        onClick={() => player?.nextTrack()}
-                                        className={`rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition ${!isPremium ? 'bg-gray-600' : 'bg-white text-black hover:scale-105 active:scale-90'}`}
-                                    >
-                                        <SkipForward fill="#000" stroke="#000" />
-                                    </button>
-                                </div>
-
-                                <div className="flex items-center justify-center mb-3">
-                                    {volume === 0 ? (
-                                        <VolumeX className="text-white mr-2" />
-                                    ) : volume < 0.6 ? (
-                                        <Volume1 className="text-white mr-2" />
-                                    ) : (
-                                        <Volume2 className="text-white mr-2" />
-                                    )}
-                                    <input
-                                        type="range"
-                                        min="0"
-                                        max="1"
-                                        step="0.01"
-                                        value={volume}
-                                        onChange={handleVolumeChange}
-                                        disabled={!isPremium}
-                                        className="w-full accent-green-400 mx-2 disabled:opacity-50"
-                                    />
-                                    <span className="text-gray-300 text-sm">
-                                        {Math.floor(volume * 100)}%
-                                    </span>
-                                </div>
-                            </>
-                        )}
-                    </motion.div>
-                ) : (
-                    <motion.div
-                        key="collapsed"
-                        initial={{ scale: 1, translateY: 250, opacity: 1 }}
-                        animate={{ scale: 1, translateY: 0, opacity: 1 }}
-                        exit={{ scale: 1, translateY: 500, opacity: 0 }}
-                        transition={{ duration: 0.25 }}
-                        className="p-3 flex items-center justify-between"
-                    >
-                        {currentTrack && (
-                            <>
-                                <img
-                                    src={currentTrack.albumImage}
-                                    alt="Album"
-                                    className="w-12 h-12 rounded-lg object-cover"
-                                />
-                                <div className="ml-3">
-                                    <p className="text-white text-sm font-medium">
-                                        {currentTrack.title}
-                                    </p>
-                                    <p className="text-gray-400 text-xs">
-                                        {currentTrack.artists}
-                                    </p>
-                                </div>
-                            </>
-                        )}
-                        <div className="ml-auto flex items-center space-x-4">
+                        <div className="flex items-center justify-center gap-6 my-4">
                             <button
-                                onClick={togglePlay}
                                 disabled={!isPremium}
-                                className={`rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition ${!isPremium ? 'bg-gray-600' : 'bg-white text-black hover:scale-105 active:scale-90'}`}
+                                onClick={() => player?.previousTrack()}
+                                className={`rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition ${!isPremium ? 'bg-gray-600' : 'bg-white text-black hover:scale-105 active:scale-90'}`}
                             >
-                                {isPaused ? <Play size={20} /> : <Pause size={20} />}
+                                <SkipBack fill="#000" stroke="#000" />
                             </button>
-                            <button onClick={() => setIsExpanded(true)}>
-                                <ChevronUp className="text-white" />
+                            <button
+                                disabled={!isPremium}
+                                onClick={togglePlay}
+                                className={`rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition ${!isPremium ? 'bg-gray-600' : 'bg-white text-black hover:scale-105 active:scale-90'}`}
+                            >
+                                {isPaused ? <Play /> : <Pause />}
+                            </button>
+                            <button
+                                disabled={!isPremium}
+                                onClick={() => player?.nextTrack()}
+                                className={`rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition ${!isPremium ? 'bg-gray-600' : 'bg-white text-black hover:scale-105 active:scale-90'}`}
+                            >
+                                <SkipForward fill="#000" stroke="#000" />
                             </button>
                         </div>
-                    </motion.div>
 
+                        <div className="flex items-center justify-center mb-3">
+                            {volume === 0 ? (
+                                <VolumeX className="text-white mr-2" />
+                            ) : volume < 0.6 ? (
+                                <Volume1 className="text-white mr-2" />
+                            ) : (
+                                <Volume2 className="text-white mr-2" />
+                            )}
+                            <input
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.01"
+                                value={volume}
+                                onChange={handleVolumeChange}
+                                disabled={!isPremium}
+                                className="w-full accent-green-400 mx-2 disabled:opacity-50"
+                            />
+                            <span className="text-gray-300 text-sm">
+                                {Math.floor(volume * 100)}%
+                            </span>
+                            <ul>
+  {devices.map((device) => (
+    <li key={device.id}>
+      {device.name} {device.is_active ? "(Active)" : ""}
+    </li>
+  ))}
+</ul>
+
+                        </div>
+                    </>
                 )}
-            </AnimatePresence>
+            </div>
         </motion.div>
+    ) : (
+        <motion.div
+            key="collapsed"
+            initial={{ opacity: 0, scale: 0.95, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 30 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="fixed bottom-20 left-1/2 -translate-x-1/2 backdrop-blur-md bg-black/10 border border-white/40 rounded-3xl shadow-xl max-w-md w-[95%] z-50 p-3 flex items-center justify-between"
+        >
+            {currentTrack && (
+                <>
+                    <img
+                        src={currentTrack.albumImage}
+                        alt="Album"
+                        className="w-12 h-12 rounded-lg object-cover"
+                    />
+                    <div className="ml-3">
+                        <p className="text-white text-sm font-medium">
+                            {currentTrack.title}
+                        </p>
+                        <p className="text-gray-400 text-xs">
+                            {currentTrack.artists}
+                        </p>
+                    </div>
+                </>
+            )}
+            <div className="ml-auto flex items-center space-x-4">
+                <button
+                    onClick={togglePlay}
+                    disabled={!isPremium}
+                    className={`rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition ${!isPremium ? 'bg-gray-600' : 'bg-white text-black hover:scale-105 active:scale-90'}`}
+                >
+                    {isPaused ? <Play size={20} /> : <Pause size={20} />}
+                </button>
+                <button onClick={() => setIsExpanded(true)}>
+                    <ChevronUp className="text-white" />
+                </button>
+            </div>
+        </motion.div>
+    )}
+</AnimatePresence>
+
     );
 }
