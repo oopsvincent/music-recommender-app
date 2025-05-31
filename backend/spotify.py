@@ -162,22 +162,22 @@ def get_profile():
     except requests.exceptions.RequestException as e:
         return jsonify({"error": "Failed to fetch user data", "details": str(e)}), 400
 
-@spotify.route("/me/albums")
-def get_saved_albums():
-    token = session.get("access_token")
-    if not token:
-        return jsonify({"error": "No access token in session"}), 401
+# @spotify.route("/me/albums")
+# def get_saved_albums():
+#     token = session.get("access_token")
+#     if not token:
+#         return jsonify({"error": "No access token in session"}), 401
 
-    refresh_access_token_if_expired()
-    token = session.get("access_token")
-    headers = {"Authorization": f"Bearer {token}"}
+#     refresh_access_token_if_expired()
+#     token = session.get("access_token")
+#     headers = {"Authorization": f"Bearer {token}"}
 
-    albums_response = requests.get("https://api.spotify.com/v1/me/albums", headers=headers)
-    if albums_response.status_code != 200:
-        return jsonify({"error": "Failed to fetch albums", "details": albums_response.text}), 400
+#     albums_response = requests.get("https://api.spotify.com/v1/me/albums", headers=headers)
+#     if albums_response.status_code != 200:
+#         return jsonify({"error": "Failed to fetch albums", "details": albums_response.text}), 400
 
-    albums = albums_response.json()
-    return jsonify(albums)
+#     albums = albums_response.json()
+#     return jsonify(albums)
 
 
 @spotify.route("/create_playlist", methods=["POST"])
@@ -283,30 +283,113 @@ def transfer_playback():
     return jsonify({"status": "playback transferred"})
 
 
-@spotify.route("/me/artists")
-def get_followed_artists():
+# @spotify.route("/me/artists")
+# def get_followed_artists():
+#     token = session.get("access_token")
+#     if not token:
+#         return jsonify({"error": "No access token in session"}), 401
+
+#     headers = {"Authorization": f"Bearer {token}"}
+#     res = requests.get("https://api.spotify.com/v1/me/following?type=artist", headers=headers)
+
+#     if res.status_code != 200:
+#         return jsonify({"error": "Failed to fetch followed artists", "details": res.text}), 400
+
+#     return jsonify(res.json())
+
+# @spotify.route("/me/shows")
+# def get_saved_shows():
+#     token = session.get("access_token")
+#     if not token:
+#         return jsonify({"error": "No access token in session"}), 401
+
+#     headers = {"Authorization": f"Bearer {token}"}
+#     res = requests.get("https://api.spotify.com/v1/me/shows", headers=headers)
+
+#     if res.status_code != 200:
+#         return jsonify({"error": "Failed to fetch saved shows", "details": res.text}), 400
+
+#     return jsonify(res.json())
+
+# Helper
+def get_spotify_headers():
+    refresh_access_token_if_expired()
     token = session.get("access_token")
     if not token:
-        return jsonify({"error": "No access token in session"}), 401
+        return None, jsonify({"error": "No access token in session"}), 401
+    return {"Authorization": f"Bearer {token}"}, None, None
 
-    headers = {"Authorization": f"Bearer {token}"}
-    res = requests.get("https://api.spotify.com/v1/me/following?type=artist", headers=headers)
+
+@spotify.route("/me/albums")
+def get_saved_albums():
+    headers, error_response, status = get_spotify_headers()
+    if error_response:
+        return error_response, status
+
+    limit = request.args.get("limit", 20)
+    offset = request.args.get("offset", 0)
+
+    url = f"https://api.spotify.com/v1/me/albums?limit={limit}&offset={offset}"
+    res = requests.get(url, headers=headers)
+
+    if res.status_code != 200:
+        return jsonify({"error": "Failed to fetch albums", "details": res.text}), 400
+
+    return jsonify(res.json())
+
+
+@spotify.route("/me/artists")
+def get_followed_artists():
+    headers, error_response, status = get_spotify_headers()
+    if error_response:
+        return error_response, status
+
+    limit = request.args.get("limit", 20)
+    after = request.args.get("after", "")
+
+    url = f"https://api.spotify.com/v1/me/following?type=artist&limit={limit}"
+    if after:
+        url += f"&after={after}"
+
+    res = requests.get(url, headers=headers)
 
     if res.status_code != 200:
         return jsonify({"error": "Failed to fetch followed artists", "details": res.text}), 400
 
     return jsonify(res.json())
 
+
 @spotify.route("/me/shows")
 def get_saved_shows():
-    token = session.get("access_token")
-    if not token:
-        return jsonify({"error": "No access token in session"}), 401
+    headers, error_response, status = get_spotify_headers()
+    if error_response:
+        return error_response, status
 
-    headers = {"Authorization": f"Bearer {token}"}
-    res = requests.get("https://api.spotify.com/v1/me/shows", headers=headers)
+    limit = request.args.get("limit", 20)
+    offset = request.args.get("offset", 0)
+
+    url = f"https://api.spotify.com/v1/me/shows?limit={limit}&offset={offset}"
+    res = requests.get(url, headers=headers)
 
     if res.status_code != 200:
         return jsonify({"error": "Failed to fetch saved shows", "details": res.text}), 400
+
+    return jsonify(res.json())
+
+
+@spotify.route("/me/playlists")
+def get_user_playlists():
+    headers, error_response, status = get_spotify_headers()
+    if error_response:
+        return error_response, status
+
+    limit = request.args.get("limit", 20)
+    offset = request.args.get("offset", 0)
+
+    url = f"https://api.spotify.com/v1/me/playlists?limit={limit}&offset={offset}"
+    res = requests.get(url, headers=headers)
+
+    if res.status_code != 200:
+        return jsonify({"error": "Failed to fetch playlists", "details": res.text}), 400
 
     return jsonify(res.json())
