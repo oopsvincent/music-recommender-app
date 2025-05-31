@@ -42,7 +42,7 @@ def get_token():
 @spotify.route("/login")
 def login():
     scopes = (
-        "user-read-private user-read-email "
+        "user-read-private user-read-email user-follow-read "
         "playlist-read-private playlist-modify-private playlist-modify-public playlist-read-collaborative "
         "streaming user-read-playback-state user-modify-playback-state user-read-currently-playing "
         "user-library-read user-library-modify user-read-recently-played"
