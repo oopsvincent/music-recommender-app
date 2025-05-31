@@ -94,7 +94,7 @@ export default function RandomTrackButton({ categoryBaseUrl }) {
             />
 
             {/* 🔁 Modal Refresh Button */}
-            <motion.button
+            {/* <motion.button
               onClick={handleClick}
               disabled={loading}
               className="absolute bottom-5 right-5 bg-[#D40000] text-white rounded-full p-3 shadow-lg hover:bg-red-700"
@@ -106,7 +106,7 @@ export default function RandomTrackButton({ categoryBaseUrl }) {
               >
                 <RefreshCcw size={20} />
               </motion.div>
-            </motion.button>
+            </motion.button> */}
           </>
         )}
       </ModalWrapper>

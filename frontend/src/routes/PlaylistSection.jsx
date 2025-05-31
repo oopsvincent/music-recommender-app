@@ -1,176 +1,197 @@
-// PlaylistSection.jsx
 import React, { useEffect, useState } from 'react';
-import Card from '../Components/Card';
-import Greet from '../Components/Greet';
+import PlaylistHeader from '../Components/PlaylistHeader';
+import PlaylistTracks from '../Components/PlaylistTracks';
+import PlaylistsOverview from '../Components/PlaylistOverview';
+import SavedAlbums from '../Components/SavedAlbums';
+import LocallySavedSongs from '../Components/LocallySavedSongs';
 import { usePlayer } from '../contexts/PlayerContext';
-import { Play, ChevronLeft } from 'lucide-react';
 
 const PlaylistSection = () => {
-    const [playlists, setPlaylists] = useState([]);
-    const [selectedPlaylist, setSelectedPlaylist] = useState(null);
-    const [localSaved, setLocalSaved] = useState([]);
-    const { showPlayer, queueTracks } = usePlayer();
-    const [albums, setAlbums] = useState([]);
+  const [playlists, setPlaylists] = useState([]);
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [selectedAlbum, setSelectedAlbum] = useState(null);
+  const [localSaved, setLocalSaved] = useState([]);
+  const [albums, setAlbums] = useState([]);
+  const [selectedSection, setSelectedSection] = useState('playlists'); // chips: playlists, albums, saved
+  const { showPlayer } = usePlayer();
 
-    const fetchAlbums = async () => {
-        try {
-            const res = await fetch('https://music-recommender-api.onrender.com/me/albums', { credentials: 'include' });
-            const data = await res.json();
-            setAlbums(data.items);
-        } catch (err) {
-            console.error('[ERROR] Failed to fetch albums:', err);
-        }
-    };
+  useEffect(() => {
+    fetchPlaylists();
+    fetchAlbums();
+    loadLocalSaved();
+  }, []);
 
-    useEffect(() => {
-        fetchPlaylists();
-        fetchAlbums();
-        loadLocalSaved();
-    }, []);
+  const fetchPlaylists = async () => {
+    try {
+      const res = await fetch('https://music-recommender-api.onrender.com/me', { credentials: 'include' });
+      const data = await res.json();
+      setPlaylists(data.playlists.items);
+      console.log(playlists);
+      
+    } catch (err) {
+      console.error('[ERROR] Failed to fetch playlists:', err);
+    }
+  };
 
+  const fetchAlbums = async () => {
+    try {
+      const res = await fetch('https://music-recommender-api.onrender.com/me/albums', { credentials: 'include' });
+      const data = await res.json();
+      setAlbums(data.items);
+    } catch (err) {
+      console.error('[ERROR] Failed to fetch albums:', err);
+    }
+  };
 
-    useEffect(() => {
-        fetchPlaylists();
-        loadLocalSaved();
-    }, []);
+  const loadLocalSaved = () => {
+    const saved = localStorage.getItem("savedSongs");
+    if (saved) setLocalSaved(JSON.parse(saved));
+  };
 
-    const fetchPlaylists = async () => {
-        try {
-            const res = await fetch('https://music-recommender-api.onrender.com/me', { credentials: 'include' });
-            const data = await res.json();
-            setPlaylists(data.playlists.items);
-        } catch (err) {
-            console.error('[ERROR] Failed to fetch playlists:', err);
-        }
-    };
+  const fetchPlaylistTracks = async (playlistId) => {
+    try {
+      const tokenRes = await fetch('https://music-recommender-api.onrender.com/refresh_access_token', {
+        credentials: 'include'
+      });
+      const tokenData = await tokenRes.json();
+      const token = tokenData.access_token;
+      const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      console.log(data);
+      
+setSelectedPlaylist({
+  id: playlistId,
+  name: data.name,
+  image: data.images?.[0]?.url,
+  owner: data.owner?.display_name,
+  tracks: data.items,
+});
 
-    const fetchPlaylistTracks = async (playlistId) => {
-        try {
-            const tokenRes = await fetch('https://music-recommender-api.onrender.com/refresh_access_token', { credentials: 'include' });
-            const tokenData = await tokenRes.json();
-            const token = tokenData.access_token;
+    } catch (err) {
+      console.error('[ERROR] Failed to fetch playlist tracks:', err);
+    }
+  };
 
-            const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+  const fetchAlbumTracks = async (albumId) => {
+    try {
+      const tokenRes = await fetch('https://music-recommender-api.onrender.com/refresh_access_token', {
+        credentials: 'include'
+      });
+      const tokenData = await tokenRes.json();
+      const token = tokenData.access_token;
+      const res = await fetch(`https://api.spotify.com/v1/albums/${albumId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      console.log(data);
+      
+setSelectedAlbum({
+  id: albumId,
+  name: data.name,
+  image: data.images?.[0]?.url,
+  owner: data.artists.map(a => a.name).join(', '), // albums don't have an "owner" like playlists do
+  label: data.label,
+  copyrights: data.copyrights,
+  total_tracks: data.total_tracks,
+  release_date: data.release_date,
+  uri: data.uri,
+  tracks: data.tracks.items.map(item => ({
+    track: {
+      ...item,
+      uri: item.uri,
+      name: item.name,
+      artists: item.artists,
+      popularity: data.popularity,
+      album: data, // attach album info
+    }
+  }))
+});
 
-            const data = await res.json();
-            setSelectedPlaylist({ id: playlistId, tracks: data.items });
-        } catch (err) {
-            console.error('[ERROR] Failed to fetch playlist tracks:', err);
-        }
-    };
+    } catch (err) {
+      console.error('[ERROR] Failed to fetch album tracks:', err);
+    }
+  };
 
-    const loadLocalSaved = () => {
-        const saved = localStorage.getItem("savedSongs");
-        if (saved) setLocalSaved(JSON.parse(saved));
-    };
+  const handleBack = () => {
+    setSelectedPlaylist(null);
+    setSelectedAlbum(null);
+  };
 
-const handlePlayAll = () => {
-    if (!selectedPlaylist) return;
-    const uris = selectedPlaylist.tracks.map(item => item.track.uri);
+  const handlePlayAll = () => {
+    const item = selectedAlbum.uri;
+    showPlayer(item);
+    const items = selectedPlaylist?.tracks || selectedAlbum?.uri || [];
+    const uris = items.map(item => (item.track ? item.track.uri : item.uri));
+    console.log(uris);
+    
     if (uris.length > 0) showPlayer(uris);
-};
+  };
 
+  const renderChips = () => (
+    <div className='flex gap-3 mb-6'>
+      {['playlists', 'albums', 'saved'].map(type => (
+        <button
+          key={type}
+          onClick={() => {
+            setSelectedSection(type);
+            handleBack(); // Reset album/playlist view
+          }}
+          className={`px-4 py-2 rounded-full font-medium ${
+            selectedSection === type ? 'bg-green-500 text-black' : 'bg-gray-700 text-white'
+          }`}
+        >
+          {type.charAt(0).toUpperCase() + type.slice(1)}
+        </button>
+      ))}
+    </div>
+  );
 
-    return (
-        <div className="flex flex-col items-center min-h-screen px-4 py-8 bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white">
-            <Greet />
+  return (
+    <div className="flex flex-col items-center min-h-screen px-4 py-8 bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white">
+      <div className='w-full max-w-6xl'>{renderChips()}</div>
 
-            {selectedPlaylist ? (
-                <div className="w-full max-w-6xl">
-                    <div className="flex justify-between items-center mb-6">
-                        <button onClick={() => setSelectedPlaylist(null)} className="flex items-center gap-2 text-gray-300 hover:text-white text-sm">
-                            <ChevronLeft className="w-5 h-5" /> Back
-                        </button>
-                        <h2 className="text-3xl font-bold">Playlist</h2>
-                        <button onClick={handlePlayAll} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl">
-                            <Play size={18} /> Play All
-                        </button>
-                    </div>
+      {(selectedPlaylist || selectedAlbum) ? (
+        <div className="w-full max-w-6xl">
+<PlaylistHeader
+  handleBack={handleBack}
+  handlePlayAll={handlePlayAll}
+  data={selectedPlaylist || selectedAlbum}
+/>
 
-                    <div className="flex flex-row flex-wrap justify-center">
-                        {selectedPlaylist.tracks.map((item, idx) => (
-                            <Card
-                                key={idx}
-                                url={item.track.album.images[0]?.url}
-                                title={item.track.name}
-                                artist={item.track.artists.map(a => a.name).join(', ')}
-                                popularity={item.track.popularity}
-                                explicit={item.track.explicit}
-                                trackURI={item.track.uri}
-                                YTURL={`https://www.youtube.com/results?search_query=${item.track.name} ${item.track.artists.map(a => a.name).join(', ')}`}
-                                spoURL={item.track.external_urls.spotify}
-                                type="track"
-                            />
-                        ))}
-                    </div>
-                </div>
-            ) : (
-                <div className="w-full max-w-6xl">
-                    <h2 className="text-2xl font-bold mb-6">Your Spotify Playlists</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {playlists.map((pl) => (
-                            <div
-                                key={pl.id}
-                                onClick={() => fetchPlaylistTracks(pl.id)}
-                                className="cursor-pointer bg-white/5 p-4 rounded-xl hover:bg-white/10 transition shadow-md"
-                            >
-                                <img
-                                    src={pl.images[0]?.url}
-                                    alt={pl.name}
-                                    className="rounded-xl mb-3 w-full h-40 object-cover"
-                                />
-                                <p className="text-white font-semibold text-lg truncate">{pl.name}</p>
-                                <p className="text-sm text-gray-400">{pl.tracks.total} songs</p>
-                            </div>
-                        ))}
-                    </div>
-                    <h2 className="text-xl font-semibold mt-10 mb-3">Your Saved Albums</h2>
-                    <div className="flex flex-row flex-wrap justify-start items-center gap-1">
-                        {albums.map((albumItem) => {
-                            const album = albumItem.album;
-                            return (
-                                <div key={album.id} className="cursor-pointer bg-white/5 p-4 rounded-xl hover:bg-white/10 transition">
-                                    <img src={album.images[0]?.url} alt={album.name} className="rounded-xl mb-3 w-full h-40 object-cover" />
-                                    <p className="text-white font-semibold text-lg">{album.name}</p>
-                                    <p className="text-sm text-gray-400">{album.artists.map(a => a.name).join(', ')}</p>
-                                </div>
-                            );
-                        })}
-                    </div>
-
-
-                    <h2 className="text-2xl font-bold mt-12 mb-4 pl-3">Locally Saved Songs</h2>
-                    {localSaved.length === 0 ? (
-                        <p className="text-gray-400">No local songs saved.</p>
-                    ) : (
-                        <div className="bg-white/5 p-2 rounded-xl border border-white/10 shadow-md">
-                            <h3 className="text-xl font-semibold mb-4 pl-3">Saved Locally</h3>
-                            <div className="flex flex-row flex-wrap justify-center">
-                                {localSaved.map((track, index) => (
-                                    <Card
-                                        key={index}
-                                        url={track.image}
-                                        title={track.title}
-                                        artist={track.artist}
-                                        spoURL={track.spoURL}
-                                        YTURL={track.YTURL}
-                                        trackURI={track.trackURI}
-                                        popularity={track.popularity}
-                                        explicit={track.explicit}
-                                        type={track.type || "track"}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
+          <PlaylistTracks tracks={(selectedPlaylist?.tracks || selectedAlbum?.tracks) || []} />
         </div>
-    );
+      ) : (
+        <div className="w-full max-w-6xl">
+          {selectedSection === 'playlists' && (
+            <>
+              <h2 className="text-2xl font-bold mb-6">Your Spotify Playlists</h2>
+              <PlaylistsOverview playlists={playlists} onSelectPlaylist={fetchPlaylistTracks} />
+            </>
+          )}
+
+          {selectedSection === 'albums' && (
+            <>
+              <h2 className="text-2xl font-bold mb-6">Your Saved Albums</h2>
+              <SavedAlbums albums={albums} onSelectAlbum={fetchAlbumTracks} />
+            </>
+          )}
+
+          {selectedSection === 'saved' && (
+            <>
+              <h2 className="text-2xl font-bold mb-6">Your Local Saved Songs</h2>
+              <LocallySavedSongs localSaved={localSaved} />
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default PlaylistSection;

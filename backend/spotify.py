@@ -255,3 +255,58 @@ def get_current_playback():
         return jsonify({"error": "Failed to fetch playback state", "details": res.text}), 400
 
     return jsonify(res.json())
+
+@spotify.route("/player/transfer", methods=["PUT"])
+def transfer_playback():
+    token = session.get("access_token")
+    if not token:
+        return jsonify({"error": "No access token in session"}), 401
+
+    data = request.json
+    device_id = data.get("device_id")
+
+    if not device_id:
+        return jsonify({"error": "Missing device_id"}), 400
+
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    payload = {"device_ids": [device_id], "play": True}  # Set play to True to auto-resume
+
+    res = requests.put(
+        "https://api.spotify.com/v1/me/player",
+        headers=headers,
+        json=payload,
+    )
+
+    if res.status_code != 204:
+        return jsonify({"error": "Failed to transfer playback", "details": res.text}), 400
+
+    return jsonify({"status": "playback transferred"})
+
+
+@spotify.route("/me/artists")
+def get_followed_artists():
+    token = session.get("access_token")
+    if not token:
+        return jsonify({"error": "No access token in session"}), 401
+
+    headers = {"Authorization": f"Bearer {token}"}
+    res = requests.get("https://api.spotify.com/v1/me/following?type=artist", headers=headers)
+
+    if res.status_code != 200:
+        return jsonify({"error": "Failed to fetch followed artists", "details": res.text}), 400
+
+    return jsonify(res.json())
+
+@spotify.route("/me/shows")
+def get_saved_shows():
+    token = session.get("access_token")
+    if not token:
+        return jsonify({"error": "No access token in session"}), 401
+
+    headers = {"Authorization": f"Bearer {token}"}
+    res = requests.get("https://api.spotify.com/v1/me/shows", headers=headers)
+
+    if res.status_code != 200:
+        return jsonify({"error": "Failed to fetch saved shows", "details": res.text}), 400
+
+    return jsonify(res.json())
