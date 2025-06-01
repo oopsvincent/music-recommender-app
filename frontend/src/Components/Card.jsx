@@ -10,7 +10,7 @@ const Card = ({
   spoURL,
   YTURL,
   popularity,
-  type,
+  type, // "track", "artist", "album"
   followers,
   description,
   explicit,
@@ -29,42 +29,25 @@ const Card = ({
 
   const toggleSave = () => {
     const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
-    if (saved) {
-      const updated = savedSongs.filter(
-        (song) => !(song.title === title && song.artist === artist)
-      );
-      localStorage.setItem("savedSongs", JSON.stringify(updated));
-      setSaved(false);
-    } else {
-      const newSong = {
-        title,
-        artist,
-        followers,
-        spoURL,
-        YTURL,
-        image: url,
-        description,
-        popularity,
-        explicit,
-        type,
-        trackURI,
-      };
-      localStorage.setItem("savedSongs", JSON.stringify([...savedSongs, newSong]));
-      setSaved(true);
-    }
+    const updatedSongs = saved
+      ? savedSongs.filter((song) => !(song.title === title && song.artist === artist))
+      : [...savedSongs, { title, artist, spoURL, YTURL, image: url, description, popularity, explicit, type, trackURI, followers }];
+    localStorage.setItem("savedSongs", JSON.stringify(updatedSongs));
+    setSaved(!saved);
   };
 
   const openLink = (link) => window.open(link, "_blank");
   const playTrack = () => {
-    if (trackURI?.startsWith("spotify:")) {
-      showPlayer(trackURI);
-    }
+    if (trackURI?.startsWith("spotify:")) showPlayer(trackURI);
   };
 
-  const displayDesc =
-    description && description.length > 150
-      ? description.slice(0, 147) + "..."
-      : description;
+  const displayDesc = description && description.length > 150
+    ? description.slice(0, 147) + "..."
+    : description;
+
+  const isTrack = type === "track";
+  const isArtist = type === "artist";
+  const isAlbum = type === "album";
 
   return (
     <div className="relative w-full max-w-md p-4 m-2 rounded-xl border border-white/20 bg-black/30 backdrop-blur-md hover:bg-black/40 transition-colors shadow-md">
@@ -76,8 +59,8 @@ const Card = ({
           className="w-24 h-24 object-cover rounded-lg shadow-md"
         />
         <div className="flex flex-col gap-2 justify-center">
-          <SmallSpotifyButton clickHandle={() => openLink(spoURL)} />
-          <SmallYouTubeButton clickHandle={() => openLink(YTURL)} />
+          {spoURL && <SmallSpotifyButton clickHandle={() => openLink(spoURL)} />}
+          {YTURL && <SmallYouTubeButton clickHandle={() => openLink(YTURL)} />}
         </div>
       </div>
 
@@ -109,31 +92,37 @@ const Card = ({
         </button>
       </div>
 
-      {/* Description */}
-      {displayDesc && (
+      {/* Description (Album/Artist Only) */}
+      {(isArtist || isAlbum) && displayDesc && (
         <p className="text-sm text-gray-300 mt-2">{displayDesc}</p>
       )}
 
-      {/* Artist + Popularity */}
       <div className="mt-3 flex flex-col gap-1">
-        <p className="text-xs text-gray-400">
-          {followers?.toLocaleString()} Followers
-        </p>
-        <div
-          className={`inline-flex items-center gap-2 text-sm ${
-            popularity < 80 ? "text-yellow-400" : "text-lime-400"
-          }`}
-        >
-          <Award size={16} />
-          <span>
-            Popularity: {popularity}{" "}
-            {popularity >= 80 && <span title="Trending 🔥">🔥</span>}
-          </span>
-        </div>
+        {/* Artist → Followers */}
+        {isArtist && followers && (
+          <p className="text-xs text-gray-400">
+            {followers.toLocaleString()} Followers
+          </p>
+        )}
+
+        {/* Track/Album → Popularity */}
+        {(isTrack || isAlbum) && popularity !== undefined && (
+          <div
+            className={`inline-flex items-center gap-2 text-sm ${
+              popularity < 80 ? "text-yellow-400" : "text-lime-400"
+            }`}
+          >
+            <Award size={16} />
+            <span>
+              Popularity: {popularity}{" "}
+              {popularity >= 80 && <span title="Trending 🔥">🔥</span>}
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* Play Button */}
-      {trackURI && (
+      {/* Play Button (Track Only) */}
+      {isTrack && trackURI && (
         <button
           onClick={playTrack}
           className="absolute bottom-3 right-3 bg-green-500 hover:bg-green-600 text-white p-2 rounded-full transition-transform hover:scale-110"
@@ -143,8 +132,8 @@ const Card = ({
         </button>
       )}
 
-      {/* Explicit Tag */}
-      {explicit && (
+      {/* Explicit Tag (Track Only) */}
+      {isTrack && explicit && (
         <span
           title="Explicit Content"
           className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-0.5 rounded"
