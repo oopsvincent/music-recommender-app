@@ -5,6 +5,7 @@ import PlaylistsOverview from '../Components/PlaylistOverview';
 import SavedAlbums from '../Components/SavedAlbums';
 import LocallySavedSongs from '../Components/LocallySavedSongs';
 import { usePlayer } from '../contexts/PlayerContext';
+import FollowedArtist from '../Components/FollowedArtist';
 
 const PlaylistSection = () => {
   const [playlists, setPlaylists] = useState([]);
@@ -12,12 +13,14 @@ const PlaylistSection = () => {
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [localSaved, setLocalSaved] = useState([]);
   const [albums, setAlbums] = useState([]);
+  const [artists, setArtists] = useState([]);
   const [selectedSection, setSelectedSection] = useState('playlists'); // chips: playlists, albums, saved
   const { showPlayer } = usePlayer();
 
   useEffect(() => {
     fetchPlaylists();
     fetchAlbums();
+    fetchArtists();
     loadLocalSaved();
   }, []);
 
@@ -42,6 +45,20 @@ const PlaylistSection = () => {
       console.error('[ERROR] Failed to fetch albums:', err);
     }
   };
+  
+  const fetchArtists = async () => {
+    try {
+      const res = await fetch('https://music-recommender-api.onrender.com/me/artists', { credentials: 'include' });
+      const data = await res.json();
+      setArtists(data.artists.items);
+      console.log(data.artists.items);
+      
+      
+    } catch (err) {
+      console.error('[ERROR] Failed to fetch albums:', err);
+    }
+  };
+
 
   const loadLocalSaved = () => {
     const saved = localStorage.getItem("savedSongs");
@@ -135,7 +152,7 @@ setSelectedAlbum({
 
   const renderChips = () => (
     <div className='flex gap-3 mb-6'>
-      {['playlists', 'albums', 'saved'].map(type => (
+      {['playlists', 'albums', 'artists', 'saved'].map(type => (
         <button
           key={type}
           onClick={() => {
@@ -179,6 +196,12 @@ setSelectedAlbum({
             <>
               <h2 className="text-2xl font-bold mb-6">Your Saved Albums</h2>
               <SavedAlbums albums={albums} onSelectAlbum={fetchAlbumTracks} />
+            </>
+          )}
+          {selectedSection === 'artists' && (
+            <>
+              <h2 className="text-2xl font-bold mb-6">Your Saved Albums</h2>
+            <FollowedArtist artists={artists} />
             </>
           )}
 

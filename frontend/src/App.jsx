@@ -6,6 +6,7 @@ import NotFound from './pages/NotFound';
 import PlaylistSection from './routes/PlaylistSection';
 import AppBar from './Components/AppBar';
 import SpotifyPlayer from './Components/SpotifyPlayer';
+import SpotifyAttribution from './Components/SpotifyAttribution';
 import SearchPage from './pages/SearchPage';
 import UserDashboard from './pages/UserDashboard';
 import SettingsPage from './pages/SettingsPage';
@@ -44,7 +45,8 @@ const App = () => {
               </div>
             </div>
           ) : (
-            <>
+              <>
+              <SpotifyAttribution />
               <AppBar selectedSection={selectedSection} setSection={setSection} />
               <Routes>
                 <Route path="/" element={<HomePage userName={userName} selectedSection={selectedSection} setSection={setSection} />} />
@@ -61,7 +63,6 @@ const App = () => {
 
               {/* ✅ Globally available floating Spotify Player */}
               <SpotifyPlayer />
-
               <Footer />
             </>
           )}
