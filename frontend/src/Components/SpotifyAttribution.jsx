@@ -1,16 +1,20 @@
 import React from 'react';
-// import { cn } from "@/lib/utils"; // Optional: ut Tailwind+ShadCN
 
-const SpotifyAttribution = ({ className }) => {
+const SpotifyAttribution = () => {
   return (
-    <div
-      className=
-        "flex items-center justify-center gap-2 p-4 bg-black rounded-lg shadow-md border border-[#1DB954]/30 text-[#1DB954]"
-    >
-      <img src="/2024-spotify-full-logo/Full_Logo_White_CMYK.svg" width={100} alt="Spotify" />
-      <span className="text-sm font-medium">
-        Content powered by Spotify
-      </span>
+    <div className="w-full flex justify-center mt-4">
+      <div className="flex items-center gap-4 px-6 py-3 bg-[#121212] border border-[#1DB954]/40 rounded-2xl shadow-sm max-w-sm w-full">
+        <img
+          src="/2024-spotify-full-logo/Full_Logo_White_CMYK.svg"
+          alt="Spotify"
+          className="w-24 object-contain"
+        />
+        <div className="flex-1">
+          <p className="text-sm text-white/80 font-medium tracking-wide">
+            Content powered by <span className="text-[#1DB954] font-semibold">Spotify</span>
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
