@@ -65,7 +65,7 @@ export default function RandomTrackButton({ categoryBaseUrl }) {
       <motion.button
         onClick={handleClick}
         disabled={loading}
-        className="bg-[#D40000] z-250 rounded-full p-3 fixed md:bottom-22 bottom-40 right-8 text-white shadow-lg hover:bg-red-700 active:scale-90 transition-transform"
+        className="bg-[#D40000] z-51 rounded-full p-3 fixed md:bottom-22 bottom-40 right-8 text-white shadow-lg hover:bg-red-700 active:scale-90 transition-transform"
         title="Random Track"
       >
         <motion.div
