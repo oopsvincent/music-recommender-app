@@ -10,6 +10,7 @@ import SpotifyAttribution from './Components/SpotifyAttribution';
 import SearchPage from './pages/SearchPage';
 import UserDashboard from './pages/UserDashboard';
 import SettingsPage from './pages/SettingsPage';
+import LibrarySection from './pages/LibrarySection';
 import { AuthProvider } from './hooks/AuthContext';
 import Callback from './pages/Callback';
 import './App.css';
@@ -55,7 +56,7 @@ const App = () => {
                 <Route path="/account" element={<UserDashboard />} />
                 <Route path="/credits" element={<CreditsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/playlist" element={<PlaylistSection />} />
+                <Route path="/playlist" element={<LibrarySection />} />
                 <Route path="/feedback" element={<FeedbackPage />} />
                 <Route path='redirect' element={<Redirect />} />
                 <Route path="*" element={<NotFound />} />

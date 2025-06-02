@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import '../App.css';
 import Card from "../Components/Card";
+import TrackCard from "../Components/TracksCard";
 import ChipSection from "../Components/ChipSection";
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -47,7 +48,7 @@ function HomePage({ userName }) {
     });
     
   return (
-    <div className="md:ml-10 md:mr-10 lg:ml-40 lg:mr-40 h-at-min relative flex flex-col justify-between select-none">
+    <div className="md:pl-10 md:pr-10 lg:pl-40 lg:pr-40 h-at-min relative flex flex-col justify-between select-none">
       <DataNoticeModal />
       <Greet />
       <ChipSection onChipSelect={(chipText) => handleChipSelect({
@@ -68,7 +69,7 @@ function HomePage({ userName }) {
         )) : trackData.map((track, index) => {
   const isArtist = track.type === 'artist';
   return (
-    <Card
+    <TrackCard
       key={index}
       title={track.title}
       artist={track.artists}

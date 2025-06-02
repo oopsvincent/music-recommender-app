@@ -3,7 +3,7 @@ import React from 'react';
 const SpotifyAttribution = () => {
   return (
     <div className="w-full flex justify-center mt-4">
-      <div className="flex items-center gap-4 px-6 py-3 bg-[#121212] border border-[#1DB954]/40 rounded-2xl shadow-sm max-w-sm w-full">
+      <div className="flex items-center gap-4 px-6 py-3 bg-[#121212] rounded-2xl shadow-sm w-full">
         <img
           src="/2024-spotify-full-logo/Full_Logo_White_CMYK.svg"
           alt="Spotify"
