@@ -21,6 +21,8 @@ export default function SpotifyDevices({ isPremium }) {
 
     const transferPlayback = async (deviceId) => {
         try {
+            console.log(deviceId);
+
             const res = await fetch('https://music-recommender-api.onrender.com/player/transfer', {
                 method: 'PUT',
                 credentials: 'include',
@@ -28,8 +30,9 @@ export default function SpotifyDevices({ isPremium }) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    device_id: deviceId, // ✅ match backend format
+                    device_ids: [deviceId], // ✅ correct key and correct format (array)
                 }),
+
             });
 
             if (res.ok) {
@@ -81,9 +84,8 @@ export default function SpotifyDevices({ isPremium }) {
                     {devices.map((device) => (
                         <div
                             key={device.id}
-                            className={`flex items-center justify-between px-2 py-1 rounded ${
-                                device.is_active ? 'bg-green-200' : 'bg-white hover:bg-gray-100'
-                            }`}
+                            className={`flex items-center justify-between px-2 py-1 rounded ${device.is_active ? 'bg-green-200' : 'bg-white hover:bg-gray-100'
+                                }`}
                         >
                             <div className="flex items-center">
                                 {getIcon(device.type)}
