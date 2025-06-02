@@ -21,7 +21,7 @@ export default function SpotifyDevices({ isPremium }) {
 
     const transferPlayback = async (deviceId) => {
         try {
-            const res = await fetch('/player/transfer', {
+            const res = await fetch('https://music-recommender-api.onrender.com/player/transfer', {
                 method: 'PUT',
                 credentials: 'include',
                 headers: {
