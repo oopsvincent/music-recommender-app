@@ -80,7 +80,7 @@ export default function SpotifyPlayer() {
             });
 
             localPlayer.addListener('ready', ({ device_id }) => {
-                console.log('Ready with Device ID:', device_id);
+                // console.log('Ready with Device ID:', device_id);
                 setDeviceId(device_id);
             });
 
@@ -127,7 +127,7 @@ export default function SpotifyPlayer() {
                     }),
                 });
 
-                console.log('[DEBUG] Track URIs sent to player:', uriOrUris);
+                // console.log('[DEBUG] Track URIs sent to player:', uriOrUris);
             } catch (err) {
                 console.error('[ERROR] Failed to play track(s):', err);
             }
@@ -170,7 +170,6 @@ export default function SpotifyPlayer() {
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    console.log(data);
 
 
                     const newTrack = {
@@ -246,7 +245,7 @@ export default function SpotifyPlayer() {
                             </button>
                         </div>
                                                         {/* Spotify branding */}
-                                <div className="w-full border-t border-white/20 pt-3 text-center text-xs text-gray-400">
+                                <div className="w-full pb-3 text-center text-xs text-gray-400">
                                     <img
                                         src="/2024-spotify-full-logo/Full_Logo_White_CMYK.svg"
                                         alt="Spotify"

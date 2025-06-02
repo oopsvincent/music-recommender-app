@@ -15,7 +15,8 @@ import Pagination from "../Components/Pagination";
 import chipMap from "../modules/chipText";
 import { handleChipSelect } from "../modules/chipSelector";
 import { fetchTracksFromDB } from "../modules/trackFetcher";
-import dailyTracks from "../modules/dailyTracks";
+// import dailyTracks from "../modules/dailyTracks";
+import fetchDailyTracks from "../modules/dailyTracks";
 // import SpotifyPlayer from "../Components/SpotifyPlayer";
 
 function HomePage({ userName }) {
@@ -25,17 +26,30 @@ function HomePage({ userName }) {
   const [pagination, setPagination] = useState({ nextUrl: null, prevUrl: null, totalCount: 0, currentPage: 1 });
   const [chipKey, setChipKey] = useState('');
   const limit = 10;
+  const [tracks, setTracks] = useState([]);
 
-  useEffect(() => {
-    const fetchTokenAndLoadTracks = async () => {
-      const token = await getSpotifyToken();
-      setSpotifyToken(token);
-      if (userName) {
-        await loadTracks(dailyTracks, token, setTrackData, setLoading);
-      }
-    };
-    fetchTokenAndLoadTracks();
-  }, [userName]);
+useEffect(() => {
+  const load = async () => {
+    const resolvedTracks = await fetchDailyTracks();
+    console.log("Resolved tracks:", resolvedTracks); // << Correct logging
+    setTracks(resolvedTracks);
+  };
+  load();
+}, []);
+
+
+useEffect(() => {
+  const fetchTokenAndLoadTracks = async () => {
+    if (tracks.length === 0) return;
+    const token = await getSpotifyToken();
+    setSpotifyToken(token);
+    if (userName) {
+      await loadTracks(tracks, token, setTrackData, setLoading);
+    }
+  };
+  fetchTokenAndLoadTracks();
+}, [userName, tracks]); // Now it will wait for tracks to be set
+
 
   const getDataFromDB = (keyOrUrl) =>
     fetchTracksFromDB({
