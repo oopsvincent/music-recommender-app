@@ -263,13 +263,13 @@ def transfer_playback():
         return jsonify({"error": "No access token in session"}), 401
 
     data = request.json
-    device_id = data.get("device_id")
+    device_ids = data.get("device_ids")
 
-    if not device_id:
-        return jsonify({"error": "Missing device_id"}), 400
+    if not device_ids or not isinstance(device_ids, list):
+        return jsonify({"error": "Missing or invalid device_ids"}), 400
 
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    payload = {"device_ids": [device_id], "play": True}  # Set play to True to auto-resume
+    payload = {"device_ids": device_ids, "play": True}
 
     res = requests.put(
         "https://api.spotify.com/v1/me/player",
