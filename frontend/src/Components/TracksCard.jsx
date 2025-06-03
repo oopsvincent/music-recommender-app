@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { PlayCircle, Star, Save, CheckCircle, AlertCircle } from "lucide-react";
-import { usePlayer } from "../contexts/PlayerContext";
-import { SmallSpotifyButton, SmallYouTubeButton } from "./MusicButtons";
+import { PlayCircle, Heart, HeartOff, ExternalLink, Flame } from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpotify, faYoutube } from "@fortawesome/free-brands-svg-icons";
+import { usePlayer } from "../contexts/PlayerContext"; // assuming you have this custom hook
 
 const TrackCard = ({
   url,
@@ -42,77 +43,61 @@ const TrackCard = ({
   };
 
   return (
-    <div className="w-full m-5 rounded-2xl bg-zinc-900/80 border border-zinc-700 p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4 shadow-md hover:bg-zinc-800/90 transition-all duration-200">
-      
-      {/* Cover Image */}
-      <div className="relative w-80 h-auto sm:w-24 sm:h-24 flex-shrink-0">
-        <img
-          src={url}
-          alt={title}
-          className="w-full h-full object-cover rounded-xl"
-        />
-      </div>
-
-      {/* Info + Actions */}
-      <div className="flex-1 w-full">
-        {/* Title + Artist */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full">
-          <div>
-            <h2 className="text-lg font-semibold text-white line-clamp-1">{title}</h2>
-            <p className="text-sm text-zinc-400 line-clamp-1">{artist}</p>
+    <div className="relative mb-5 mx-5 px-10 w-80 overflow-scroll flex gap-4 items-center bg-zinc-900 hover:bg-zinc-800 transition-all duration-200 rounded-2xl p-4 shadow-md group">
+      <img
+        src={url}
+        alt={title}
+        className="w-16 h-16 rounded-lg object-cover shadow-sm"
+      />
+      <div className="flex flex-col justify-between flex-grow min-w-0">
+        <div className="flex items-center gap-2 text-sm text-white font-semibold truncate">
+          {title}
           {explicit && (
-            <span className="relative top-0 right-0 bg-red-600 text-white text-XL px-1 py-[1px] rounded-bl font-bold">
-              EXPLICIT
+            <span className="text-xs bg-red-600 text-white px-1 py-0.5 rounded-sm">
+              E
             </span>
           )}
-          </div>
-
-          <div className="mt-2 sm:mt-0 flex items-center gap-2">
-            {typeof popularity === "number" && (
-                <div className="flex items-center gap-1 text-yellow-400 text-xs">
-                <Star size={14} />
-                <span>{popularity}</span>
-              </div>
-            )}
-            {saved && (
-              <div className="flex items-center gap-1 text-green-500 text-xs">
-                <CheckCircle size={14} />
-                <span>Saved</span>
-              </div>
-            )}
-          </div>
         </div>
-
-        {/* Controls */}
-        <div className="mt-3 flex flex-wrap gap-3 items-center">
-          {/* Play */}
-          {trackURI && (
-            <button
-              onClick={playTrack}
-              className="text-green-400 hover:text-green-300 transition-transform hover:scale-110"
-              title="Play Track"
-            >
-              <PlayCircle size={30} />
-            </button>
-          )}
-
-          {/* Save */}
+        <div className="text-xs text-zinc-400 truncate">{artist}</div>
+        <div className="flex items-center gap-2 mt-2">
           <button
-            onClick={toggleSave}
-            title={saved ? "Unsave" : "Save"}
-            className="text-zinc-400 hover:text-white transition-transform hover:scale-110"
+            onClick={playTrack}
+            className="text-green-400 hover:scale-110 transition-transform"
+            title="Play"
           >
-            {saved ? <CheckCircle size={22} /> : <Save size={22} />}
+            <PlayCircle size={22} />
           </button>
 
-          {/* Spotify & YouTube */}
-          <div className="flex gap-2 ml-auto">
-            {spoURL && (
-              <SmallSpotifyButton clickHandle={() => openLink(spoURL)} />
-            )}
-            {YTURL && (
-              <SmallYouTubeButton clickHandle={() => openLink(YTURL)} />
-            )}
+          <button
+            onClick={toggleSave}
+            className="text-pink-500 hover:scale-110 transition-transform"
+            title={saved ? "Unsave" : "Save"}
+          >
+            {saved ? <HeartOff size={20} /> : <Heart size={20} />}
+          </button>
+
+          <button
+            onClick={() => openLink(spoURL)}
+            title="Open on Spotify"
+            className="text-green-500 hover:text-green-400 transition-colors"
+          >
+            <FontAwesomeIcon icon={faSpotify} size="lg" />
+          </button>
+
+          <button
+            onClick={() => openLink(YTURL)}
+            title="Open on YouTube"
+            className="text-red-500 hover:text-red-400 transition-colors"
+          >
+            <FontAwesomeIcon icon={faYoutube} size="lg" />
+          </button>
+
+          <div
+            className="ml-auto flex items-center gap-1 text-xs text-yellow-400"
+            title={`Popularity: ${popularity}`}
+          >
+            <Flame size={16} />
+            <span>{popularity}</span>
           </div>
         </div>
       </div>

@@ -203,6 +203,42 @@ export default function SpotifyPlayer() {
     }, [isPremium]);
 
     useEffect(() => {
+    if (!currentTrack) return;
+
+    // Set document title to the current track's name
+    document.title = `${currentTrack.title} — ${currentTrack.artists}`;
+
+    // Change favicon to album image
+    const favicon = document.querySelector('link[rel="icon"]') || document.createElement('link');
+    favicon.rel = 'icon';
+    favicon.type = 'image/png';
+    favicon.href = currentTrack.albumImage;
+
+    document.head.appendChild(favicon);
+    
+    if ("mediaSession" in navigator) {
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: currentTrack.title,
+    artist: currentTrack.artists,
+    // album: "Album Name (optional)",
+    artwork: [
+      { src: currentTrack.albumImage, sizes: "512x512", type: "image/png" }
+    ]
+  });
+}
+
+
+    // Optional: Clean up on unmount
+    return () => {
+        document.title = 'GrooveEstrella Music Recommender'; // Or your default app title
+        if (favicon) {
+            favicon.href = '/favicon.ico'; // Reset to default favicon
+        }
+    };
+}, [currentTrack]);
+
+
+    useEffect(() => {
         if (!player || !isPremium) return;
 
         const poll = setInterval(async () => {
@@ -234,9 +270,9 @@ export default function SpotifyPlayer() {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 30 }}
                     transition={{ duration: 0.3, ease: 'easeOut' }}
-                    className="[&::-webkit-scrollbar]:hidden fixed inset-0 sm:bottom-20 sm:left-1/2 sm:-translate-x-1/2 sm:w-[95%] sm:max-w-md backdrop-blur-md bg-[#121212]/90 border border-white/20 rounded-none sm:rounded-3xl shadow-xl z-[150]"
+                    className="fixed inset-0 sm:bottom-20 sm:left-1/2 sm:-translate-x-1/2 sm:w-[95%] sm:max-w-md backdrop-blur-md bg-[#121212]/90 border border-white/20 rounded-none sm:rounded-3xl shadow-xl z-[150] scrollb-none"
                 >
-                    <div className="p-5 pt-6 pb-10 flex flex-col items-center w-full space-y-5 overflow-y-auto max-h-[90vh]">
+                    <div className="p-5 pt-6 pb-10 flex flex-col items-center w-full space-y-5 overflow-y-auto max-h-[90vh] scrollb-none">
                         {/* Header */}
                         <div className="flex justify-between items-center w-full">
                             <h2 className="text-white text-base font-semibold">Now Playing</h2>

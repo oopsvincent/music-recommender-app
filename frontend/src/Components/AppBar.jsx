@@ -112,7 +112,7 @@ const AppBar = ({ selectedSection, setSection }) => {
                     }`}
                 >
                     <ListMusic />
-                    <p className="text-xs">Playlist</p>
+                    <p className="text-xs">Library</p>
                 </motion.div>
             </div>
         </nav>

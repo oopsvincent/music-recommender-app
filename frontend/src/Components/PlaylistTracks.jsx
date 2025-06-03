@@ -1,12 +1,13 @@
 // PlaylistTracks.jsx
 import React from 'react';
 import Card from '../Components/Card';
+import { TrackCard } from './CardComponents/TracksCard';
 
 const PlaylistTracks = ({ tracks }) => {
     return (
-        <div className="flex flex-row flex-wrap justify-center">
+        <div className="flex flex-row flex-wrap justify-center gap-5">
             {tracks.map((item, idx) => (
-                <Card
+                <TrackCard
                     key={idx}
                     url={item.track.album.images[0]?.url}
                     title={item.track.name}
@@ -16,7 +17,6 @@ const PlaylistTracks = ({ tracks }) => {
                     trackURI={item.track.uri}
                     YTURL={`https://www.youtube.com/results?search_query=${item.track.name} ${item.track.artists.map(a => a.name).join(', ')}`}
                     spoURL={item.track.external_urls.spotify}
-                    type="track"
                 />
             ))}
         </div>
