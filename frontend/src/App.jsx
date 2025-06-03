@@ -22,6 +22,7 @@ import { PlayerProvider } from './contexts/PlayerContext';
 import Footer from './Components/Footer';
 import CreditsPage from './pages/CreditsPages';
 import Redirect from './pages/redirect';
+import ArtistPage from './pages/ArtistPage';
 
 const App = () => {
   const [selectedSection, setSection] = useState('');
@@ -50,6 +51,7 @@ const App = () => {
               <SpotifyAttribution />
               <AppBar selectedSection={selectedSection} setSection={setSection} />
               <Routes>
+                <Route path="/artist/:id" element={<ArtistPage />} />
                 <Route path="/" element={<HomePage userName={userName} selectedSection={selectedSection} setSection={setSection} />} />
                 <Route path="/callback" element={<Callback />} />
                 <Route path="/search" element={<SearchPage />} />

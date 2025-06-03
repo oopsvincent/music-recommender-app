@@ -181,3 +181,11 @@ body {
   background-size: 100vw;
   background-position: center;
 }
+
+.scroll-hidden {
+    scrollbar-width: none;
+}
+
+.scroll-hidden::-webkit-scrollbar{
+    
+}

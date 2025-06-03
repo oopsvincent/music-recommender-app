@@ -4,6 +4,9 @@ import Card from '../Components/Card';
 import Skeleton from 'react-loading-skeleton';
 import useDebouncedSearch from '../hooks/useDebouncedSearch';
 import fetchYouTubeData from '../hooks/useYoutubeSearch';
+import { ArtistCard } from '../Components/CardComponents/ArtistsCard';
+import { TrackCard } from '../Components/CardComponents/TracksCard';
+import { AlbumCard } from '../Components/CardComponents/AlbumsCard';
 
 
 const SearchPage = () => {
@@ -33,7 +36,7 @@ const SearchPage = () => {
             : "Start typing to search for tracks"}
     </p>
 
-    <div className="flex flex-row flex-wrap justify-center mb-5">
+    <div className="flex flex-row flex-wrap justify-center gap-5">
         {loading ? (
             Array.from({ length: 20 }).map((_, index) => (
                 <div key={index} className="p-4">
@@ -47,19 +50,41 @@ const SearchPage = () => {
             ))
         ) : (
             (searchTerm ? searchResults  : searchResults).map((track, index) => (
-                <Card
+                <div className='flex flex-row flex-wrap justify-center gap-5' key={index}>
+                {track.type === "artist" && 
+                <ArtistCard 
+                followers={track.followers}
+                url={track.url}
+                title={track.title}
+                YTURL={track.YTURL}
+                spoURL={track.spoURL}
+                id={track.id}
+                />}
+                
+                    {track.type === "album" && 
+                    <AlbumCard
+                    popularity={track.popularity}
+                    YTURL={track.YTURL}
+                    spoURL={track.spoURL}
+                    url={track.url}
+                    title={track.title}
+                    artist={track.artists}
+                />    
+                }
+                {track.type === "track" &&                 
+                <TrackCard
                     followers={track.followers}
-                    key={index}
                     url={track.url}
                     title={track.title}
                     artist={track.artists}
                     spoURL={track.spoURL}
                     YTURL={fetchYouTubeData(track.title + " " + track.artists)}
                     popularity={track.popularity}
-                    type={track.type}
                     explicit={track.explicit}
                     trackURI={track.trackURI}
                 />
+                }
+                </div>
             ))
         )}
 

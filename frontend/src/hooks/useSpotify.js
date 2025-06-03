@@ -111,6 +111,7 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
                     next: nextResults,
                     prev: prevResults,
                     trackURI: item.uri,
+                    id: item.id,
                 };
             } else if (type === "album") {
                 return {
