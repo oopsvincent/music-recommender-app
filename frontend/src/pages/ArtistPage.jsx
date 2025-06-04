@@ -1,63 +1,127 @@
 // ArtistPage.jsx
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { getSpotifyToken } from "../hooks/useSpotify";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Bookmark, BookmarkCheck } from "lucide-react";
 import { SpotifyButton } from "../Components/MusicButtons";
-import { Link } from "react-router-dom";
 
 export default function ArtistPage() {
-    const { id, redirected_from } = useParams();
+    const { id } = useParams();
+    const [token, setToken] = useState("");
     const [artist, setArtist] = useState(null);
     const [topTracks, setTopTracks] = useState([]);
-    const [token, setToken] = useState("");
-
-    console.log(redirected_from);
-    
+    const [albums, setAlbums] = useState([]);
+    const [relatedArtists, setRelatedArtists] = useState([]);
+    const [saved, setSaved] = useState(false);
 
     useEffect(() => {
         async function fetchData() {
             const t = await getSpotifyToken();
             setToken(t);
 
-            const artistRes = await axios.get(`https://api.spotify.com/v1/artists/${id}`, {
-                headers: { Authorization: `Bearer ${t}` },
-            });
-            setArtist(artistRes.data);
+            const [artistRes, topTracksRes, albumsRes, relatedRes] = await Promise.all([
+                axios.get(`https://api.spotify.com/v1/artists/${id}`, {
+                    headers: { Authorization: `Bearer ${t}` },
+                }),
+                axios.get(`https://api.spotify.com/v1/artists/${id}/top-tracks?market=US`, {
+                    headers: { Authorization: `Bearer ${t}` },
+                }),
+                axios.get(`https://api.spotify.com/v1/artists/${id}/albums?include_groups=album,single&market=US`, {
+                    headers: { Authorization: `Bearer ${t}` },
+                }),
+                // axios.get(`https://api.spotify.com/v1/artists/${id}/related-artists`, {
+                //     headers: { Authorization: `Bearer ${t}` },
+                // }),
+            ]);
 
-            const tracksRes = await axios.get(`https://api.spotify.com/v1/artists/${id}/top-tracks?market=US`, {
-                headers: { Authorization: `Bearer ${t}` },
-            });
-            setTopTracks(tracksRes.data.tracks);
+            setArtist(artistRes.data);
+            setTopTracks(topTracksRes.data.tracks);
+
+            const uniqueAlbums = [];
+            const seen = new Set();
+            for (const album of albumsRes.data.items) {
+                if (!seen.has(album.name)) {
+                    uniqueAlbums.push(album);
+                    seen.add(album.name);
+                }
+            }
+            setAlbums(uniqueAlbums.slice(0, 12));
+            setRelatedArtists(relatedRes.data.artists);
+
+            // Check if artist is saved
+            const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
+            setSaved(savedArtists.some(a => a.id === artistRes.data.id));
         }
 
         fetchData();
     }, [id]);
 
+    const handleSave = () => {
+        const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
+
+        if (saved) {
+            const updated = savedArtists.filter(a => a.id !== artist.id);
+            localStorage.setItem("savedArtists", JSON.stringify(updated));
+            setSaved(false);
+        } else {
+            const newArtist = {
+                id: artist.id,
+                name: artist.name,
+                url: artist.external_urls.spotify,
+                image: artist.images[0]?.url,
+                followers: artist.followers.total,
+                popularity: artist.popularity,
+            };
+            savedArtists.push(newArtist);
+            localStorage.setItem("savedArtists", JSON.stringify(savedArtists));
+            setSaved(true);
+        }
+    };
+
     if (!artist) return <div className="text-white p-10">Loading...</div>;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-black p-6 text-white">
-            <Link to="/" className="flex items-center gap-2 text-gray-300 hover:text-white mb-6">
-                <ArrowLeft /> Back
-            </Link>
+            {/* Breadcrumb */}
+            <div className="flex justify-between items-center mb-6">
+                <Link to="/" className="flex items-center gap-2 text-gray-300 hover:text-white text-sm">
+                    <ArrowLeft size={18} /> Back to Home
+                </Link>
+                {saved ? (
+                    <BookmarkCheck stroke="white" fill="green" onClick={handleSave} className="cursor-pointer" />
+                ) : (
+                    <Bookmark stroke="white" onClick={handleSave} className="cursor-pointer" />
+                )}
+            </div>
 
+            {/* Artist Header */}
             <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
                 <img
                     src={artist.images[0]?.url}
                     alt={artist.name}
                     className="w-52 h-52 md:w-64 md:h-64 rounded-full ring-4 ring-purple-500/50 object-cover shadow-lg"
                 />
-                <div className="space-y-4 text-center md:text-left">
+                <div className="space-y-3 text-center md:text-left">
                     <h1 className="text-5xl font-extrabold">{artist.name}</h1>
                     <p className="text-lg text-gray-300">{artist.followers.total.toLocaleString()} Followers</p>
                     <p className="text-lg text-yellow-400">Popularity: {artist.popularity}</p>
+
+                    {/* Genre Tags */}
+                    <div className="flex flex-wrap gap-2 justify-center md:justify-start mt-2">
+                        {artist.genres.map((genre, i) => (
+                            <span key={i} className="bg-purple-700/60 px-3 py-1 rounded-full text-sm text-white">
+                                {genre}
+                            </span>
+                        ))}
+                    </div>
+
                     <SpotifyButton clickHandle={() => window.open(artist.external_urls.spotify, "_blank")} />
                 </div>
             </div>
 
+            {/* Top Tracks */}
             <div className="mt-12">
                 <h2 className="text-3xl font-bold mb-4">Top Tracks</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -78,6 +142,46 @@ export default function ArtistPage() {
                                 <SpotifyButton clickHandle={() => window.open(track.external_urls.spotify, "_blank")} />
                             </div>
                         </motion.div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Discography */}
+            <div className="mt-12">
+                <h2 className="text-3xl font-bold mb-4">Discography</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                    {albums.map(album => (
+                        <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            key={album.id}
+                            className="bg-white/5 p-3 rounded-xl text-center space-y-2"
+                        >
+                            <img src={album.images[0]?.url} alt={album.name} className="w-full h-48 object-cover rounded-md shadow" />
+                            <h4 className="text-white font-semibold text-sm truncate">{album.name}</h4>
+                            <p className="text-gray-400 text-xs">{album.release_date}</p>
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Related Artists */}
+            <div className="mt-12">
+                <h2 className="text-3xl font-bold mb-4">Related Artists</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                    {relatedArtists.slice(0, 8).map(ra => (
+                        <Link to={`/artist/${ra.id}`} key={ra.id}>
+                            <motion.div
+                                whileHover={{ scale: 1.02 }}
+                                className="bg-white/10 p-4 rounded-xl text-center"
+                            >
+                                <img
+                                    src={ra.images[0]?.url}
+                                    alt={ra.name}
+                                    className="w-24 h-24 rounded-full object-cover mx-auto mb-2"
+                                />
+                                <h4 className="text-white font-medium">{ra.name}</h4>
+                            </motion.div>
+                        </Link>
                     ))}
                 </div>
             </div>

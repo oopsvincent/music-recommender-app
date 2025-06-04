@@ -47,7 +47,7 @@ export const TrackCard = ({
 
   const handlePlayClick = () => {
     if (trackURI && trackURI.startsWith("spotify:")) {
-      showPlayer(trackURI);
+      showPlayer(trackURI, true);
     } else {
       console.warn("Invalid Spotify URI:", trackURI);
     }
