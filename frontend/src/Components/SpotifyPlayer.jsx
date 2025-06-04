@@ -111,7 +111,7 @@ export default function SpotifyPlayer() {
     }, [isPremium, isAuthenticated]);
 
     useEffect(() => {
-        const playTrack = async (uriOrUris) => {
+        const playTrack = async (uriOrUris, isContext = false) => {
             if (!deviceId || !uriOrUris || !isPremium) return;
 
             try {
@@ -121,13 +121,11 @@ export default function SpotifyPlayer() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         device_id: deviceId,
-                        ...(Array.isArray(uriOrUris)
-                            ? { uris: uriOrUris }
-                            : { uris: [uriOrUris] }) // always expect array for uris
+                        ...(isContext
+                            ? { context_uri: uriOrUris } // e.g. spotify:album:xxx or spotify:playlist:xxx
+                            : { uris: Array.isArray(uriOrUris) ? uriOrUris : [uriOrUris] })
                     }),
                 });
-
-                // console.log('[DEBUG] Track URIs sent to player:', uriOrUris);
             } catch (err) {
                 console.error('[ERROR] Failed to play track(s):', err);
             }
@@ -203,39 +201,39 @@ export default function SpotifyPlayer() {
     }, [isPremium]);
 
     useEffect(() => {
-    if (!currentTrack) return;
+        if (!currentTrack) return;
 
-    // Set document title to the current track's name
-    document.title = `${currentTrack.title} — ${currentTrack.artists}`;
+        // Set document title to the current track's name
+        document.title = `${currentTrack.title} — ${currentTrack.artists}`;
 
-    // Change favicon to album image
-    const favicon = document.querySelector('link[rel="icon"]') || document.createElement('link');
-    favicon.rel = 'icon';
-    favicon.type = 'image/png';
-    favicon.href = currentTrack.albumImage;
+        // Change favicon to album image
+        const favicon = document.querySelector('link[rel="icon"]') || document.createElement('link');
+        favicon.rel = 'icon';
+        favicon.type = 'image/png';
+        favicon.href = currentTrack.albumImage;
 
-    document.head.appendChild(favicon);
-    
-    if ("mediaSession" in navigator) {
-  navigator.mediaSession.metadata = new MediaMetadata({
-    title: currentTrack.title,
-    artist: currentTrack.artists,
-    // album: "Album Name (optional)",
-    artwork: [
-      { src: currentTrack.albumImage, sizes: "512x512", type: "image/png" }
-    ]
-  });
-}
+        document.head.appendChild(favicon);
 
-
-    // Optional: Clean up on unmount
-    return () => {
-        document.title = 'GrooveEstrella Music Recommender'; // Or your default app title
-        if (favicon) {
-            favicon.href = '/favicon.ico'; // Reset to default favicon
+        if ("mediaSession" in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: currentTrack.title,
+                artist: currentTrack.artists,
+                // album: "Album Name (optional)",
+                artwork: [
+                    { src: currentTrack.albumImage, sizes: "512x512", type: "image/png" }
+                ]
+            });
         }
-    };
-}, [currentTrack]);
+
+
+        // Optional: Clean up on unmount
+        return () => {
+            document.title = 'GrooveEstrella Music Recommender'; // Or your default app title
+            if (favicon) {
+                favicon.href = '/favicon.ico'; // Reset to default favicon
+            }
+        };
+    }, [currentTrack]);
 
 
     useEffect(() => {
@@ -274,21 +272,21 @@ export default function SpotifyPlayer() {
                 >
                     <div className="p-5 pt-6 pb-10 flex flex-col items-center w-full space-y-5 overflow-y-auto max-h-[90vh] scrollb-none">
                         {/* Header */}
-                        <div className="flex justify-between items-center w-full">
+                        <div className="flex justify-between items-center w-full m-0">
                             <h2 className="text-white text-base font-semibold">Now Playing</h2>
                             <button onClick={() => setIsExpanded(false)}>
                                 <ChevronDown className="text-white" />
                             </button>
                         </div>
-                                                        {/* Spotify branding */}
-                                <div className="w-full pb-3 text-center text-xs text-gray-400">
-                                    <img
-                                        src="/2024-spotify-full-logo/Full_Logo_White_CMYK.svg"
-                                        alt="Spotify"
-                                        className="mx-auto w-32"
-                                    />
-                                    <p className="mt-1">Powered by Spotify</p>
-                                </div>
+                        {/* Spotify branding */}
+                        <div className="w-auto pb-3 text-center text-xs m-0 text-gray-400">
+                            <img
+                                src="/2024-spotify-full-logo/Full_Logo_White_CMYK.svg"
+                                alt="Spotify"
+                                className="mx-auto w-32"
+                            />
+                            <p className="mt-1">Powered by Spotify</p>
+                        </div>
 
                         {/* Track info */}
                         {currentTrack && (
@@ -315,44 +313,55 @@ export default function SpotifyPlayer() {
                                     value={position}
                                     onChange={handleSeek}
                                     disabled={!isPremium}
-                                    className="w-full accent-green-500 disabled:opacity-50"
+                                    className="w-full accent-green-500 disabled:opacity-50 mb-0"
                                 />
-                                <p className="text-gray-400 text-xs tracking-wide text-center">
-                                    {formatTime(position)} / {formatTime(duration)}
-                                </p>
+                                <div className='w-full flex justify-between items-center mb-0'>
+                                    <p className="text-gray-400 text-xs tracking-wide text-center">
+                                        {formatTime(position)}
+                                    </p>
+                                    <p className="text-gray-400 text-xs tracking-wide text-center">
+                                        {formatTime(duration)}
+                                    </p>
+                                </div>
 
                                 {/* Controls */}
-                                <div className="flex items-center justify-center gap-6 mt-3">
-                                    <button
+                                <div className="flex items-center justify-center gap-6 m-0 mb-2">
+                                    <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        whileHover={{ scale: 1.1 }}
                                         disabled={!isPremium}
                                         onClick={() => player?.previousTrack()}
                                         className={`rounded-full w-12 h-12 flex items-center justify-center transition shadow-md ${!isPremium
                                             ? 'bg-gray-700'
-                                            : 'bg-white text-black hover:scale-105 active:scale-95'
+                                            : 'text-white'
                                             }`}
                                     >
-                                        <SkipBack size={20} />
-                                    </button>
-                                    <button
+                                        <SkipBack size={32} fill='white' />
+                                    </motion.button>
+                                    <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        whileHover={{ scale: 1.05 }}
                                         disabled={!isPremium}
                                         onClick={togglePlay}
                                         className={`rounded-full w-16 h-16 flex items-center justify-center transition shadow-md ${!isPremium
                                             ? 'bg-gray-700'
-                                            : 'bg-white text-black hover:scale-105 active:scale-95'
+                                            : 'bg-white text-black'
                                             }`}
                                     >
-                                        {isPaused ? <Play size={24} /> : <Pause size={24} />}
-                                    </button>
-                                    <button
+                                        {isPaused ? <Play size={28} /> : <Pause size={28} />}
+                                    </motion.button>
+                                    <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        whileHover={{ scale: 1.1 }}
                                         disabled={!isPremium}
                                         onClick={() => player?.nextTrack()}
                                         className={`rounded-full w-12 h-12 flex items-center justify-center transition shadow-md ${!isPremium
                                             ? 'bg-gray-700'
-                                            : 'bg-white text-black hover:scale-105 active:scale-95'
+                                            : 'text-white'
                                             }`}
                                     >
-                                        <SkipForward size={20} />
-                                    </button>
+                                        <SkipForward size={32} fill='white' />
+                                    </motion.button>
                                 </div>
 
                                 {/* Volume */}
@@ -418,16 +427,18 @@ export default function SpotifyPlayer() {
                         </>
                     )}
                     <div className="ml-4 flex items-center space-x-3">
-                        <button
+                        <motion.button
+                        whileTap={{ scale: 1.1 }}
+                        whileHover={{ scale: 0.95 }}
                             onClick={togglePlay}
                             disabled={!isPremium}
                             className={`rounded-full w-9 h-9 flex items-center justify-center shadow-md transition ${!isPremium
                                 ? 'bg-gray-700'
-                                : 'bg-white text-black hover:scale-105 active:scale-95'
+                                : 'text-black bg-white'
                                 }`}
                         >
                             {isPaused ? <Play size={16} /> : <Pause size={16} />}
-                        </button>
+                        </motion.button>
                         <button onClick={() => setIsExpanded(true)}>
                             <ChevronUp className="text-white" />
                         </button>

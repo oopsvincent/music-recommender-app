@@ -47,8 +47,6 @@ export default function UserDashboard() {
   const handleLogout = async () => {
     try {
       await fetch('https://music-recommender-api.onrender.com/logout', { credentials: 'include' });
-      localStorage.clear();
-      navigate('/');
       window.location.reload();
     } catch (err) {
       console.error('[ERROR] Logout failed:', err);

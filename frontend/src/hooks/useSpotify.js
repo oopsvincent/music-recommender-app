@@ -74,7 +74,7 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
         );
 
         const data = await response.json();
-        // console.log("API Response:", data);
+        console.log("API Response:", data);
 
         const resultsArray = data[type + "s"]?.items || [];
         const nextResults = data?.previous;
@@ -84,6 +84,7 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
             setSearchResults([]);
             return;
         }
+
 
         const results = resultsArray.map((item) => {
             if (type === "track") {
