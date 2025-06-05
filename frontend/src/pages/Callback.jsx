@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/AuthContext';
+import { Loader2 } from 'lucide-react';
 
 export default function Callback() {
   const location = useLocation();
@@ -18,7 +19,7 @@ export default function Callback() {
       return;
     }
 
-    console.log("🎟 Code received:", code);
+    // console.log("🎟 Code received:", code);
 
     // Step 1: Exchange code → backend (sets session cookie)
     fetch(`https://music-recommender-api.onrender.com/callback?code=${encodeURIComponent(code)}`, {
@@ -30,7 +31,7 @@ export default function Callback() {
         return response.json();
       })
       .then((data) => {
-        console.log("✅ Callback success, verifying session...");
+        // console.log("✅ Callback success, verifying session...");
 
         // Step 2: Verify session by calling /me (requires cookie)
         return fetch(`https://music-recommender-api.onrender.com/me`, {
@@ -43,7 +44,7 @@ export default function Callback() {
         return res.json();
       })
       .then((profileData) => {
-        console.log("✅ Session verified, user profile:", profileData);
+        // console.log("✅ Session verified, user profile:", profileData);
 
         // Step 3: Set dummy token to indicate 'authenticated'
         setAuthTokens({ sessionActive: true });  // We're just marking login status
@@ -57,5 +58,10 @@ export default function Callback() {
       });
   }, [location, navigate, setAuthTokens]);
 
-  return <div className='text-white text-center text-xl p-10'>Processing your Spotify login… Please wait.</div>;
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-black text-white">
+      <Loader2 className="animate-spin w-8 h-8 mr-3" />
+      <span className="text-lg">Loading your music library...</span>
+    </div>
+  );
 }

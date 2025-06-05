@@ -231,7 +231,7 @@ const loadLocalStorageData = () => {
         {!isAuthenticated && (
   <div className="mb-6 text-yellow-300 bg-yellow-800/30 p-3 rounded-md text-sm text-center border border-yellow-500/30">
     You’re not logged in. Showing locally saved content only. <br />
-    <a href="/auth/login" className="underline text-yellow-400">Login to Spotify</a> to view your full library.
+    <a href="/account" className="underline text-yellow-400">Login to Spotify</a> to view your full library.
   </div>
 )}
 

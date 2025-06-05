@@ -267,6 +267,93 @@ def transfer_playback():
 
     return jsonify({"status": "playback transferred"})
 
+@spotify.route("/player/repeat", methods=["PUT"])
+def set_repeat():
+    if not refresh_access_token_if_expired():
+        return jsonify({"error": "Unauthorized"}), 401
+
+    token = session.get("access_token")
+    data = request.json
+    state = data.get("state")  # 'off', 'context', 'track'
+    device_id = data.get("device_id", "")
+
+    if state not in ["off", "context", "track"]:
+        return jsonify({"error": "Invalid repeat mode"}), 400
+
+    headers = {"Authorization": f"Bearer {token}"}
+    res = requests.put(
+        f"https://api.spotify.com/v1/me/player/repeat?state={state}&device_id={device_id}",
+        headers=headers,
+    )
+
+    if res.status_code != 204:
+        return jsonify({"error": "Failed to set repeat", "details": res.text}), 400
+
+    return jsonify({"status": "repeat set", "repeat": state})
+
+@spotify.route("/player/shuffle", methods=["PUT"])
+def set_shuffle():
+    if not refresh_access_token_if_expired():
+        return jsonify({"error": "Unauthorized"}), 401
+
+    token = session.get("access_token")
+    data = request.json
+    state = data.get("state")  # true or false
+    device_id = data.get("device_id", "")
+
+    if state is None:
+        return jsonify({"error": "Missing 'state' (true/false)"}), 400
+
+    headers = {"Authorization": f"Bearer {token}"}
+    res = requests.put(
+        f"https://api.spotify.com/v1/me/player/shuffle?state={str(state).lower()}&device_id={device_id}",
+        headers=headers,
+    )
+
+    if res.status_code != 204:
+        return jsonify({"error": "Failed to set shuffle", "details": res.text}), 400
+
+    return jsonify({"status": "shuffle set", "shuffle": state})
+
+@spotify.route("/player/queue")
+def get_queue():
+    if not refresh_access_token_if_expired():
+        return jsonify({"error": "Unauthorized"}), 401
+
+    token = session.get("access_token")
+    headers = {"Authorization": f"Bearer {token}"}
+    res = requests.get("https://api.spotify.com/v1/me/player/queue", headers=headers)
+
+    if res.status_code != 200:
+        return jsonify({"error": "Failed to fetch queue", "details": res.text}), 400
+
+    return jsonify(res.json())  # contains 'currently_playing' and 'queue' list
+
+@spotify.route("/player/queue", methods=["POST"])
+def add_to_queue():
+    if not refresh_access_token_if_expired():
+        return jsonify({"error": "Unauthorized"}), 401
+
+    token = session.get("access_token")
+    data = request.json
+    uri = data.get("uri")
+    device_id = data.get("device_id", "")
+
+    if not uri:
+        return jsonify({"error": "Missing track URI"}), 400
+
+    headers = {"Authorization": f"Bearer {token}"}
+    res = requests.post(
+        f"https://api.spotify.com/v1/me/player/queue?uri={uri}&device_id={device_id}",
+        headers=headers
+    )
+
+    if res.status_code != 204:
+        return jsonify({"error": "Failed to add to queue", "details": res.text}), 400
+
+    return jsonify({"status": "track queued", "uri": uri})
+
+
 # Helper
 def get_spotify_headers():
     refresh_access_token_if_expired()
