@@ -29,6 +29,9 @@ export default function SpotifyPlayer() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const { visiblePlayer, trackUri, isPremium } = usePlayer();
     const [devices, setDevices] = useState([]);
+    const [isShuffling, setIsShuffling] = useState(false);
+    const [repeatMode, setRepeatMode] = useState('off'); // options: 'off', 'context', 'track'
+
 
     useEffect(() => {
         if (isExpanded) {
@@ -155,6 +158,32 @@ export default function SpotifyPlayer() {
         const secs = Math.floor((ms % 60000) / 1000);
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     };
+
+    const toggleShuffle = async () => {
+        try {
+            const res = await fetch(`https://music-recommender-api.onrender.com/player/shuffle?state=${!isShuffling}`, {
+                method: 'PUT',
+                credentials: 'include',
+            });
+            if (res.ok) setIsShuffling(!isShuffling);
+        } catch (err) {
+            console.error('[ERROR] Failed to toggle shuffle:', err);
+        }
+    };
+
+    const cycleRepeatMode = async () => {
+        const nextMode = repeatMode === 'off' ? 'context' : repeatMode === 'context' ? 'track' : 'off';
+        try {
+            const res = await fetch(`https://music-recommender-api.onrender.com/player/repeat?state=${nextMode}`, {
+                method: 'PUT',
+                credentials: 'include',
+            });
+            if (res.ok) setRepeatMode(nextMode);
+        } catch (err) {
+            console.error('[ERROR] Failed to change repeat mode:', err);
+        }
+    };
+
 
     useEffect(() => {
         let intervalId;
@@ -324,45 +353,89 @@ export default function SpotifyPlayer() {
                                     </p>
                                 </div>
 
-                                {/* Controls */}
-                                <div className="flex items-center justify-center gap-6 m-0 mb-2">
+                                <div className="flex items-center justify-between w-full px-10 mt-2">
+                                    {/* Shuffle */}
                                     <motion.button
                                         whileTap={{ scale: 0.9 }}
                                         whileHover={{ scale: 1.1 }}
+                                        onClick={toggleShuffle}
                                         disabled={!isPremium}
-                                        onClick={() => player?.previousTrack()}
-                                        className={`rounded-full w-12 h-12 flex items-center justify-center transition shadow-md ${!isPremium
-                                            ? 'bg-gray-700'
-                                            : 'text-white'
-                                            }`}
+                                        className={`rounded-full w-10 h-10 flex items-center justify-center transition ${isShuffling ? 'bg-green-500 text-white' : 'text-white'}`}
                                     >
-                                        <SkipBack size={32} fill='white' />
+                                        🔀
                                     </motion.button>
-                                    <motion.button
-                                        whileTap={{ scale: 0.9 }}
-                                        whileHover={{ scale: 1.05 }}
-                                        disabled={!isPremium}
-                                        onClick={togglePlay}
-                                        className={`rounded-full w-16 h-16 flex items-center justify-center transition shadow-md ${!isPremium
-                                            ? 'bg-gray-700'
-                                            : 'bg-white text-black'
-                                            }`}
-                                    >
-                                        {isPaused ? <Play size={28} /> : <Pause size={28} />}
-                                    </motion.button>
+
+                                    {/* Main Controls */}
+                                    {/* Controls */}
+                                    <div className="flex items-center justify-center gap-6 m-0 mb-2">
+                                        <motion.button
+                                            whileTap={{ scale: 0.9 }}
+                                            whileHover={{ scale: 1.1 }}
+                                            disabled={!isPremium}
+                                            onClick={() => player?.previousTrack()}
+                                            className={`rounded-full w-12 h-12 flex items-center justify-center transition shadow-md ${!isPremium
+                                                ? 'bg-gray-700'
+                                                : 'text-white'
+                                                }`}
+                                        >
+                                            <SkipBack size={32} fill='white' />
+                                        </motion.button>
+                                        <motion.button
+                                            whileTap={{ scale: 0.9 }}
+                                            whileHover={{ scale: 1.05 }}
+                                            disabled={!isPremium}
+                                            onClick={togglePlay}
+                                            className={`rounded-full w-16 h-16 flex items-center justify-center transition shadow-md ${!isPremium
+                                                ? 'bg-gray-700'
+                                                : 'bg-white text-black'
+                                                }`}
+                                        >
+                                            {isPaused ? <Play size={28} /> : <Pause size={28} />}
+                                        </motion.button>
+                                        <motion.button
+                                            whileTap={{ scale: 0.9 }}
+                                            whileHover={{ scale: 1.1 }}
+                                            disabled={!isPremium}
+                                            onClick={() => player?.nextTrack()}
+                                            className={`rounded-full w-12 h-12 flex items-center justify-center transition shadow-md ${!isPremium
+                                                ? 'bg-gray-700'
+                                                : 'text-white'
+                                                }`}
+                                        >
+                                            <SkipForward size={32} fill='white' />
+                                        </motion.button>
+
+                                    </div>
+
+                                    {/* Repeat */}
                                     <motion.button
                                         whileTap={{ scale: 0.9 }}
                                         whileHover={{ scale: 1.1 }}
+                                        onClick={cycleRepeatMode}
                                         disabled={!isPremium}
-                                        onClick={() => player?.nextTrack()}
-                                        className={`rounded-full w-12 h-12 flex items-center justify-center transition shadow-md ${!isPremium
-                                            ? 'bg-gray-700'
-                                            : 'text-white'
+                                        className={`rounded-full w-10 h-10 flex items-center justify-center transition ${repeatMode !== 'off' ? 'bg-green-500 text-white' : 'text-white'
                                             }`}
                                     >
-                                        <SkipForward size={32} fill='white' />
+                                        🔁{repeatMode === 'track' && '1'}
                                     </motion.button>
                                 </div>
+
+
+                                <div className="w-full flex justify-center mt-4">
+                                    <motion.button
+                                        whileTap={{ scale: 0.95 }}
+                                        whileHover={{ scale: 1.05 }}
+                                        onClick={() => console.log('Show queue logic here')}
+                                        disabled={!isPremium}
+                                        className="text-sm text-white border border-white/20 px-4 py-2 rounded-lg"
+                                    >
+                                        View Queue
+                                    </motion.button>
+                                </div>
+
+
+
+
 
                                 {/* Volume */}
                                 <div className="flex items-center w-full gap-3 px-2 mt-3">
@@ -428,8 +501,8 @@ export default function SpotifyPlayer() {
                     )}
                     <div className="ml-4 flex items-center space-x-3">
                         <motion.button
-                        whileTap={{ scale: 1.1 }}
-                        whileHover={{ scale: 0.95 }}
+                            whileTap={{ scale: 1.1 }}
+                            whileHover={{ scale: 0.95 }}
                             onClick={togglePlay}
                             disabled={!isPremium}
                             className={`rounded-full w-9 h-9 flex items-center justify-center shadow-md transition ${!isPremium
