@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Bookmark, BookmarkCheck, Calendar } from "lucide-react";
 import { SpotifyButton, YouTubeButton } from "../MusicButtons";
@@ -12,49 +12,39 @@ export const AlbumCard = ({
   popularity, // Used as release date for albums
   description
 }) => {
-    const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-    function toggleSave() {
-        const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
+  useEffect(() => {
+    const savedAlbums = JSON.parse(localStorage.getItem("savedAlbums")) || [];
+    const isSaved = savedAlbums.some(album => album.title === title && album.artist === artist);
+    setSaved(isSaved);
+  }, [title, artist]);
 
-        if (saved) {
-            // REMOVE the song
-            const updated = savedSongs.filter(song => !(song.title === title && song.artist === artist));
-            localStorage.setItem("savedSongs", JSON.stringify(updated));
-            setSaved(false);
-        } else {
-            // ADD the song
-            const newSong = {
-                title,
-                artist,
-                spoURL,
-                YTURL,
-                image: url,
-                popularity,
-                explicit,
-                trackURI,
-                id,
-            };
-            savedSongs.push(newSong);
-            localStorage.setItem("savedSongs", JSON.stringify(savedSongs));
-            setSaved(true);
-        }
+  function toggleSave() {
+    const savedAlbums = JSON.parse(localStorage.getItem("savedAlbums")) || [];
+
+    if (saved) {
+      // REMOVE the album
+      const updated = savedAlbums.filter(album => !(album.title === title && album.artist === artist));
+      localStorage.setItem("savedAlbums", JSON.stringify(updated));
+      setSaved(false);
+    } else {
+      // ADD the album
+      const newAlbum = {
+        title,
+        artist,
+        image: url,
+        spoURL,
+        YTURL,
+        releaseDate: popularity,
+        description,
+        type: "album",
+      };
+      savedAlbums.push(newAlbum);
+      localStorage.setItem("savedAlbums", JSON.stringify(savedAlbums));
+      setSaved(true);
     }
-
-    const handleSave = () => {
-        toggleSave({
-            title,
-            artist,
-            spoURL,
-            YTURL,
-            image: url,
-            popularity,
-            explicit,
-            type: "track",
-            trackURI,
-            id,
-        });
-    };
+  }
 
   const handleClick = (url) => {
     setTimeout(() => window.open(url, "_blank"), 300);
@@ -68,8 +58,6 @@ export const AlbumCard = ({
       whileTap={{ scale: 0.98 }}
       className="relative w-64 bg-gradient-to-br from-blue-900/80 to-black/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl hover:shadow-blue-500/10 transition-all duration-500"
     >
-
-
       {/* Album Cover */}
       <div className="relative overflow-hidden">
         <img 
@@ -82,10 +70,15 @@ export const AlbumCard = ({
 
       {/* Content */}
       <div className="relative p-4 space-y-3">
-              {/* Controls */}
-            <div className="absolute top-4 right-4 z-10">
-                {saved ? <BookmarkCheck stroke="white" fill="green" onClick={handleSave} /> : <Bookmark stroke="white" onClick={handleSave} />}
-            </div>
+        {/* Save Icon */}
+        <div className="absolute top-4 right-4 z-10 cursor-pointer">
+          {saved ? (
+            <BookmarkCheck stroke="white" fill="green" onClick={toggleSave} />
+          ) : (
+            <Bookmark stroke="white" onClick={toggleSave} />
+          )}
+        </div>
+
         <div>
           <h3 className="text-xl font-bold text-white truncate" title={title}>
             {title}

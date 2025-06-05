@@ -130,15 +130,14 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
                 };
             } else if (type === "playlist") {
                 return {
+                    id: item?.id,
                     title: item?.name || "#",
                     url: item?.images?.[0]?.url || "#",
-                    artists: item?.type,
+                    owner: item?.owner?.display_name,
                     spoURL: item?.external_urls?.spotify || "#",
-                    popularity: item?.owner?.display_name,
+                    trackURI: item?.uri,
+                    public: item?.public,
                     type: "playlist",
-                    next: nextResults,
-                    prev: prevResults,
-                    trackURI: item.uri,
                 };
             } else if (type === "show") {
                 return {
@@ -151,7 +150,7 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
                     explicit: item.explicit,
                     next: nextResults,
                     prev: prevResults,
-                    trackURI: item.uri,
+                    // trackURI: item.uri,
                 };
             } else if (type === "episode") {
                 return {
@@ -164,7 +163,7 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
                     explicit: item.explicit,
                     next: nextResults,
                     prev: prevResults,
-                    trackURI: item.uri,
+                    // trackURI: item.uri,
                 };
             }
         });

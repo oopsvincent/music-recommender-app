@@ -7,6 +7,7 @@ import fetchYouTubeData from '../hooks/useYoutubeSearch';
 import { ArtistCard } from '../Components/CardComponents/ArtistsCard';
 import { TrackCard } from '../Components/CardComponents/TracksCard';
 import { AlbumCard } from '../Components/CardComponents/AlbumsCard';
+import { PlaylistCard } from '../Components/CardComponents/PlaylistsCard';
 
 
 const SearchPage = () => {
@@ -81,6 +82,16 @@ const SearchPage = () => {
                     YTURL={fetchYouTubeData(track.title + " " + track.artists)}
                     popularity={track.popularity}
                     explicit={track.explicit}
+                    trackURI={track.trackURI}
+                />
+                }
+                {track.type === "playlist" && 
+                <PlaylistCard
+                    owner={track.owner}
+                    isPublic={track.public}
+                    spoURL={track.spoURL}
+                    url={track.url}
+                    title={track.title}
                     trackURI={track.trackURI}
                 />
                 }

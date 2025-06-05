@@ -162,23 +162,6 @@ def get_profile():
     except requests.exceptions.RequestException as e:
         return jsonify({"error": "Failed to fetch user data", "details": str(e)}), 400
 
-# @spotify.route("/me/albums")
-# def get_saved_albums():
-#     token = session.get("access_token")
-#     if not token:
-#         return jsonify({"error": "No access token in session"}), 401
-
-#     refresh_access_token_if_expired()
-#     token = session.get("access_token")
-#     headers = {"Authorization": f"Bearer {token}"}
-
-#     albums_response = requests.get("https://api.spotify.com/v1/me/albums", headers=headers)
-#     if albums_response.status_code != 200:
-#         return jsonify({"error": "Failed to fetch albums", "details": albums_response.text}), 400
-
-#     albums = albums_response.json()
-#     return jsonify(albums)
-
 
 @spotify.route("/create_playlist", methods=["POST"])
 def create_playlist():
@@ -199,6 +182,8 @@ def create_playlist():
     
     if not user_id:
         return jsonify({"error": "Could not get user ID"}), 400
+    
+    
 @spotify.route("/logout")
 def logout():
     session.clear()
@@ -281,35 +266,6 @@ def transfer_playback():
         return jsonify({"error": "Failed to transfer playback", "details": res.text}), 400
 
     return jsonify({"status": "playback transferred"})
-
-
-# @spotify.route("/me/artists")
-# def get_followed_artists():
-#     token = session.get("access_token")
-#     if not token:
-#         return jsonify({"error": "No access token in session"}), 401
-
-#     headers = {"Authorization": f"Bearer {token}"}
-#     res = requests.get("https://api.spotify.com/v1/me/following?type=artist", headers=headers)
-
-#     if res.status_code != 200:
-#         return jsonify({"error": "Failed to fetch followed artists", "details": res.text}), 400
-
-#     return jsonify(res.json())
-
-# @spotify.route("/me/shows")
-# def get_saved_shows():
-#     token = session.get("access_token")
-#     if not token:
-#         return jsonify({"error": "No access token in session"}), 401
-
-#     headers = {"Authorization": f"Bearer {token}"}
-#     res = requests.get("https://api.spotify.com/v1/me/shows", headers=headers)
-
-#     if res.status_code != 200:
-#         return jsonify({"error": "Failed to fetch saved shows", "details": res.text}), 400
-
-#     return jsonify(res.json())
 
 # Helper
 def get_spotify_headers():

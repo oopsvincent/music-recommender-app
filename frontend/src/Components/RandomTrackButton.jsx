@@ -1,7 +1,7 @@
 // src/components/RandomTrackButton.jsx
 import { useState, useEffect } from 'react';
 import ModalWrapper from './ModalWrapper';
-import Card from './Card';
+import { TrackCard } from './CardComponents/TracksCard';
 import { getSpotifyToken } from '../hooks/useSpotify';
 import loadTracks from '../hooks/useTrackLoader';
 import fetchYouTubeData from '../hooks/useYoutubeSearch';
@@ -65,7 +65,7 @@ export default function RandomTrackButton({ categoryBaseUrl }) {
       <motion.button
         onClick={handleClick}
         disabled={loading}
-        className="bg-[#D40000] z-51 rounded-full p-3 fixed md:bottom-22 bottom-40 right-8 text-white shadow-lg hover:bg-red-700 active:scale-90 transition-transform"
+        className={`bg-[#D40000] ${selectedTrack ? "z-151" : "z-50"} rounded-full p-3 fixed md:bottom-22 bottom-40 right-8 text-white shadow-lg hover:bg-red-700 active:scale-90 transition-transform`}
         title="Random Track"
       >
         <motion.div
@@ -80,7 +80,7 @@ export default function RandomTrackButton({ categoryBaseUrl }) {
       <ModalWrapper isOpen={!!selectedTrack} onClose={() => setSelectedTrack(null)}>
         {selectedTrack && (
           <>
-            <Card
+            <TrackCard
               title={selectedTrack.title}
               artist={selectedTrack.artists}
               explicit={selectedTrack.explicit}

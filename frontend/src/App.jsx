@@ -58,7 +58,7 @@ const App = () => {
                 <Route path="/account" element={<UserDashboard />} />
                 <Route path="/credits" element={<CreditsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/playlist" element={<LibrarySection />} />
+                <Route path="/library" element={<PlaylistSection />} />
                 <Route path="/feedback" element={<FeedbackPage />} />
                 <Route path='redirect' element={<Redirect />} />
                 <Route path="*" element={<NotFound />} />
