@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import SpotifyDevices from './SpotifyDevices';
 import { motion, AnimatePresence } from 'framer-motion';
-import Slider from '@mui/material';
+import Slider from '@mui/material/Slider';
 
 import {
     Play,
