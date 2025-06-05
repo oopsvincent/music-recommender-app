@@ -2,6 +2,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import SpotifyDevices from './SpotifyDevices';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Slider } from '@mui/material';
+
 import {
     Play,
     Pause,
@@ -12,6 +14,10 @@ import {
     Volume2,
     ChevronUp,
     ChevronDown,
+    Shuffle,
+    Repeat,
+    Repeat1,
+    ListOrdered,
 } from 'lucide-react';
 import { usePlayer } from '../contexts/PlayerContext';
 
@@ -161,9 +167,14 @@ export default function SpotifyPlayer() {
 
     const toggleShuffle = async () => {
         try {
-            const res = await fetch(`https://music-recommender-api.onrender.com/player/shuffle?state=${!isShuffling}`, {
+            const res = await fetch(`https://music-recommender-api.onrender.com/player/shuffle`, {
                 method: 'PUT',
                 credentials: 'include',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    state: !isShuffling,
+                    device_id: currentDeviceId || "" // optional
+                })
             });
             if (res.ok) setIsShuffling(!isShuffling);
         } catch (err) {
@@ -171,18 +182,68 @@ export default function SpotifyPlayer() {
         }
     };
 
+
     const cycleRepeatMode = async () => {
         const nextMode = repeatMode === 'off' ? 'context' : repeatMode === 'context' ? 'track' : 'off';
         try {
-            const res = await fetch(`https://music-recommender-api.onrender.com/player/repeat?state=${nextMode}`, {
+            const res = await fetch(`https://music-recommender-api.onrender.com/player/repeat`, {
                 method: 'PUT',
                 credentials: 'include',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    state: nextMode,
+                    device_id: currentDeviceId || ""
+                })
             });
             if (res.ok) setRepeatMode(nextMode);
         } catch (err) {
             console.error('[ERROR] Failed to change repeat mode:', err);
         }
     };
+
+    const [queue, setQueue] = useState([]);
+
+    useEffect(() => {
+        const fetchQueue = async () => {
+            try {
+                const res = await fetch(`https://music-recommender-api.onrender.com/player/queue`, {
+                    credentials: 'include',
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    setQueue(data.queue || []);
+                } else {
+                    console.error('[ERROR] Failed to fetch queue:', data);
+                }
+            } catch (err) {
+                console.error('[ERROR] Fetching queue:', err);
+            }
+        };
+
+        fetchQueue();
+    }, [isPaused]); // Refresh when track changes
+
+
+    const addToQueue = async (uri) => {
+        try {
+            const res = await fetch(`https://music-recommender-api.onrender.com/player/queue`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    uri: uri,
+                    device_id: currentDeviceId || ""
+                })
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                console.error('[ERROR] Failed to add to queue:', err);
+            }
+        } catch (err) {
+            console.error('[ERROR] Failed to queue track:', err);
+        }
+    };
+
 
 
     useEffect(() => {
@@ -236,12 +297,12 @@ export default function SpotifyPlayer() {
         document.title = `${currentTrack.title} — ${currentTrack.artists}`;
 
         // Change favicon to album image
-        const favicon = document.querySelector('link[rel="icon"]') || document.createElement('link');
-        favicon.rel = 'icon';
-        favicon.type = 'image/png';
-        favicon.href = currentTrack.albumImage;
+        // const favicon = document.querySelector('link[rel="icon"]') || document.createElement('link');
+        // favicon.rel = 'icon';
+        // favicon.type = 'image/png';
+        // favicon.href = currentTrack.albumImage;
 
-        document.head.appendChild(favicon);
+        // document.head.appendChild(favicon);
 
         if ("mediaSession" in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
@@ -256,12 +317,12 @@ export default function SpotifyPlayer() {
 
 
         // Optional: Clean up on unmount
-        return () => {
-            document.title = 'GrooveEstrella Music Recommender'; // Or your default app title
-            if (favicon) {
-                favicon.href = '/favicon.ico'; // Reset to default favicon
-            }
-        };
+        // return () => {
+        //     document.title = 'GrooveEstrella Music Recommender'; // Or your default app title
+        //     if (favicon) {
+        //         favicon.href = '/favicon.ico'; // Reset to default favicon
+        //     }
+        // };
     }, [currentTrack]);
 
 
@@ -335,14 +396,34 @@ export default function SpotifyPlayer() {
                                 </div>
 
                                 {/* Seek bar */}
-                                <input
+                                {/* <input
                                     type="range"
-                                    min="0"
-                                    max={duration}
-                                    value={position}
+
                                     onChange={handleSeek}
+
+
+                                /> */}
+                                <Slider
+                                    size="small"
+                                    aria-label="Small"
+                                    onChange={(_, newValue) => handleSeek({ target: { value: newValue } })}
                                     disabled={!isPremium}
                                     className="w-full accent-green-500 disabled:opacity-50 mb-0"
+                                    min={0}
+                                    max={duration}
+                                    value={position}
+                                    step={1}
+                                    sx={{
+                                        '& .MuiSlider-thumb': {
+                                            color: '#870087',  // Spotify green
+                                        },
+                                        '& .MuiSlider-track': {
+                                            color: '#870087',
+                                        },
+                                        '& .MuiSlider-rail': {
+                                            color: '#ffffff40',
+                                        }
+                                    }}
                                 />
                                 <div className='w-full flex justify-between items-center mb-0'>
                                     <p className="text-gray-400 text-xs tracking-wide text-center">
@@ -353,27 +434,29 @@ export default function SpotifyPlayer() {
                                     </p>
                                 </div>
 
-                                <div className="flex items-center justify-between w-full px-10 mt-2">
+                                <div className="flex items-center justify-between w-full px-5 mt-2">
                                     {/* Shuffle */}
                                     <motion.button
                                         whileTap={{ scale: 0.9 }}
                                         whileHover={{ scale: 1.1 }}
                                         onClick={toggleShuffle}
                                         disabled={!isPremium}
-                                        className={`rounded-full w-10 h-10 flex items-center justify-center transition ${isShuffling ? 'bg-green-500 text-white' : 'text-white'}`}
+                                        className={`rounded-full w-10 h-10 flex items-center justify-center transition ${isShuffling ? 'bg-green-600 text-black shadow-inner' : 'text-white bg-white/10'
+                                            }`}
                                     >
-                                        🔀
+                                        <Shuffle size={20} />
                                     </motion.button>
+
 
                                     {/* Main Controls */}
                                     {/* Controls */}
-                                    <div className="flex items-center justify-center gap-6 m-0 mb-2">
+                                    <div className="flex items-center justify-center gap-6">
                                         <motion.button
                                             whileTap={{ scale: 0.9 }}
                                             whileHover={{ scale: 1.1 }}
                                             disabled={!isPremium}
                                             onClick={() => player?.previousTrack()}
-                                            className={`rounded-full w-12 h-12 flex items-center justify-center transition shadow-md ${!isPremium
+                                            className={`rounded-full w-12 h-12 flex items-center justify-center transition ${!isPremium
                                                 ? 'bg-gray-700'
                                                 : 'text-white'
                                                 }`}
@@ -390,14 +473,14 @@ export default function SpotifyPlayer() {
                                                 : 'bg-white text-black'
                                                 }`}
                                         >
-                                            {isPaused ? <Play size={28} /> : <Pause size={28} />}
+                                            {isPaused ? <Play size={28} fill='black' /> : <Pause size={28} fill='black' />}
                                         </motion.button>
                                         <motion.button
                                             whileTap={{ scale: 0.9 }}
                                             whileHover={{ scale: 1.1 }}
                                             disabled={!isPremium}
                                             onClick={() => player?.nextTrack()}
-                                            className={`rounded-full w-12 h-12 flex items-center justify-center transition shadow-md ${!isPremium
+                                            className={`rounded-full w-12 h-12 flex items-center justify-center transition ${!isPremium
                                                 ? 'bg-gray-700'
                                                 : 'text-white'
                                                 }`}
@@ -413,52 +496,75 @@ export default function SpotifyPlayer() {
                                         whileHover={{ scale: 1.1 }}
                                         onClick={cycleRepeatMode}
                                         disabled={!isPremium}
-                                        className={`rounded-full w-10 h-10 flex items-center justify-center transition ${repeatMode !== 'off' ? 'bg-green-500 text-white' : 'text-white'
+                                        className={`rounded-full w-10 h-10 flex items-center justify-center transition ${repeatMode !== 'off' ? 'bg-green-600 text-black shadow-inner' : 'text-white bg-white/10'
                                             }`}
                                     >
-                                        🔁{repeatMode === 'track' && '1'}
+                                        <div className="relative flex items-center justify-center">
+                                            <Repeat size={20} />
+                                            {repeatMode === 'track' && (
+                                                <span className="absolute -bottom-1 -right-1 text-[10px] font-bold bg-black text-white px-[4px] rounded-full">
+                                                    1
+                                                </span>
+                                            )}
+                                        </div>
                                     </motion.button>
+
+
                                 </div>
-
-
-                                <div className="w-full flex justify-center mt-4">
-                                    <motion.button
-                                        whileTap={{ scale: 0.95 }}
-                                        whileHover={{ scale: 1.05 }}
-                                        onClick={() => console.log('Show queue logic here')}
-                                        disabled={!isPremium}
-                                        className="text-sm text-white border border-white/20 px-4 py-2 rounded-lg"
-                                    >
-                                        View Queue
-                                    </motion.button>
-                                </div>
-
-
-
 
 
                                 {/* Volume */}
-                                <div className="flex items-center w-full gap-3 px-2 mt-3">
-                                    {volume === 0 ? (
-                                        <VolumeX className="text-white" />
-                                    ) : volume < 0.6 ? (
-                                        <Volume1 className="text-white" />
-                                    ) : (
-                                        <Volume2 className="text-white" />
-                                    )}
-                                    <input
-                                        type="range"
-                                        min="0"
-                                        max="1"
-                                        step="0.01"
-                                        value={volume}
-                                        onChange={handleVolumeChange}
-                                        disabled={!isPremium}
-                                        className="w-full accent-green-400 disabled:opacity-50"
-                                    />
-                                    <span className="text-gray-400 text-xs">
-                                        {Math.floor(volume * 100)}%
-                                    </span>
+                                <div className="flex items-center justify-between gap-4 px-2 w-full">
+                                    {/* Volume controls */}
+                                    <div className="flex items-center gap-3 flex-1">
+                                        <button className="w-8">
+                                            {volume === 0 ? (
+                                                <VolumeX className="text-white" />
+                                            ) : volume < 0.6 ? (
+                                                <Volume1 className="text-white" />
+                                            ) : (
+                                                <Volume2 className="text-white" />
+                                            )}
+                                        </button>
+                                        <Slider
+                                            size="small"
+                                            min={0}
+                                            max={1}
+                                            step={0.01}
+                                            value={volume}
+                                            onChange={(_, newValue) => handleVolumeChange({ target: { value: newValue } })}
+                                            disabled={!isPremium}
+                                            sx={{
+                                                flexGrow: 1,
+                                                width: 'auto',
+                                                '& .MuiSlider-thumb': {
+                                                    color: '#870087',
+                                                },
+                                                '& .MuiSlider-track': {
+                                                    color: '#870087',
+                                                },
+                                                '& .MuiSlider-rail': {
+                                                    color: '#ffffff40',
+                                                }
+                                            }}
+                                        />
+                                        <span className="text-gray-400 text-xs w-12 text-right">
+                                            {Math.floor(volume * 100)}%
+                                        </span>
+                                        {/* Queue button */}
+                                        <div className="flex justify-center">
+                                            <motion.button
+                                                whileTap={{ scale: 0.95 }}
+                                                whileHover={{ scale: 1.05 }}
+                                                onClick={() => console.log('Show queue logic here')}
+                                                disabled={!isPremium}
+                                                className="text-sm text-white border border-white/20 px-4 py-2 rounded-lg"
+                                            >
+                                                <ListOrdered size={32} />
+                                            </motion.button>
+                                        </div>
+                                    </div>
+
                                 </div>
 
                                 {/* Devices */}

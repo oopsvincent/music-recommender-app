@@ -2,6 +2,8 @@
 import React from 'react';
 
 const PlaylistsOverview = ({ playlists, onSelectPlaylist }) => {
+    console.log(playlists);
+    
     return (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {playlists.map((pl) => (
