@@ -173,7 +173,7 @@ export default function SpotifyPlayer() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     state: !isShuffling,
-                    device_id: currentDeviceId || "" // optional
+                    device_id: deviceId || "" // optional
                 })
             });
             if (res.ok) setIsShuffling(!isShuffling);
@@ -192,7 +192,7 @@ export default function SpotifyPlayer() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     state: nextMode,
-                    device_id: currentDeviceId || ""
+                    device_id: deviceId || ""
                 })
             });
             if (res.ok) setRepeatMode(nextMode);
@@ -232,7 +232,7 @@ export default function SpotifyPlayer() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     uri: uri,
-                    device_id: currentDeviceId || ""
+                    device_id: deviceId || ""
                 })
             });
             if (!res.ok) {
