@@ -60,16 +60,20 @@ const SearchPage = () => {
                 YTURL={track.YTURL}
                 spoURL={track.spoURL}
                 id={track.id}
+                URI={track.trackURI}
+                popularity={track.popularity}
                 />}
                 
                     {track.type === "album" && 
                     <AlbumCard
-                    popularity={track.popularity}
+                    released_date={track.released_date}
                     YTURL={track.YTURL}
                     spoURL={track.spoURL}
                     url={track.url}
                     title={track.title}
                     artist={track.artists}
+                    trackURI={track.trackURI}
+                    description={track.description}
                 />    
                 }
                 {track.type === "track" &&                 

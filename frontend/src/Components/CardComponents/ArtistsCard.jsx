@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Bookmark, BookmarkCheck, Users, Award } from "lucide-react";
 import { SpotifyButton, YouTubeButton } from "../MusicButtons";
 import { useNavigate } from "react-router-dom";
+import { usePlayer } from "../../contexts/PlayerContext";
+import { PlayButton } from "./PlayButton";
 
 export const ArtistCard = ({
     url,
@@ -11,63 +13,78 @@ export const ArtistCard = ({
     YTURL,
     popularity,
     followers,
-    id
+    id,
+    URI, // Expecting: spotify:artist:...
 }) => {
-
+    console.log(URI);
+    
+    
     const navigate = useNavigate();
-
-const handleCardClick = () => {
-    navigate(`/artist/${id}`);
-};
+    const { showPlayer } = usePlayer();
 
     const [saved, setSaved] = useState(false);
 
-    function toggleSave() {
-        const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
+    // Check localStorage on mount
+    useEffect(() => {
+        const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
+        const isSaved = savedArtists.some((artist) => artist.URI === URI);
+        setSaved(isSaved);
+    }, [URI]);
+
+    const toggleSave = () => {
+        const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
 
         if (saved) {
-            // REMOVE the song
-            const updated = savedSongs.filter(song => !(song.title === title && song.artist === artist));
-            localStorage.setItem("savedSongs", JSON.stringify(updated));
+            const updated = savedArtists.filter((a) => a.URI !== URI);
+            localStorage.setItem("savedArtists", JSON.stringify(updated));
             setSaved(false);
         } else {
-            // ADD the song
-            const newSong = {
+            const newArtist = {
                 title,
-                artist,
                 spoURL,
                 YTURL,
                 image: url,
                 popularity,
-                explicit,
-                trackURI,
+                followers,
+                URI,
                 id,
             };
-            savedSongs.push(newSong);
-            localStorage.setItem("savedSongs", JSON.stringify(savedSongs));
+            savedArtists.push(newArtist);
+            localStorage.setItem("savedArtists", JSON.stringify(savedArtists));
             setSaved(true);
         }
-    }
+    };
 
     const handleSave = () => {
         toggleSave({
             title,
-            artist,
             spoURL,
             YTURL,
             image: url,
             popularity,
-            explicit,
-            type: "track",
-            trackURI,
+            followers,
+            URI,
             id,
         });
     };
 
-
     const handleClick = (url) => {
-        setTimeout(() => window.open(url, "_blank"), 300);
+        if (url) window.open(url, "_blank");
     };
+
+    const handleCardClick = (e) => {
+        // Prevent conflict when clicking save button
+        if (e.target.closest(".noskip")) return;
+        navigate(`/artist/${id}`);
+    };
+
+  const handlePlayClick = () => {
+    if (URI?.startsWith("spotify:artist:")) {
+      showPlayer(URI, true); // context_uri mode
+    } else {
+      console.warn("[ArtistCard] Invalid album URI:", URI);
+    }
+  };
 
     return (
         <motion.div
@@ -75,13 +92,21 @@ const handleCardClick = () => {
             whileInView={{ opacity: 1, scale: 1, y: 0 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="relative w-72 bg-gradient-to-br from-purple-900/80 to-black/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl hover:shadow-purple-500/10 transition-all duration-500"
             onClick={handleCardClick}
+            className="relative w-72 bg-gradient-to-br from-purple-900/80 to-black/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl hover:shadow-purple-500/10 transition-all duration-500"
         >
-            {/* Controls */}
-            <div className="absolute top-4 right-4 z-10">
-                {saved ? <BookmarkCheck stroke="white" fill="green" onClick={handleSave} /> : <Bookmark stroke="white" onClick={handleSave} />}
+            {/* Save Icon */}
+            <div className="absolute top-4 right-4 z-10 noskip">
+                {saved ? (
+                    <BookmarkCheck stroke="white" fill="green" onClick={handleSave} />
+                ) : (
+                    <Bookmark stroke="white" onClick={handleSave} />
+                )}
             </div>
+            
+                          <div className="absolute top-5 left-5 flex gap-2 items-center z-10 noskip">
+        <PlayButton onPlay={handlePlayClick} />
+        </div>
 
             <div className="p-6">
                 {/* Artist Image */}
@@ -96,7 +121,7 @@ const handleCardClick = () => {
                     </div>
                 </div>
 
-                {/* Artist Info */}
+                {/* Info */}
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl font-bold text-white" title={title}>
                         {title}
@@ -107,14 +132,16 @@ const handleCardClick = () => {
                         <span>{followers?.toLocaleString()} Followers</span>
                     </div>
 
-                    {/* Popularity */}
-                    <div className={`flex items-center justify-center gap-2 ${popularity >= 80 ? "text-green-400" : "text-yellow-400"}`}>
+                    <div
+                        className={`flex items-center justify-center gap-2 ${popularity >= 80 ? "text-green-400" : "text-yellow-400"
+                            }`}
+                    >
                         <Award size={18} />
                         <span>Popularity: {popularity}</span>
                         {popularity >= 80 && <span title="Trending">🔥</span>}
                     </div>
 
-                    {/* Buttons */}
+
                     <div className="space-y-2 pt-2 flex flex-col">
                         <SpotifyButton clickHandle={() => handleClick(spoURL)} />
                         <YouTubeButton clickHandle={() => handleClick(YTURL)} />

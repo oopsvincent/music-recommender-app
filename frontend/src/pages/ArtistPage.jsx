@@ -6,6 +6,8 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { ArrowLeft, Bookmark, BookmarkCheck } from "lucide-react";
 import { SpotifyButton } from "../Components/MusicButtons";
+import { TrackCard } from "../Components/CardComponents/TracksCard";
+import { AlbumCard } from "../Components/CardComponents/AlbumsCard";
 
 export default function ArtistPage() {
     const { id } = useParams();
@@ -124,43 +126,42 @@ export default function ArtistPage() {
             {/* Top Tracks */}
             <div className="mt-12">
                 <h2 className="text-3xl font-bold mb-4">Top Tracks</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {topTracks.map(track => (
-                        <motion.div
-                            whileHover={{ scale: 1.03 }}
-                            key={track.id}
-                            className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/10 shadow-md"
-                        >
-                            <div className="flex items-center gap-4">
-                                <img src={track.album.images[0]?.url} alt={track.name} className="w-16 h-16 rounded-md" />
-                                <div>
-                                    <h3 className="font-bold text-lg">{track.name}</h3>
-                                    <p className="text-gray-300 text-sm">{track.album.name}</p>
-                                </div>
-                            </div>
-                            <div className="mt-2">
-                                <SpotifyButton clickHandle={() => window.open(track.external_urls.spotify, "_blank")} />
-                            </div>
-                        </motion.div>
+                <div className="flex flex-row flex-wrap gap-5">
+                    {topTracks.map((track, index) => (
+                        <TrackCard
+                            key={index}
+                            url={track.album.images[0]?.url}
+                            title={track.name}
+                            artist={track.artists.map(a => a.name).join(', ')}
+                            spoURL={track.external_urls.spotify}
+                            YTURL={""} // You can plug this from YouTube API if needed
+                            popularity={track.popularity}
+                            explicit={track.explicit}
+                            trackURI={track.uri}
+                        />
                     ))}
+
                 </div>
             </div>
 
             {/* Discography */}
             <div className="mt-12">
                 <h2 className="text-3xl font-bold mb-4">Discography</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-                    {albums.map(album => (
-                        <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            key={album.id}
-                            className="bg-white/5 p-3 rounded-xl text-center space-y-2"
-                        >
-                            <img src={album.images[0]?.url} alt={album.name} className="w-full h-48 object-cover rounded-md shadow" />
-                            <h4 className="text-white font-semibold text-sm truncate">{album.name}</h4>
-                            <p className="text-gray-400 text-xs">{album.release_date}</p>
-                        </motion.div>
+                <div className="flex flex-row flex-wrap gap-5">
+                    {albums.map((album, index) => (
+                        <AlbumCard
+                            key={index}
+                            url={album.images[0]?.url}
+                            title={album.name}
+                            artist={album.artists.map(a => a.name).join(', ')}
+                            spoURL={album.external_urls.spotify}
+                            YTURL={""}
+                            released_date={album.release_date}
+                            description={album.name}
+                            trackURI={album.uri}
+                        />
                     ))}
+
                 </div>
             </div>
 

@@ -24,6 +24,7 @@ const FollowedArtist = ({ artists = [], onSelectArtist }) => {
           popularity={artist.popularity}
           spoURL={artist.url}
           onClick={() => onSelectArtist?.(artist.id)} // Optional callback if needed
+          URI={artist.uri}
         />
       ))}
     </div>
