@@ -16,6 +16,13 @@ export const PlayerProvider = ({ children }) => {
     const [trackUri, setTrackUri] = useState(null);
     const [isPremium, setIsPremium] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [playbackInfo, setPlaybackInfo] = useState({
+        uri: null,
+        isContext: false,
+        offset: null,
+        positionMs: 0,
+    });
+
 
     const fetchUserProfile = useCallback(async () => {
         try {
@@ -44,43 +51,39 @@ export const PlayerProvider = ({ children }) => {
         fetchUserProfile();
     }, [fetchUserProfile]);
 
-    const showPlayer = useCallback(
-        (uri) => {
+    const showPlayer = useCallback((uri, isContext = false, offset = null, positionMs = 0) => {
+        if (!isAuthenticated) {
+            console.warn("[WARN] Cannot show player: User not authenticated.");
+            return;
+        }
 
-            const isValidUri = typeof uri === 'string' &&
-                /^spotify:(track|album|playlist):[a-zA-Z0-9]+$/.test(uri);
+        const isValidUri = typeof uri === 'string' &&
+            /^spotify:(track|album|playlist|artist):[a-zA-Z0-9]+$/.test(uri);
 
-            const isUriArray = Array.isArray(uri) && uri.every(u =>
-                /^spotify:track:[a-zA-Z0-9]+$/.test(u)
-            );
+        const isUriArray = Array.isArray(uri) && uri.every(u =>
+            /^spotify:track:[a-zA-Z0-9]+$/.test(u)
+        );
 
-            if (!isAuthenticated) {
-                console.warn("[WARN] Cannot show player: User not authenticated.");
-                return;
-            }
+        if (!isValidUri && !isUriArray) {
+            console.warn("[WARN] Invalid URI or URI array passed to showPlayer.");
+            return;
+        }
 
-            if (!isValidUri && !isUriArray) {
-                console.warn("[WARN] Invalid URI or URI array passed to showPlayer.");
-                return;
-            }
+        setPlaybackInfo({ uri, isContext, offset, positionMs });
+        setVisiblePlayer(true);
 
-            setTrackUri(uri); // Can now be single URI or array
-            setVisiblePlayer(true);
+        DEBUG_MODE && console.log(`[DEBUG] Player activated with:`, { uri, isContext, offset, positionMs });
+    }, [isAuthenticated]);
 
-            DEBUG_MODE && console.log(`[DEBUG] Player activated with URI(s):`, uri);
-
-        },
-        [isAuthenticated]
-    );
 
     return (
         <PlayerContext.Provider
             value={{
                 visiblePlayer,
-                trackUri,
+                playbackInfo,
                 showPlayer,
                 isPremium,
-                isAuthenticated,
+                isAuthenticated
             }}
         >
             {children}

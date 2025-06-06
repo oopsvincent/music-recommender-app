@@ -33,10 +33,13 @@ export default function SpotifyPlayer() {
     const [duration, setDuration] = useState(0);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const { visiblePlayer, trackUri, isPremium } = usePlayer();
+    const { visiblePlayer, playbackInfo, isPremium } = usePlayer();
     const [devices, setDevices] = useState([]);
     const [isShuffling, setIsShuffling] = useState(false);
     const [repeatMode, setRepeatMode] = useState('off'); // options: 'off', 'context', 'track'
+    const [isContextURI, setIsContextURI] = useState(false);
+    const [offset, setOffset] = useState(null);
+    const [positionMS, setPositionMS] = useState(0);
 
 
     useEffect(() => {
@@ -77,7 +80,7 @@ export default function SpotifyPlayer() {
 
         window.onSpotifyWebPlaybackSDKReady = () => {
             const localPlayer = new window.Spotify.Player({
-                name: 'Harmony Web Player',
+                name: 'GrooveEstrella Web Player',
                 getOAuthToken: (cb) => {
                     fetch('https://music-recommender-api.onrender.com/refresh_access_token', {
                         credentials: 'include',
@@ -119,29 +122,43 @@ export default function SpotifyPlayer() {
         };
     }, [isPremium, isAuthenticated]);
 
-    useEffect(() => {
-        const playTrack = async (uriOrUris, isContext = false) => {
-            if (!deviceId || !uriOrUris || !isPremium) return;
+    const playTrack = async (uriOrUris, isContext = false, offset = null, positionMs = 0) => {
+        if (!deviceId || !uriOrUris || !isPremium) return;
 
-            try {
-                await fetch('https://music-recommender-api.onrender.com/player/play', {
-                    method: 'PUT',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        device_id: deviceId,
-                        ...(isContext
-                            ? { context_uri: uriOrUris } // e.g. spotify:album:xxx or spotify:playlist:xxx
-                            : { uris: Array.isArray(uriOrUris) ? uriOrUris : [uriOrUris] })
-                    }),
-                });
-            } catch (err) {
-                console.error('[ERROR] Failed to play track(s):', err);
-            }
+
+        const payload = {
+            device_id: deviceId,
+            ...(isContext
+                ? { context_uri: uriOrUris }
+                : { uris: Array.isArray(uriOrUris) ? uriOrUris : [uriOrUris] })
         };
 
-        if (deviceId && trackUri && isPremium) playTrack(trackUri);
-    }, [deviceId, trackUri, isPremium]);
+        if (offset !== null) payload.offset = offset;
+        if (positionMs > 0) payload.position_ms = positionMs;
+
+        try {
+            await fetch('https://music-recommender-api.onrender.com/player/play', {
+                method: 'PUT',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        } catch (err) {
+            console.error('[ERROR] Failed to play track(s):', err);
+        }
+        setIsContextURI(isContext);
+        setOffset(offset);
+        setPositionMS(positionMs)
+        console.log(uriOrUris, isContextURI, offset, positionMS);
+    };
+    useEffect(() => {
+        if (!deviceId || !isPremium || !playbackInfo.uri) return;
+
+        const { uri, isContext, offset, positionMs } = playbackInfo;
+
+        playTrack(uri, isContext, offset, positionMs);
+    }, [deviceId, playbackInfo, isPremium]);
+
 
     const togglePlay = () => {
         if (player && isPremium) player.togglePlay();
@@ -165,42 +182,59 @@ export default function SpotifyPlayer() {
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     };
 
-    const toggleShuffle = async () => {
-        try {
-            const res = await fetch(`https://music-recommender-api.onrender.com/player/shuffle`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    state: !isShuffling,
-                    device_id: deviceId || "" // optional
-                })
-            });
-            if (res.ok) setIsShuffling(!isShuffling);
-        } catch (err) {
-            console.error('[ERROR] Failed to toggle shuffle:', err);
-        }
-    };
+const toggleShuffle = async () => {
+  try {
+    const res = await fetch('https://music-recommender-api.onrender.com/player/shuffle', {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        state: !isShuffling, // boolean
+        device_id: deviceId || "" // optional
+      })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      setIsShuffling(!isShuffling);
+    } else {
+      console.error('[ERROR] Shuffle response:', data);
+    }
+  } catch (err) {
+    console.error('[ERROR] Failed to toggle shuffle:', err);
+  }
+};
 
 
-    const cycleRepeatMode = async () => {
-        const nextMode = repeatMode === 'off' ? 'context' : repeatMode === 'context' ? 'track' : 'off';
-        try {
-            const res = await fetch(`https://music-recommender-api.onrender.com/player/repeat`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    state: nextMode,
-                    device_id: deviceId || ""
-                })
-            });
-            if (res.ok) setRepeatMode(nextMode);
-        } catch (err) {
-            console.error('[ERROR] Failed to change repeat mode:', err);
-        }
-    };
 
+const cycleRepeatMode = async () => {
+  const nextMode = repeatMode === 'off' ? 'context' : repeatMode === 'context' ? 'track' : 'off';
+
+  try {
+    const res = await fetch('https://music-recommender-api.onrender.com/player/repeat', {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        state: nextMode,
+        device_id: deviceId || ""
+      })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      setRepeatMode(nextMode);
+    } else {
+      console.error('[ERROR] Repeat mode response:', data);
+    }
+  } catch (err) {
+    console.error('[ERROR] Failed to change repeat mode:', err);
+  }
+};
+
+
+
+    const [showQueue, setShowQueue] = useState(false);
     const [queue, setQueue] = useState([]);
 
     useEffect(() => {
@@ -221,7 +255,7 @@ export default function SpotifyPlayer() {
         };
 
         fetchQueue();
-    }, [isPaused]); // Refresh when track changes
+    }, [isPaused, showQueue]); // Refresh when track changes
 
 
     const addToQueue = async (uri) => {
@@ -556,12 +590,33 @@ export default function SpotifyPlayer() {
                                             <motion.button
                                                 whileTap={{ scale: 0.95 }}
                                                 whileHover={{ scale: 1.05 }}
-                                                onClick={() => console.log('Show queue logic here')}
+                                                onClick={() => setShowQueue(prev => !prev)}
                                                 disabled={!isPremium}
-                                                className="text-sm text-white border border-white/20 px-4 py-2 rounded-lg"
+                                                className="text-sm text-white px-4 py-2 rounded-lg"
                                             >
-                                                <ListOrdered size={32} />
+                                                <ListOrdered size={28} />
                                             </motion.button>
+                                            {showQueue && (
+    <div className="fixed top-24 right-4 bg-black border border-white/20 rounded-lg p-4 z-50 w-[90%] max-w-md shadow-xl max-h-[50vh] overflow-y-auto">
+        <h2 className="text-white text-lg font-semibold mb-3">Upcoming Queue</h2>
+        {queue.length > 0 ? (
+            <ul className="space-y-3">
+                {queue.map((track, index) => (
+                    <li key={index} className="text-gray-300 text-sm flex items-center gap-3">
+                        <img src={track.album?.images?.[0]?.url} alt="" className="w-10 h-10 rounded" />
+                        <div>
+                            <p className="font-semibold text-white">{track.name}</p>
+                            <p className="text-xs text-gray-400">{track.artists?.map(a => a.name).join(", ")}</p>
+                        </div>
+                    </li>
+                ))}
+            </ul>
+        ) : (
+            <p className="text-gray-400 text-sm">Queue is empty.</p>
+        )}
+    </div>
+)}
+
                                         </div>
                                     </div>
 

@@ -1,7 +1,7 @@
 import { ExplicitBadge } from "./ExplicitBadge";
 import { PlayButton } from "./PlayButton";
 import { usePlayer } from "../../contexts/PlayerContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Bookmark, BookmarkCheck, Award, CirclePlay } from "lucide-react";
 import { SpotifyButton, YouTubeButton } from "../MusicButtons";
@@ -18,6 +18,14 @@ export const TrackCard = ({
 }) => {
   const { showPlayer } = usePlayer();
   const [ saved, setSaved ] = useState(false);
+
+    useEffect(() => {
+      const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
+      const isSaved = savedSongs.some(
+        (album) => album.title === title && album.artist === artist
+      );
+      setSaved(isSaved);
+    }, [title, artist]);
 
       function toggleSave() {
         const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
@@ -45,13 +53,14 @@ export const TrackCard = ({
         }
     }
 
-  const handlePlayClick = () => {
-    if (trackURI && trackURI.startsWith("spotify:")) {
-      showPlayer(trackURI, true);
-    } else {
-      console.warn("Invalid Spotify URI:", trackURI);
-    }
-  };
+const handlePlayClick = () => {
+  if (trackURI && trackURI.startsWith("spotify:track:")) {
+    showPlayer(trackURI, false); // ⬅️ Explicitly mark as non-context
+  } else {
+    console.warn("Invalid Spotify URI:", trackURI);
+  }
+};
+
 
   const handleSave = () => {
     toggleSave({

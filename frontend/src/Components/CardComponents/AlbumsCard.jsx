@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Bookmark, BookmarkCheck, Calendar } from "lucide-react";
+import { Bookmark, BookmarkCheck, Calendar, Play } from "lucide-react";
 import { SpotifyButton, YouTubeButton } from "../MusicButtons";
+import { usePlayer } from "../../contexts/PlayerContext";
 
 export const AlbumCard = ({
   url,
@@ -9,45 +10,58 @@ export const AlbumCard = ({
   artist,
   spoURL,
   YTURL,
-  popularity, // Used as release date for albums
-  description
+  released_date,
+  description,
+  trackURI, // Expecting spotify:album:xyz...
 }) => {
   const [saved, setSaved] = useState(false);
+  const { showPlayer } = usePlayer();
 
   useEffect(() => {
     const savedAlbums = JSON.parse(localStorage.getItem("savedAlbums")) || [];
-    const isSaved = savedAlbums.some(album => album.title === title && album.artist === artist);
+    const isSaved = savedAlbums.some(
+      (album) => album.title === title && album.artist === artist
+    );
     setSaved(isSaved);
   }, [title, artist]);
 
-  function toggleSave() {
+  const toggleSave = () => {
     const savedAlbums = JSON.parse(localStorage.getItem("savedAlbums")) || [];
 
     if (saved) {
-      // REMOVE the album
-      const updated = savedAlbums.filter(album => !(album.title === title && album.artist === artist));
+      const updated = savedAlbums.filter(
+        (album) => !(album.title === title && album.artist === artist)
+      );
       localStorage.setItem("savedAlbums", JSON.stringify(updated));
       setSaved(false);
     } else {
-      // ADD the album
       const newAlbum = {
         title,
         artist,
         image: url,
         spoURL,
         YTURL,
-        releaseDate: popularity,
+        release_date: released_date,
         description,
         type: "album",
+        trackURI,
       };
       savedAlbums.push(newAlbum);
       localStorage.setItem("savedAlbums", JSON.stringify(savedAlbums));
       setSaved(true);
     }
-  }
+  };
 
   const handleClick = (url) => {
-    setTimeout(() => window.open(url, "_blank"), 300);
+    if (url) window.open(url, "_blank");
+  };
+
+  const handlePlay = () => {
+    if (trackURI?.startsWith("spotify:album:")) {
+      showPlayer(trackURI, true); // context_uri mode
+    } else {
+      console.warn("[AlbumCard] Invalid album URI:", trackURI);
+    }
   };
 
   return (
@@ -59,14 +73,26 @@ export const AlbumCard = ({
       className="relative w-64 bg-gradient-to-br from-blue-900/80 to-black/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl hover:shadow-blue-500/10 transition-all duration-500"
     >
       {/* Album Cover */}
-      <div className="relative overflow-hidden">
-        <img 
-          src={url} 
-          alt={title} 
-          className="w-full h-48 object-cover transition-transform duration-700 hover:scale-110" 
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-      </div>
+<div className="relative overflow-hidden">
+  <img 
+    src={url} 
+    alt={title} 
+    className="w-full h-48 object-cover transition-transform duration-700 hover:scale-110" 
+  />
+  
+  {/* Dark overlay */}
+  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+
+  {/* Play button */}
+  <button
+    onClick={handlePlay}
+    className="absolute bottom-2 right-2 z-20 bg-white text-black p-2 rounded-full shadow hover:scale-110 transition"
+    title="Play Album"
+  >
+    <Play size={20} />
+  </button>
+</div>
+
 
       {/* Content */}
       <div className="relative p-4 space-y-3">
@@ -91,18 +117,16 @@ export const AlbumCard = ({
         {/* Release Date */}
         <div className="flex items-center gap-2 text-blue-400 text-sm">
           <Calendar size={16} />
-          <span>Released: {popularity}</span>
+          <span>Released: {released_date}</span>
         </div>
 
         {/* Description */}
         {description && (
-          <p className="text-gray-400 text-xs line-clamp-2">
-            {description}
-          </p>
+          <p className="text-gray-400 text-xs line-clamp-2">{description}"</p>
         )}
 
         {/* Buttons */}
-        <div className="space-y-2 pt-2">
+        <div className="space-y-2 pt-2 flex flex-col">
           <SpotifyButton clickHandle={() => handleClick(spoURL)} />
           <YouTubeButton clickHandle={() => handleClick(YTURL)} />
         </div>

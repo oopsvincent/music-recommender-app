@@ -61,7 +61,7 @@ export default function Callback() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-black text-white">
       <Loader2 className="animate-spin w-8 h-8 mr-3" />
-      <span className="text-lg">Loading your music library...</span>
+      <span className="text-lg">Processing your Spotify Login...</span>
     </div>
   );
 }
