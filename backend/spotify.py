@@ -210,17 +210,32 @@ def play_track():
         return jsonify({"error": "No access token in session"}), 401
 
     data = request.json
-    device_id = data.get("device_id")
+    device_id = data.get("device_id", "")
     uris = data.get("uris")
+    context_uri = data.get("context_uri")
+    offset = data.get("offset")  # can be index or uri
+    position_ms = data.get("position_ms")
 
-    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    payload = {"uris": uris} if uris else {}
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
 
-    res = requests.put(
-        f"https://api.spotify.com/v1/me/player/play?device_id={device_id}",
-        headers=headers,
-        json=payload,
-    )
+    payload = {}
+    if uris:
+        payload["uris"] = uris
+    if context_uri:
+        payload["context_uri"] = context_uri
+    if offset is not None:
+        payload["offset"] = offset
+    if position_ms is not None:
+        payload["position_ms"] = position_ms
+
+    url = f"https://api.spotify.com/v1/me/player/play"
+    if device_id:
+        url += f"?device_id={device_id}"
+
+    res = requests.put(url, headers=headers, json=payload)
 
     if res.status_code != 204:
         return jsonify({"error": "Failed to play track", "details": res.text}), 400
