@@ -3,6 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 export default function CreditsPage() {
+      window.scrollTo(0, 0)
   const fadeUp = {
     hidden: { opacity: 0, y: 40 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
@@ -10,7 +11,7 @@ export default function CreditsPage() {
 
   return (
     <motion.div
-      className="min-h-screen bg-black text-white flex flex-col justify-center items-center p-6"
+      className="min-h-screen bg-black text-white flex flex-col justify-center items-center p-6 space-grotesk"
       initial="hidden"
       animate="visible"
       variants={fadeUp}

@@ -13,7 +13,7 @@ import { PlaylistCard } from '../Components/CardComponents/PlaylistsCard';
 const SearchPage = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [searchType, setSearchType] = useState("track");
     
     const debouncedSearch = useDebouncedSearch(searchTerm, searchType, setLoading, setSearchResults);
@@ -37,16 +37,11 @@ const SearchPage = () => {
             : "Start typing to search for tracks"}
     </p>
 
-    <div className="flex flex-row flex-wrap justify-center gap-5">
+    <div className="flex flex-row flex-wrap justify-center p-10 gap-5">
         {loading ? (
             Array.from({ length: 20 }).map((_, index) => (
                 <div key={index} className="p-4">
-                    <Skeleton height={200} width={150} />
-                    <Skeleton height={25} width={`80%`} style={{ marginTop: 10 }} />
-                    <Skeleton height={15} width={`60%`} style={{ marginTop: 5 }} />
-                    <Skeleton height={35} width={`100%`} style={{ marginTop: 40 }} />
-                    <Skeleton height={35} width={`100%`} style={{ marginTop: 5 }} />
-                    <Skeleton height={10} width={`40%`} style={{ marginTop: 5 }} />
+                    <Skeleton key={index} height={450} width={270} className="m-2 glassmorpho rounded-2xl" />
                 </div>
             ))
         ) : (
@@ -66,6 +61,7 @@ const SearchPage = () => {
                 
                     {track.type === "album" && 
                     <AlbumCard
+                    id={track.id}
                     released_date={track.released_date}
                     YTURL={track.YTURL}
                     spoURL={track.spoURL}

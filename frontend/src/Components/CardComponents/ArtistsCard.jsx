@@ -14,10 +14,8 @@ export const ArtistCard = ({
     popularity,
     followers,
     id,
-    URI, // Expecting: spotify:artist:...
+    URI, 
 }) => {
-    console.log(URI);
-    
     
     const navigate = useNavigate();
     const { showPlayer } = usePlayer();
@@ -142,9 +140,9 @@ export const ArtistCard = ({
                     </div>
 
 
-                    <div className="space-y-2 pt-2 flex flex-col">
+                    <div className="space-y-2 pt-2 flex flex-col noskip">
                         <SpotifyButton clickHandle={() => handleClick(spoURL)} />
-                        <YouTubeButton clickHandle={() => handleClick(YTURL)} />
+                        <YouTubeButton clickHandle={() => handleClick(`https://www.youtube.com/results?search_query=${title}`)} />
                     </div>
                 </div>
             </div>

@@ -129,7 +129,6 @@ export const PlaylistCard = ({
         {/* Buttons */}
         <div className="space-y-2 pt-2 flex flex-col">
           <SpotifyButton clickHandle={() => handleClick(spoURL)} />
-          <YouTubeButton clickHandle={() => handleClick(YTURL)} />
         </div>
       </div>
     </motion.div>

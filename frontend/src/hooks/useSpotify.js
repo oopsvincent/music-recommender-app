@@ -116,6 +116,7 @@ async function fetchSpotifySearchResults(query, type, setSearchResults, setLoadi
                 };
             } else if (type === "album") {
                 return {
+                    id: item.id,
                     title: item.name,
                     url: item.images?.[0]?.url,
                     artists: item.artists.map((artist) => artist.name).join(", "),

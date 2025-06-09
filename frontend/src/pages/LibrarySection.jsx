@@ -6,7 +6,7 @@ import SavedAlbums from '../Components/SavedAlbums';
 import LocallySavedSongs from '../Components/LocallySavedSongs';
 import FollowedArtist from '../Components/FollowedArtist';
 import { usePlayer } from '../contexts/PlayerContext';
-import { Loader2 } from 'lucide-react';
+import { Loader } from 'lucide-react';
 
 const LibrarySection = () => {
   const [playlists, setPlaylists] = useState([]);
@@ -166,7 +166,7 @@ const LibrarySection = () => {
   };
 
   const renderChips = () => (
-    <div className="flex gap-4 mb-8">
+    <div className="flex gap-4 mb-8 flex-nowrap overflow-scroll scrollb-none">
       {['playlists', 'albums', 'artists', 'saved'].map(section => (
         <button
           key={section}
@@ -189,7 +189,7 @@ const LibrarySection = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black text-white">
-        <Loader2 className="animate-spin w-6 h-6 mr-2" />
+        <Loader className="animate-spin w-6 h-6 mr-2" />
         <span>Loading your library...</span>
       </div>
     );
