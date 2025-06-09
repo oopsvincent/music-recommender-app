@@ -2,23 +2,55 @@
 import { useNavigate } from "react-router-dom";
 
 export default function Footer() {
-
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   return (
-    <footer className=" pb-40 bottom-0 left-0 w-full bg-black/80 backdrop-blur-sm border-t border-white/10 py-3 px-6 text-center text-xs text-gray-300 z-40 tracking-wide">
-      <p>© 2025 <span className="font-semibold text-white cursor-pointer"><span onClick={() => {
-        navigate("/redirect?page=the-code-breakers");
-      }}>The Code Breakers</span></span> — Crafted with <span className="text-red-400">♥</span> & elegance in the spirit of creativity and innovation.</p>
-      <p className="mt-1">Built by <span className="font-semibold text-green-400 underline cursor-pointer"><span onClick={() => {
-        navigate("/redirect?page=the-code-breakers");
-      }}>The Code Breakers</span></span> <span>& <span className="cursor-pointer" onClick={() => {
-        navigate("/credits");
-      }}>team</span></span> — All rights reserved. Licensed under MIT.</p>
-        <p className="mt-1">Inspired by the power of music and the beauty of code.</p>
-        <p className='x'>Full team credits <span className='text-red-600 underline cursor-pointer' onClick={() => {
-            navigate("/credits");
-        }}>here</span></p>
+    <footer className="md:pb-42 pb-50 px-6 pt-6 text-center text-[13px] text-gray-400 bg-black/70 backdrop-blur-md border-t border-white/10 w-full z-40">
+      <div className="space-y-2 max-w-3xl mx-auto">
+        <p>
+          © 2025{" "}
+          <span
+            className="text-white font-semibold hover:text-green-400 transition cursor-pointer"
+            onClick={() => navigate("/redirect?page=the-code-breakers")}
+          >
+            The Code Breakers
+          </span>{" "}
+          — Crafted with <span className="text-red-500">♥</span> for visionaries who love music & code.
+        </p>
+
+        <p>
+          Built by{" "}
+          <span
+            className="text-green-400 underline hover:text-green-300 cursor-pointer transition"
+            onClick={() => navigate("/redirect?page=the-code-breakers")}
+          >
+            The Code Breakers
+          </span>{" "}
+          &{" "}
+          <span
+            className="text-blue-400 underline hover:text-blue-300 cursor-pointer transition"
+            onClick={() => navigate("/credits")}
+          >
+            our team
+          </span>{" "}
+          — MIT Licensed.
+        </p>
+
+        <p className="italic text-gray-500">
+          Inspired by the rhythm of sound and the elegance of software.
+        </p>
+
+        <p>
+          Full team credits{" "}
+          <span
+            className="text-red-500 underline hover:text-red-400 cursor-pointer"
+            onClick={() => navigate("/credits")}
+          >
+            here
+          </span>
+          .
+        </p>
+      </div>
     </footer>
   );
 }

@@ -2,7 +2,6 @@ import React from 'react';
 import { ArtistCard } from './CardComponents/ArtistsCard';
 
 const FollowedArtist = ({ artists = [], onSelectArtist }) => {
-    console.log(artists);
     
   if (!Array.isArray(artists) || artists.length === 0) {
     return (
@@ -18,9 +17,9 @@ const FollowedArtist = ({ artists = [], onSelectArtist }) => {
         <ArtistCard
           key={artist.id}
           title={artist.name}
-          followers={artist.followers ?? 'Unknown'}
+          followers={artist.followers.total ?? 'Unknown'}
           id={artist.id}
-          url={artist.image}
+          url={artist.images[0].url}
           popularity={artist.popularity}
           spoURL={artist.url}
           onClick={() => onSelectArtist?.(artist.id)} // Optional callback if needed

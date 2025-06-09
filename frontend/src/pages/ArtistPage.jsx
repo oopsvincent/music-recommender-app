@@ -4,7 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import { getSpotifyToken } from "../hooks/useSpotify";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { ArrowLeft, Bookmark, BookmarkCheck } from "lucide-react";
+import { ArrowLeft, Bookmark, BookmarkCheck, Loader } from "lucide-react";
 import { SpotifyButton } from "../Components/MusicButtons";
 import { TrackCard } from "../Components/CardComponents/TracksCard";
 import { AlbumCard } from "../Components/CardComponents/AlbumsCard";
@@ -17,6 +17,47 @@ export default function ArtistPage() {
     const [albums, setAlbums] = useState([]);
     const [relatedArtists, setRelatedArtists] = useState([]);
     const [saved, setSaved] = useState(false);
+
+      window.scrollTo(0, 0)
+
+    // Check localStorage on mount
+useEffect(() => {
+  if (!artist) return;
+
+  const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
+  const isSaved = savedArtists.some(a => a.id === artist.id);
+  setSaved(isSaved);
+}, [artist]);
+
+
+const toggleSave = () => {
+  const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
+
+  if (saved) {
+    const updated = savedArtists.filter((a) => a.id !== artist.id);
+    localStorage.setItem("savedArtists", JSON.stringify(updated));
+    setSaved(false);
+  } else {
+    const newArtist = {
+      id: artist.id,
+      title: artist.name,
+      spoURL: artist.external_urls.spotify,
+      YTURL: "", // Placeholder if needed
+      image: artist.images[0]?.url,
+      followers: artist.followers.total,
+      popularity: artist.popularity,
+      uri: artist.uri,
+    };
+    savedArtists.push(newArtist);
+    localStorage.setItem("savedArtists", JSON.stringify(savedArtists));
+    setSaved(true);
+  }
+};
+
+const handleSave = () => {
+  toggleSave();
+};
+
 
     useEffect(() => {
         async function fetchData() {
@@ -60,29 +101,11 @@ export default function ArtistPage() {
         fetchData();
     }, [id]);
 
-    const handleSave = () => {
-        const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
 
-        if (saved) {
-            const updated = savedArtists.filter(a => a.id !== artist.id);
-            localStorage.setItem("savedArtists", JSON.stringify(updated));
-            setSaved(false);
-        } else {
-            const newArtist = {
-                id: artist.id,
-                name: artist.name,
-                url: artist.external_urls.spotify,
-                image: artist.images[0]?.url,
-                followers: artist.followers.total,
-                popularity: artist.popularity,
-            };
-            savedArtists.push(newArtist);
-            localStorage.setItem("savedArtists", JSON.stringify(savedArtists));
-            setSaved(true);
-        }
-    };
-
-    if (!artist) return <div className="text-white p-10">Loading...</div>;
+    if (!artist) return     <div className="flex items-center justify-center min-h-screen bg-black text-white">
+      <Loader className="animate-spin w-8 h-8 mr-3" />
+      <span className="text-lg">Loading the Artist Data...</span>
+    </div>;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-black p-6 text-white">
@@ -126,7 +149,7 @@ export default function ArtistPage() {
             {/* Top Tracks */}
             <div className="mt-12">
                 <h2 className="text-3xl font-bold mb-4">Top Tracks</h2>
-                <div className="flex flex-row flex-wrap gap-5">
+                <div className="flex flex-row flex-wrap justify-center gap-5">
                     {topTracks.map((track, index) => (
                         <TrackCard
                             key={index}
@@ -147,7 +170,7 @@ export default function ArtistPage() {
             {/* Discography */}
             <div className="mt-12">
                 <h2 className="text-3xl font-bold mb-4">Discography</h2>
-                <div className="flex flex-row flex-wrap gap-5">
+                <div className="flex flex-row flex-wrap justify-center gap-5">
                     {albums.map((album, index) => (
                         <AlbumCard
                             key={index}
@@ -157,7 +180,7 @@ export default function ArtistPage() {
                             spoURL={album.external_urls.spotify}
                             YTURL={""}
                             released_date={album.release_date}
-                            description={album.name}
+                            description={`Total Tracks: ${album.total_tracks}`}
                             trackURI={album.uri}
                         />
                     ))}
@@ -166,7 +189,7 @@ export default function ArtistPage() {
             </div>
 
             {/* Related Artists */}
-            <div className="mt-12">
+            {/* <div className="mt-12">
                 <h2 className="text-3xl font-bold mb-4">Related Artists</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
                     {relatedArtists.slice(0, 8).map(ra => (
@@ -185,7 +208,7 @@ export default function ArtistPage() {
                         </Link>
                     ))}
                 </div>
-            </div>
+            </div> */}
         </div>
     );
 }

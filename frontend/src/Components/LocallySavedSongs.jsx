@@ -55,6 +55,7 @@ const LocallySavedSongs = () => {
         ) : (
           albums.map((album, index) => (
             <AlbumCard
+            id={album.id}
               key={index}
               url={album.image}
               title={album.title}

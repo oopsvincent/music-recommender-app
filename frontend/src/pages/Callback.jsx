@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/AuthContext';
-import { Loader2 } from 'lucide-react';
+import { Loader } from 'lucide-react';
 
 export default function Callback() {
   const location = useLocation();
@@ -60,7 +60,7 @@ export default function Callback() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-black text-white">
-      <Loader2 className="animate-spin w-8 h-8 mr-3" />
+      <Loader className="animate-spin w-8 h-8 mr-3" />
       <span className="text-lg">Processing your Spotify Login...</span>
     </div>
   );
