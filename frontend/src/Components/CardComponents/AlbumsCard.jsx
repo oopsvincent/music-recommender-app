@@ -10,11 +10,7 @@ export const AlbumCard = ({
   url,
   title,
   artist,
-  spoURL,
-  YTURL,
-  released_date,
-  description,
-  trackURI, // Expecting spotify:album:xyz...
+  trackURI,
 }) => {
   const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
@@ -42,8 +38,6 @@ useEffect(() => {
         image: url,
         spoURL,
         YTURL,
-        release_date: released_date,
-        description,
         type: "album",
         trackURI,
       };
@@ -77,14 +71,14 @@ useEffect(() => {
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={handleCardClick}
-      className="relative w-64 bg-gradient-to-br from-blue-900/80 to-black/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl hover:shadow-blue-500/10 transition-all duration-500"
+      className="relative w-64 bg-gradient-to-br from-blue-900/80 to-gray/80 backdrop-blur-xl rounded-md overflow-hidden shadow-2xl hover:shadow-blue-500/10 transition-all duration-500"
     >
       {/* Album Cover */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden rounded-xl p-5 ">
         <img
           src={url}
           alt={title}
-          className="w-full h-48 object-cover transition-transform duration-700 hover:scale-110"
+          className="w-auto h-auto object-cover transition-transform duration-700 hover:scale-110"
         />
 
         {/* Play Button */}
@@ -109,34 +103,45 @@ useEffect(() => {
         </div>
 
         <div>
-          <h3 className="text-xl font-bold text-white truncate" title={title}>
+          <h3 className="text-xl w-[90%] font-bold text-white truncate cursor-pointer hover:underline" title={title}>
+
             {title}
           </h3>
-          <p className="text-gray-300 text-sm truncate" title={artist}>
-            {artist}
-          </p>
+{artist.map((a, i) => (
+  <span
+    key={a.id}
+    className="text-gray-300 text-sm truncate cursor-pointer hover:underline"
+    title={a.name}
+    onClick={() => window.open(`/artist/${a.id}`)}
+  >
+    {a.name}{i < artist.length - 1 && ', '}
+  </span>
+))}
+            <h2 className="text-sm text-gray-400">
+                album
+            </h2>
         </div>
 
         {/* Release Date */}
-        <div className="flex items-center gap-2 text-blue-400 text-sm">
+        {/* <div className="flex items-center gap-2 text-blue-400 text-sm">
           <Calendar size={16} />
           <span>Released: {released_date}</span>
-        </div>
+        </div> */}
 
         {/* Description */}
-        {description && (
+        {/* {description && (
           <p className="text-gray-400 text-xs line-clamp-2">{description}</p>
-        )}
+        )} */}
 
         {/* Buttons */}
-        <div className="space-y-2 pt-2 flex flex-col no-click">
+        {/* <div className="space-y-2 pt-2 flex flex-col no-click">
           <SpotifyButton clickHandle={() => handleClick(spoURL)} />
           <YouTubeButton
             clickHandle={() =>
               handleClick(`https://www.youtube.com/results?search_query=${encodeURIComponent(title + " " + artist)}`)
             }
           />
-        </div>
+        </div> */}
       </div>
     </motion.div>
   );

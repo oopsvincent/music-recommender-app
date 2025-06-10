@@ -84,21 +84,18 @@ function HomePage({ userName }) {
                 )) : trackData.map((track, index) => {
                     const isArtist = track.type === 'artist';
                     return (
-                        <TrackCard
-                            key={index}
-                            title={track.title}
-                            artist={track.artists}
-                            url={track.url}
-                            spoURL={track.spoURL}
-                            YTURL={fetchYouTubeData(`${track.title} ${track.artists}`)}
-                            popularity={track.popularity}
-                            type={track.type}
-                            explicit={track.explicit}
-                            trackURI={track.trackURI}
-                            // Only pass followers for artists
-                            {...(isArtist && { followers: track.followers })}
-                            handleSave={() => { }}
-                        />
+                                <TrackCard
+                                    followers={track.followers}
+                                    url={track.url}
+                                    title={track.title}
+                                    artist={track.artists.map((artist) => ({ name: artist.name, id: artist.id }))}
+                                    spoURL={track.spoURL}
+                                    YTURL={fetchYouTubeData(track.title + " " + track.artists)}
+                                    popularity={track.popularity}
+                                    explicit={track.explicit}
+                                    trackURI={track.trackURI}
+                                    albumID={track.albumID}
+                                />
                     );
                 })}
             </div>

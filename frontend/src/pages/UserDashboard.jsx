@@ -1,6 +1,7 @@
 // src/pages/UserDashboard.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Loader } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
 import { faSignOutAlt, faEnvelope, faGlobe, faUser, faCrown } from '@fortawesome/free-solid-svg-icons';
@@ -70,7 +71,10 @@ export default function UserDashboard() {
       
       <div className='relative z-10 w-full max-w-xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-[0_0_60px_5px_rgba(0,255,160,0.15)] rounded-3xl p-8 space-y-6 animate-fade-in'>
         {loading ? (
-          <p className='text-xl font-semibold text-center'>Loading your dashboard...</p>
+    <div className="flex items-center justify-center text-white">
+      <Loader className="animate-spin w-8 h-8 mr-3" />
+      <span className="text-lg">Loading Your Account...</span>
+    </div>
         ) : userData ? (
           <>
             <div className='flex flex-col items-center space-y-4'>
