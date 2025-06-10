@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import SearchComp from '../Components/Search';
 import Card from '../Components/Card';
 import Skeleton from 'react-loading-skeleton';
@@ -15,7 +15,7 @@ const SearchPage = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(false);
     const [searchType, setSearchType] = useState("track");
-    
+
     const debouncedSearch = useDebouncedSearch(searchTerm, searchType, setLoading, setSearchResults);
     function handleSearchChange(query, type) {
         setSearchTerm(query);
@@ -28,80 +28,77 @@ const SearchPage = () => {
     }
 
 
-  return (
-    <div>
-    <SearchComp handleChange={handleSearchChange} />
-    <p className="text-white p-5">
-        {searchTerm
-            ? `User is searching for: ${searchTerm}`
-            : "Start typing to search for tracks"}
-    </p>
+    return (
+        <div>
+            <SearchComp handleChange={handleSearchChange} />
+            <p className="text-white p-5">
+                {searchTerm
+                    ? `User is searching for: ${searchTerm}`
+                    : "Start typing to search for tracks"}
+            </p>
 
-    <div className="flex flex-row flex-wrap justify-center p-10 gap-5">
-        {loading ? (
-            Array.from({ length: 20 }).map((_, index) => (
-                <div key={index} className="p-4">
-                    <Skeleton key={index} height={450} width={270} className="m-2 glassmorpho rounded-2xl" />
-                </div>
-            ))
-        ) : (
-            (searchTerm ? searchResults  : searchResults).map((track, index) => (
-                <div className='flex flex-row flex-wrap justify-center gap-5' key={index}>
-                {track.type === "artist" && 
-                <ArtistCard 
-                followers={track.followers}
-                url={track.url}
-                title={track.title}
-                YTURL={track.YTURL}
-                spoURL={track.spoURL}
-                id={track.id}
-                URI={track.trackURI}
-                popularity={track.popularity}
-                />}
-                
-                    {track.type === "album" && 
-                    <AlbumCard
-                    id={track.id}
-                    released_date={track.released_date}
-                    YTURL={track.YTURL}
-                    spoURL={track.spoURL}
-                    url={track.url}
-                    title={track.title}
-                    artist={track.artists}
-                    trackURI={track.trackURI}
-                    description={track.description}
-                />    
-                }
-                {track.type === "track" &&                 
-                <TrackCard
-                    followers={track.followers}
-                    url={track.url}
-                    title={track.title}
-                    artist={track.artists}
-                    spoURL={track.spoURL}
-                    YTURL={fetchYouTubeData(track.title + " " + track.artists)}
-                    popularity={track.popularity}
-                    explicit={track.explicit}
-                    trackURI={track.trackURI}
-                />
-                }
-                {track.type === "playlist" && 
-                <PlaylistCard
-                    owner={track.owner}
-                    isPublic={track.public}
-                    spoURL={track.spoURL}
-                    url={track.url}
-                    title={track.title}
-                    trackURI={track.trackURI}
-                />
-                }
-                </div>
-            ))
-        )}
+            <div className="flex flex-row flex-wrap justify-center p-10 gap-5">
+                {loading ? (
+                    Array.from({ length: 20 }).map((_, index) => (
+                        <div key={index} className="p-4">
+                            <Skeleton key={index} height={450} width={270} className="m-2 glassmorpho rounded-2xl" />
+                        </div>
+                    ))
+                ) : (
+                    (searchTerm ? searchResults : searchResults).map((track, index) => (
+                        <div className='flex flex-row flex-wrap justify-center gap-5' key={index}>
+                            {track.type === "artist" &&
+                                <ArtistCard
+                                    followers={track.followers}
+                                    url={track.url}
+                                    title={track.title}
+                                    YTURL={track.YTURL}
+                                    spoURL={track.spoURL}
+                                    id={track.id}
+                                    URI={track.trackURI}
+                                    popularity={track.popularity}
+                                />}
 
-    </div>
-</div>
-  )
+                            {track.type === "album" &&
+                                <AlbumCard
+                                    id={track.id}
+                                    url={track.url}
+                                    title={track.title}
+                                    artist={track.artists.map((artist) => ({ name: artist.name, id: artist.id }))}
+                                    trackURI={track.trackURI}
+                                />
+                            }
+                            {track.type === "track" &&
+                                <TrackCard
+                                    followers={track.followers}
+                                    url={track.url}
+                                    title={track.title}
+                                    artist={track.artists.map((artist) => ({ name: artist.name, id: artist.id }))}
+                                    spoURL={track.spoURL}
+                                    YTURL={fetchYouTubeData(track.title + " " + track.artists)}
+                                    popularity={track.popularity}
+                                    explicit={track.explicit}
+                                    trackURI={track.trackURI}
+                                    albumID={track.albumID}
+                                />
+                            }
+                            {track.type === "playlist" &&
+                                <PlaylistCard
+                                    owner={track.owner}
+                                    isPublic={track.public}
+                                    spoURL={track.spoURL}
+                                    url={track.url}
+                                    title={track.title}
+                                    trackURI={track.trackURI}
+                                />
+                            }
+                        </div>
+                    ))
+                )}
+
+            </div>
+        </div>
+    )
 }
 
 export default SearchPage

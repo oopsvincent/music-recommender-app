@@ -18,45 +18,45 @@ export default function ArtistPage() {
     const [relatedArtists, setRelatedArtists] = useState([]);
     const [saved, setSaved] = useState(false);
 
-      window.scrollTo(0, 0)
+    window.scrollTo(0, 0)
 
     // Check localStorage on mount
-useEffect(() => {
-  if (!artist) return;
+    useEffect(() => {
+        if (!artist) return;
 
-  const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
-  const isSaved = savedArtists.some(a => a.id === artist.id);
-  setSaved(isSaved);
-}, [artist]);
+        const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
+        const isSaved = savedArtists.some(a => a.id === artist.id);
+        setSaved(isSaved);
+    }, [artist]);
 
 
-const toggleSave = () => {
-  const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
+    const toggleSave = () => {
+        const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
 
-  if (saved) {
-    const updated = savedArtists.filter((a) => a.id !== artist.id);
-    localStorage.setItem("savedArtists", JSON.stringify(updated));
-    setSaved(false);
-  } else {
-    const newArtist = {
-      id: artist.id,
-      title: artist.name,
-      spoURL: artist.external_urls.spotify,
-      YTURL: "", // Placeholder if needed
-      image: artist.images[0]?.url,
-      followers: artist.followers.total,
-      popularity: artist.popularity,
-      uri: artist.uri,
+        if (saved) {
+            const updated = savedArtists.filter((a) => a.id !== artist.id);
+            localStorage.setItem("savedArtists", JSON.stringify(updated));
+            setSaved(false);
+        } else {
+            const newArtist = {
+                id: artist.id,
+                title: artist.name,
+                spoURL: artist.external_urls.spotify,
+                YTURL: "", // Placeholder if needed
+                image: artist.images[0]?.url,
+                followers: artist.followers.total,
+                popularity: artist.popularity,
+                uri: artist.uri,
+            };
+            savedArtists.push(newArtist);
+            localStorage.setItem("savedArtists", JSON.stringify(savedArtists));
+            setSaved(true);
+        }
     };
-    savedArtists.push(newArtist);
-    localStorage.setItem("savedArtists", JSON.stringify(savedArtists));
-    setSaved(true);
-  }
-};
 
-const handleSave = () => {
-  toggleSave();
-};
+    const handleSave = () => {
+        toggleSave();
+    };
 
 
     useEffect(() => {
@@ -102,9 +102,9 @@ const handleSave = () => {
     }, [id]);
 
 
-    if (!artist) return     <div className="flex items-center justify-center min-h-screen bg-black text-white">
-      <Loader className="animate-spin w-8 h-8 mr-3" />
-      <span className="text-lg">Loading the Artist Data...</span>
+    if (!artist) return <div className="flex items-center justify-center min-h-screen bg-black text-white">
+        <Loader className="animate-spin w-8 h-8 mr-3" />
+        <span className="text-lg">Loading the Artist Data...</span>
     </div>;
 
     return (
@@ -155,12 +155,16 @@ const handleSave = () => {
                             key={index}
                             url={track.album.images[0]?.url}
                             title={track.name}
-                            artist={track.artists.map(a => a.name).join(', ')}
+                            artist={track.artists.map((artist) => ({
+                                name: artist.name,
+                                id: artist.id
+                            }))}
                             spoURL={track.external_urls.spotify}
                             YTURL={""} // You can plug this from YouTube API if needed
                             popularity={track.popularity}
                             explicit={track.explicit}
                             trackURI={track.uri}
+                            albumID={track.album.id}
                         />
                     ))}
 
@@ -176,12 +180,12 @@ const handleSave = () => {
                             key={index}
                             url={album.images[0]?.url}
                             title={album.name}
-                            artist={album.artists.map(a => a.name).join(', ')}
-                            spoURL={album.external_urls.spotify}
-                            YTURL={""}
-                            released_date={album.release_date}
-                            description={`Total Tracks: ${album.total_tracks}`}
+                            artist={album.artists.map((artist) => ({
+                                name: artist.name,
+                                id: artist.id
+                            }))}
                             trackURI={album.uri}
+                            id={album.id}
                         />
                     ))}
 
