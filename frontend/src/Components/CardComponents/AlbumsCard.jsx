@@ -17,42 +17,43 @@ export const AlbumCard = ({
   const { showPlayer } = usePlayer();
 
 useEffect(() => {
-  const savedItems = JSON.parse(localStorage.getItem("savedAlbums")) || [];
-  const isSaved = savedItems.some(item => item.trackURI === trackURI);
+  const savedAlbums = JSON.parse(localStorage.getItem("savedAlbums")) || [];
+  const isSaved = savedAlbums.some(album => album.id === id); // ✅ match on id
   setSaved(isSaved);
-}, [trackURI]);
+}, [id]);
 
+const toggleSave = () => {
+  const savedAlbums = JSON.parse(localStorage.getItem("savedAlbums")) || [];
 
-  const toggleSave = () => {
-    const savedAlbums = JSON.parse(localStorage.getItem("savedAlbums")) || [];
+  if (saved) {
+    const updated = savedAlbums.filter(album => album.id !== id);
+    localStorage.setItem("savedAlbums", JSON.stringify(updated));
+    setSaved(false);
+  } else {
+    const newAlbum = {
+      id,
+      title,
+      artist: artist,
+      image: url,
+      type: "album",
+      trackURI,
+    };
+    savedAlbums.push(newAlbum);
+    localStorage.setItem("savedAlbums", JSON.stringify(savedAlbums));
+    setSaved(true);
+  }
+};
 
-    if (saved) {
-      const updated = savedAlbums.filter((album) => album.trackURI !== trackURI);
-      localStorage.setItem("savedAlbums", JSON.stringify(updated));
-      setSaved(false);
-    } else {
-      const newAlbum = {
-        id,
-        title,
-        artist,
-        image: url,
-        spoURL,
-        YTURL,
-        type: "album",
-        trackURI,
-      };
-      savedAlbums.push(newAlbum);
-      localStorage.setItem("savedAlbums", JSON.stringify(savedAlbums));
-      setSaved(true);
+    const handleSave = () => {
+        toggleSave();
     }
-  };
 
   const handleClick = (url) => {
     if (url) window.open(url, "_blank");
   };
 
   const handleCardClick = (e) => {
-    if (e.target.closest(".no-click")) return;
+    if (e.target.closest(".noskip")) return;
     navigate(`/album/${id}`);
   };
 
@@ -96,9 +97,9 @@ useEffect(() => {
         {/* Save Icon */}
         <div className="absolute top-4 right-4 z-10 cursor-pointer no-click">
           {saved ? (
-            <BookmarkCheck stroke="white" fill="green" onClick={toggleSave} />
+            <BookmarkCheck stroke="white" fill="green" onClick={handleSave} />
           ) : (
-            <Bookmark stroke="white" onClick={toggleSave} />
+            <Bookmark stroke="white" onClick={handleSave} />
           )}
         </div>
 
@@ -107,41 +108,21 @@ useEffect(() => {
 
             {title}
           </h3>
-{artist.map((a, i) => (
-  <span
-    key={a.id}
-    className="text-gray-300 text-sm truncate cursor-pointer hover:underline"
-    title={a.name}
-    onClick={() => window.open(`/artist/${a.id}`)}
-  >
-    {a.name}{i < artist.length - 1 && ', '}
-  </span>
+{Array.isArray(artist) &&
+  artist.map((a, i) => (
+    <span
+      key={a.id}
+      className="text-gray-300 text-sm truncate cursor-pointer hover:underline noskip"
+      title={a.name}
+      onClick={() => navigate(`/artist/${a.id}`)}
+    >
+      {a.name}{i < artist.length - 1 && ', '}
+    </span>
 ))}
             <h2 className="text-sm text-gray-400">
                 album
             </h2>
         </div>
-
-        {/* Release Date */}
-        {/* <div className="flex items-center gap-2 text-blue-400 text-sm">
-          <Calendar size={16} />
-          <span>Released: {released_date}</span>
-        </div> */}
-
-        {/* Description */}
-        {/* {description && (
-          <p className="text-gray-400 text-xs line-clamp-2">{description}</p>
-        )} */}
-
-        {/* Buttons */}
-        {/* <div className="space-y-2 pt-2 flex flex-col no-click">
-          <SpotifyButton clickHandle={() => handleClick(spoURL)} />
-          <YouTubeButton
-            clickHandle={() =>
-              handleClick(`https://www.youtube.com/results?search_query=${encodeURIComponent(title + " " + artist)}`)
-            }
-          />
-        </div> */}
       </div>
     </motion.div>
   );
