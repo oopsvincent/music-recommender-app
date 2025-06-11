@@ -24,6 +24,7 @@ import CreditsPage from './pages/CreditsPages';
 import Redirect from './pages/redirect';
 import ArtistPage from './pages/ArtistPage';
 import AlbumPage from './pages/AlbumPage';
+import TrackPage from './pages/TrackPage';
 
 const App = () => {
   const [selectedSection, setSection] = useState('');
@@ -54,6 +55,7 @@ const App = () => {
               <Routes>
                 <Route path="/artist/:id" element={<ArtistPage />} />
                 <Route path="/album/:id" element={<AlbumPage />} />
+                <Route path="/track/:id" element={<TrackPage />} />
                 <Route path="/" element={<HomePage userName={userName} selectedSection={selectedSection} setSection={setSection} />} />
                 <Route path="/callback" element={<Callback />} />
                 <Route path="/search" element={<SearchPage />} />

@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Bookmark, BookmarkCheck, Award, CirclePlay } from "lucide-react";
 import { SpotifyButton, YouTubeButton } from "../MusicButtons";
+import { useNavigate } from "react-router-dom";
 
 export const TrackCard = ({
     url,
@@ -16,11 +17,12 @@ export const TrackCard = ({
     trackURI,
     albumID,
 }) => {
+    const navigate = useNavigate();
     const { showPlayer } = usePlayer();
     const [saved, setSaved] = useState(false);
 
 
-    console.log(artist);
+    // console.log(artist);
 
 
     useEffect(() => {
@@ -66,16 +68,7 @@ export const TrackCard = ({
 
 
     const handleSave = () => {
-        toggleSave({
-            title,
-            artist: artist,
-            spoURL,
-            image: url,
-            popularity,
-            explicit,
-            type: "track",
-            trackURI,
-        });
+        toggleSave();
     };
 
     const handleClick = (url) => {
@@ -117,7 +110,7 @@ export const TrackCard = ({
                     </div>
                     <h3 className="text-xl font-bold text-white overflow-scroll w-45 text-nowrap scrollb-none cursor-pointer hover:underline" title={title}
                         onClick={() => {
-                            window.open(`/album/${albumID}`)
+                            navigate(`/album/${albumID}`)
                         }}
                     >
                         {title}
@@ -128,7 +121,7 @@ export const TrackCard = ({
                             key={a.id}
                             className="text-gray-300 text-sm truncate cursor-pointer hover:underline"
                             title={a.name}
-                            onClick={() => window.open(`/artist/${a.id}`)}
+                            onClick={() => navigate(`/artist/${a.id}`)}
                         >
                             {a.name}{i < artist.length - 1 && ', '}
                         </span>

@@ -16,7 +16,7 @@ const FollowedArtist = ({ artists = [], onSelectArtist }) => {
       {artists.map((artist) => (
         <ArtistCard
           key={artist.id}
-          title={artist.name}
+          artist={artist.name}
           followers={artist.followers.total ?? 'Unknown'}
           id={artist.id}
           url={artist.images[0].url}

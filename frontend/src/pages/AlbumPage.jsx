@@ -66,7 +66,8 @@ export default function AlbumPage() {
                 ]);
                 setAlbum(albumRes.data);
                 setTracks(tracksRes.data.items);
-                console.log(tracksRes.data);
+
+                document.title = `${albumRes.data.name} — • ${albumRes.data.artists.map((a) => a.name)}`;
 
             } catch (err) {
                 console.error("Error fetching album data:", err);
@@ -120,7 +121,7 @@ export default function AlbumPage() {
                             onClick={() => showPlayer(album.uri, true)}
                             className="bg-green-500 text-black p-4 rounded-full font-medium hover:bg-green-600"
                         >
-                            <Play size={32}/>
+                            <Play size={32} />
                         </button>
                     </div>
                 </div>
@@ -139,6 +140,7 @@ export default function AlbumPage() {
                             YTURL={track.YTURL}
                             trackURI={album.uri}
                             pos={index}
+                            trackID={track.id}
                         />
                     ))}
 

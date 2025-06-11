@@ -51,7 +51,7 @@ const SearchPage = () => {
                                 <ArtistCard
                                     followers={track.followers}
                                     url={track.url}
-                                    title={track.title}
+                                    artist={track.title}
                                     YTURL={track.YTURL}
                                     spoURL={track.spoURL}
                                     id={track.id}

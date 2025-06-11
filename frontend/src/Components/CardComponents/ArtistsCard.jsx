@@ -8,15 +8,16 @@ import { PlayButton } from "./PlayButton";
 
 export const ArtistCard = ({
     url,
-    title,
+    artist,
     spoURL,
     YTURL,
     popularity,
     followers,
     id,
-    URI, 
+    URI,
 }) => {
-    
+    // console.log(artist);
+
     const navigate = useNavigate();
     const { showPlayer } = usePlayer();
 
@@ -25,28 +26,31 @@ export const ArtistCard = ({
     // Check localStorage on mount
     useEffect(() => {
         const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
-        const isSaved = savedArtists.some((artist) => artist.URI === URI);
+        const isSaved = savedArtists.some(a => a.id === id); // ✅ match directly on ID prop
         setSaved(isSaved);
-    }, [URI]);
+    }, [id]);
+
+
 
     const toggleSave = () => {
         const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
 
         if (saved) {
-            const updated = savedArtists.filter((a) => a.URI !== URI);
+            const updated = savedArtists.filter((a) => a.id !== artist.id);
             localStorage.setItem("savedArtists", JSON.stringify(updated));
             setSaved(false);
         } else {
             const newArtist = {
-                title,
+                id,
+                artist,   // string like "Adele"
                 spoURL,
                 YTURL,
                 image: url,
-                popularity,
                 followers,
-                URI,
-                id,
+                popularity,
+                uri: URI,
             };
+
             savedArtists.push(newArtist);
             localStorage.setItem("savedArtists", JSON.stringify(savedArtists));
             setSaved(true);
@@ -54,16 +58,7 @@ export const ArtistCard = ({
     };
 
     const handleSave = () => {
-        toggleSave({
-            title,
-            spoURL,
-            YTURL,
-            image: url,
-            popularity,
-            followers,
-            URI,
-            id,
-        });
+        toggleSave();
     };
 
     const handleClick = (url) => {
@@ -76,13 +71,13 @@ export const ArtistCard = ({
         navigate(`/artist/${id}`);
     };
 
-  const handlePlayClick = () => {
-    if (URI?.startsWith("spotify:artist:")) {
-      showPlayer(URI, true); // context_uri mode
-    } else {
-      console.warn("[ArtistCard] Invalid album URI:", URI);
-    }
-  };
+    const handlePlayClick = () => {
+        if (URI?.startsWith("spotify:artist:")) {
+            showPlayer(URI, true); // context_uri mode
+        } else {
+            console.warn("[ArtistCard] Invalid album URI:", URI);
+        }
+    };
 
     return (
         <motion.div
@@ -101,10 +96,10 @@ export const ArtistCard = ({
                     <Bookmark stroke="white" onClick={handleSave} />
                 )}
             </div>
-            
-                          <div className="absolute top-5 left-5 flex gap-2 items-center z-10 noskip">
-        <PlayButton onPlay={handlePlayClick} />
-        </div>
+
+            <div className="absolute top-5 left-5 flex gap-2 items-center z-10 noskip">
+                <PlayButton onPlay={handlePlayClick} />
+            </div>
 
             <div className="p-6">
                 {/* Artist Image */}
@@ -112,7 +107,7 @@ export const ArtistCard = ({
                     <div className="relative">
                         <img
                             src={url}
-                            alt={title}
+                            alt={artist}
                             className="w-32 h-32 rounded-full object-cover ring-4 ring-purple-500/30 transition-transform duration-500 hover:scale-105"
                         />
                         <div className="absolute inset-0 rounded-full bg-gradient-to-t from-purple-600/20 to-transparent" />
@@ -121,8 +116,8 @@ export const ArtistCard = ({
 
                 {/* Info */}
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl font-bold text-white" title={title}>
-                        {title}
+                    <h2 className="text-3xl font-bold text-white" title={artist}>
+                        {artist}
                     </h2>
 
                     <div className="flex items-center justify-center gap-2 text-gray-300">
@@ -142,7 +137,7 @@ export const ArtistCard = ({
 
                     <div className="space-y-2 pt-2 flex flex-col noskip">
                         <SpotifyButton clickHandle={() => handleClick(spoURL)} />
-                        <YouTubeButton clickHandle={() => handleClick(`https://www.youtube.com/results?search_query=${title}`)} />
+                        <YouTubeButton clickHandle={() => handleClick(`https://www.youtube.com/results?search_query=${artist}`)} />
                     </div>
                 </div>
             </div>

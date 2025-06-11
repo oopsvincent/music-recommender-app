@@ -4,10 +4,11 @@ import { useParams, Link } from "react-router-dom";
 import { getSpotifyToken } from "../hooks/useSpotify";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { ArrowLeft, Bookmark, BookmarkCheck, Loader } from "lucide-react";
-import { SpotifyButton } from "../Components/MusicButtons";
+import { ArrowLeft, Bookmark, BookmarkCheck, Loader, Play } from "lucide-react";
+import { SpotifyButton, YouTubeButton } from "../Components/MusicButtons";
 import { TrackCard } from "../Components/CardComponents/TracksCard";
 import { AlbumCard } from "../Components/CardComponents/AlbumsCard";
+import { usePlayer } from "../contexts/PlayerContext";
 
 export default function ArtistPage() {
     const { id } = useParams();
@@ -15,8 +16,9 @@ export default function ArtistPage() {
     const [artist, setArtist] = useState(null);
     const [topTracks, setTopTracks] = useState([]);
     const [albums, setAlbums] = useState([]);
-    const [relatedArtists, setRelatedArtists] = useState([]);
+    // const [relatedArtists, setRelatedArtists] = useState([]);
     const [saved, setSaved] = useState(false);
+    const { showPlayer } = usePlayer();
 
     window.scrollTo(0, 0)
 
@@ -64,7 +66,7 @@ export default function ArtistPage() {
             const t = await getSpotifyToken();
             setToken(t);
 
-            const [artistRes, topTracksRes, albumsRes, relatedRes] = await Promise.all([
+            const [artistRes, topTracksRes, albumsRes] = await Promise.all([
                 axios.get(`https://api.spotify.com/v1/artists/${id}`, {
                     headers: { Authorization: `Bearer ${t}` },
                 }),
@@ -81,6 +83,9 @@ export default function ArtistPage() {
 
             setArtist(artistRes.data);
             setTopTracks(topTracksRes.data.tracks);
+            console.log(artistRes.data);
+            document.title = `${artistRes.data.name} | GrooveEstrella`;
+
 
             const uniqueAlbums = [];
             const seen = new Set();
@@ -91,7 +96,7 @@ export default function ArtistPage() {
                 }
             }
             setAlbums(uniqueAlbums.slice(0, 12));
-            setRelatedArtists(relatedRes.data.artists);
+            // setRelatedArtists(relatedRes.artists);
 
             // Check if artist is saved
             const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
@@ -142,7 +147,25 @@ export default function ArtistPage() {
                         ))}
                     </div>
 
-                    <SpotifyButton clickHandle={() => window.open(artist.external_urls.spotify, "_blank")} />
+                    <div className="flex flex-col md:flex-row justify-center mt-5">
+                        <SpotifyButton clickHandle={() => window.open(artist.external_urls.spotify, "_blank")} />
+                        <YouTubeButton clickHandle={() =>
+                            window.open(
+                                `https://www.youtube.com/results?search_query=${encodeURIComponent(
+                                    artist.name
+                                )}`,
+                                "_blank"
+                            )
+                        } />
+                    </div>
+                    <div className="mt-4 flex space-x-2">
+                        <button
+                            onClick={() => showPlayer(artist.uri, true)}
+                            className="bg-green-500 text-black p-4 rounded-full font-medium hover:bg-green-600"
+                        >
+                            <Play size={32} />
+                        </button>
+                    </div>
                 </div>
             </div>
 

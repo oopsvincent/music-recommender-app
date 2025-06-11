@@ -94,15 +94,15 @@ const LocallySavedSongs = () => {
                 ) : (
                     artists.map((artist, index) => (
                         <ArtistCard
-                            key={index}
-                            url={artist.image}
-                            title={artist.title}
-                            spoURL={artist.spoURL}
-                            YTURL={artist.YTURL}
-                            popularity={artist.popularity}
+                        key={index}
                             followers={artist.followers}
-                            URI={artist.URI}
+                            url={artist.image}
+                            artist={artist.artist}
+                            YTURL={artist.YTURL}
+                            spoURL={artist.spoURL}
                             id={artist.id}
+                            URI={artist.trackURI}
+                            popularity={artist.popularity}
                         />
                     ))
                 );
