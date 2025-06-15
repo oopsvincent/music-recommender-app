@@ -1,8 +1,4 @@
-import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import AddToPlaylist from '../Components/PlaylistDB/AddToPlaylist';
-import ViewPlaylists from '../Components/PlaylistDB/ViewPlaylist';
-// import TracksDaily from '../Components/TracksDaily';
 
 function removeData() {
     localStorage.clear();
