@@ -32,30 +32,31 @@ export const ArtistCard = ({
 
 
 
-    const toggleSave = () => {
-        const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
+const toggleSave = () => {
+    const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
 
-        if (saved) {
-            const updated = savedArtists.filter((a) => a.id !== artist.id);
-            localStorage.setItem("savedArtists", JSON.stringify(updated));
-            setSaved(false);
-        } else {
-            const newArtist = {
-                id,
-                artist,   // string like "Adele"
-                spoURL,
-                YTURL,
-                image: url,
-                followers,
-                popularity,
-                uri: URI,
-            };
+    if (saved) {
+        const updated = savedArtists.filter((a) => a.id !== id);
+        localStorage.setItem("savedArtists", JSON.stringify(updated));
+        setSaved(false);
+    } else {
+        const newArtist = {
+            id,
+            artist,   // string like "Adele"
+            spoURL,
+            YTURL,
+            image: url,
+            followers,
+            popularity,
+            uri: URI,
+        };
 
-            savedArtists.push(newArtist);
-            localStorage.setItem("savedArtists", JSON.stringify(savedArtists));
-            setSaved(true);
-        }
-    };
+        savedArtists.push(newArtist);
+        localStorage.setItem("savedArtists", JSON.stringify(savedArtists));
+        setSaved(true);
+    }
+};
+
 
     const handleSave = () => {
         toggleSave();
@@ -89,7 +90,7 @@ export const ArtistCard = ({
             className="relative w-72 bg-gradient-to-br from-purple-900/80 to-black/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl hover:shadow-purple-500/10 transition-all duration-500"
         >
             {/* Save Icon */}
-            <div className="absolute top-4 right-4 z-10 noskip">
+            <div className="absolute top-4 right-4 z-10 noskip cursor-pointer">
                 {saved ? (
                     <BookmarkCheck stroke="white" fill="green" onClick={handleSave} />
                 ) : (

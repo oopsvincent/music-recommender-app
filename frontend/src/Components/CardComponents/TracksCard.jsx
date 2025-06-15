@@ -31,32 +31,33 @@ export const TrackCard = ({
             (album) => album.trackURI === trackURI
         );
         setSaved(isSaved);
-    }, [title, artist]);
+    }, [trackURI]);
 
-    function toggleSave() {
-        const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
+function toggleSave() {
+    const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
 
-        if (saved) {
-            // REMOVE the song
-            const updated = savedSongs.filter(song => !(song.title === title && song.artist === artist));
-            localStorage.setItem("savedSongs", JSON.stringify(updated));
-            setSaved(false);
-        } else {
-            // ADD the song
-            const newSong = {
-                title,
-                artist: artist,
-                spoURL,
-                image: url,
-                popularity,
-                explicit,
-                trackURI,
-            };
-            savedSongs.push(newSong);
-            localStorage.setItem("savedSongs", JSON.stringify(savedSongs));
-            setSaved(true);
-        }
+    if (saved) {
+        // REMOVE by trackURI
+        const updated = savedSongs.filter(song => song.trackURI !== trackURI);
+        localStorage.setItem("savedSongs", JSON.stringify(updated));
+        setSaved(false);
+    } else {
+        // ADD the song
+        const newSong = {
+            title,
+            artist,
+            spoURL,
+            image: url,
+            popularity,
+            explicit,
+            trackURI,
+        };
+        savedSongs.push(newSong);
+        localStorage.setItem("savedSongs", JSON.stringify(savedSongs));
+        setSaved(true);
     }
+}
+
 
     const handlePlayClick = () => {
         if (trackURI && trackURI.startsWith("spotify:track:")) {

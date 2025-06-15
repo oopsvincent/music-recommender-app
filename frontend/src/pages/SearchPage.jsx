@@ -90,6 +90,7 @@ const SearchPage = () => {
                                     url={track.url}
                                     title={track.title}
                                     trackURI={track.trackURI}
+                                    id={track.id}
                                 />
                             }
                         </div>
