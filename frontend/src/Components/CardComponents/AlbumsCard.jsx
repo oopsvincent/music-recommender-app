@@ -52,10 +52,11 @@ const toggleSave = () => {
     if (url) window.open(url, "_blank");
   };
 
-  const handleCardClick = (e) => {
-    if (e.target.closest(".noskip")) return;
-    navigate(`/album/${id}`);
-  };
+    const handleCardClick = (e) => {
+        // Prevent conflict when clicking save button
+        if (e.target.closest(".noskip")) return;
+        navigate(`/artist/${id}`);
+    };
 
   const handlePlay = () => {
     if (trackURI?.startsWith("spotify:album:")) {
@@ -95,7 +96,7 @@ const toggleSave = () => {
       {/* Content */}
       <div className="relative p-4 space-y-3">
         {/* Save Icon */}
-        <div className="absolute top-4 right-4 z-10 cursor-pointer no-click">
+        <div className="absolute top-4 right-4 z-10 cursor-pointer noskip">
           {saved ? (
             <BookmarkCheck stroke="white" fill="green" onClick={handleSave} />
           ) : (

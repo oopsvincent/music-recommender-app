@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Bookmark, BookmarkCheck, User } from "lucide-react";
 import { SpotifyButton, YouTubeButton } from "../MusicButtons";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const PlaylistCard = ({
   url,
@@ -13,8 +14,10 @@ export const PlaylistCard = ({
   owner,
   description,
   isPublic,
-  trackURI, // This is expected to be a Spotify URI (spotify:playlist:... or spotify:album:...)
+  trackURI,
+  id,
 }) => {
+    const navigate = useNavigate();
   const { showPlayer } = usePlayer();
   const [saved, setSaved] = useState(false);
 
@@ -45,6 +48,7 @@ export const PlaylistCard = ({
         image: url,
         type: "playlist",
         trackURI,
+        id,
       };
       savedPlaylists.push(newPlaylist);
       localStorage.setItem("savedPlaylists", JSON.stringify(savedPlaylists));
@@ -65,6 +69,10 @@ export const PlaylistCard = ({
       window.open(url, "_blank");
     }
   };
+
+  const openPlaylist = (id) => {
+        navigate(`/playlist/${id}`)
+  }
 
   const truncatedDesc =
     description?.length > 100 ? description.slice(0, 97) + "..." : description;
@@ -109,7 +117,7 @@ export const PlaylistCard = ({
       {/* Content */}
       <div className="p-4 space-y-3">
         <div>
-          <h3 className="text-xl font-bold text-white truncate" title={title}>
+          <h3 className="text-xl font-bold text-white truncate hover:underline cursor-pointer" title={title} onClick={() => openPlaylist(id)}>
             {title || "Untitled Playlist"}
           </h3>
           <div className="flex items-center gap-1 text-gray-300 text-sm">

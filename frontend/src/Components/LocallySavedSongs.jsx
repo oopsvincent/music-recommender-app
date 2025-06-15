@@ -85,6 +85,7 @@ const LocallySavedSongs = () => {
                             description={playlist.description}
                             isPublic={playlist.public}
                             trackURI={playlist.trackURI}
+                            id={playlist.id}
                         />
                     ))
                 );
