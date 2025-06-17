@@ -50,6 +50,16 @@ export default function Footer() {
           </span>
           .
         </p>
+
+        {/* Spotify Attribution - minimal & compliant */}
+        <div className="flex justify-center items-center gap-2 pt-4 opacity-60">
+          <span className="text-xs">Powered by</span>
+          <img
+            src="/2024-spotify-full-logo/Full_Logo_White_CMYK.svg"
+            alt="Spotify"
+            className="h-10 object-contain"
+          />
+        </div>
       </div>
     </footer>
   );
