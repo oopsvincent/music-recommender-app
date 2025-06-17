@@ -1,233 +1,686 @@
 // SpotifyPlayer.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import SpotifyDevices from './SpotifyDevices';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, SkipBack, SkipForward, VolumeX, Volume1, Volume2, MonitorSpeaker, ChevronUp, ChevronDown } from "lucide-react";
+import Slider from '@mui/material/Slider';
+
+import {
+    Play,
+    Pause,
+    SkipBack,
+    SkipForward,
+    VolumeX,
+    Volume1,
+    Volume2,
+    ChevronUp,
+    ChevronDown,
+    Shuffle,
+    Repeat,
+    Repeat1,
+    ListOrdered,
+} from 'lucide-react';
 import { usePlayer } from '../contexts/PlayerContext';
 
 export default function SpotifyPlayer() {
-  const [player, setPlayer] = useState(null);
-  const [deviceId, setDeviceId] = useState(null);
-  const [isPaused, setIsPaused] = useState(true);
-  const [currentTrack, setCurrentTrack] = useState(null);
-  const [volume, setVolume] = useState(0.5);
-  const [devices, setDevices] = useState([]);
-  const [activeDevice, setActiveDevice] = useState(null);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [position, setPosition] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+    // At the top level of your component or context
+    const playerRef = useRef(null);
+    const [player, setPlayer] = useState(null);
+    const [deviceId, setDeviceId] = useState(null);
+    const [isPaused, setIsPaused] = useState(true);
+    const [currentTrack, setCurrentTrack] = useState(null);
+    const [volume, setVolume] = useState(1); // default volume = 100%
+    const [position, setPosition] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const { visiblePlayer, playbackInfo, isPremium } = usePlayer();
+    const [devices, setDevices] = useState([]);
+    const [isShuffling, setIsShuffling] = useState(false);
+    const [repeatMode, setRepeatMode] = useState('off'); // options: 'off', 'context', 'track'
+    const [isContextURI, setIsContextURI] = useState(false);
+    const [offset, setOffset] = useState(null);
+    const [positionMS, setPositionMS] = useState(0);
 
-  const { visiblePlayer, trackUri, isPremium } = usePlayer();
 
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const res = await fetch('https://music-recommender-api.onrender.com/me', { credentials: 'include' });
-        setIsAuthenticated(res.ok);
-      } catch (err) {
-        console.error('[ERROR] Failed to verify session:', err);
-        setIsAuthenticated(false);
-      }
+    useEffect(() => {
+        if (isExpanded) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    }, [isExpanded]);
+
+    useEffect(() => {
+        const checkSession = async () => {
+            try {
+                const res = await fetch('https://music-recommender-api.onrender.com/me', {
+                    credentials: 'include',
+                });
+                setIsAuthenticated(res.ok);
+            } catch (err) {
+                console.error('[ERROR] Failed to verify session:', err);
+                setIsAuthenticated(false);
+            }
+        };
+        checkSession();
+    }, []);
+
+    useEffect(() => {
+        if (!isPremium || !isAuthenticated) return;
+
+        if (playerRef.current) {
+            setPlayer(playerRef.current);
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://sdk.scdn.co/spotify-player.js';
+        script.async = true;
+        document.body.appendChild(script);
+
+        window.onSpotifyWebPlaybackSDKReady = () => {
+            const localPlayer = new window.Spotify.Player({
+                name: 'GrooveEstrella Web Player',
+                getOAuthToken: (cb) => {
+                    fetch('https://music-recommender-api.onrender.com/refresh_access_token', {
+                        credentials: 'include',
+                    })
+                        .then((res) => res.json())
+                        .then((data) => cb(data.access_token));
+                },
+                volume: 0.5,
+            });
+
+            localPlayer.addListener('ready', ({ device_id }) => {
+                // console.log('Ready with Device ID:', device_id);
+                setDeviceId(device_id);
+            });
+
+            localPlayer.addListener('player_state_changed', (state) => {
+                if (!state) return;
+                const track = state.track_window.current_track;
+                setIsPaused(state.paused);
+                setCurrentTrack({
+                    title: track.name,
+                    artists: track.artists.map((a) => a.name).join(', '),
+                    albumImage: track.album.images[0]?.url,
+                });
+                setPosition(state.position);
+                setDuration(state.duration);
+            });
+
+            localPlayer.connect();
+            setPlayer(localPlayer);
+            playerRef.current = localPlayer;
+        };
+
+        return () => {
+            if (playerRef.current) {
+                playerRef.current.disconnect();
+                playerRef.current = null;
+            }
+        };
+    }, [isPremium, isAuthenticated]);
+
+    const playTrack = async (uriOrUris, isContext = false, offset = null, positionMs = 0) => {
+        if (!deviceId || !uriOrUris || !isPremium) return;
+
+
+        const payload = {
+            device_id: deviceId,
+            ...(isContext
+                ? { context_uri: uriOrUris }
+                : { uris: Array.isArray(uriOrUris) ? uriOrUris : [uriOrUris] })
+        };
+
+        if (offset !== null) payload.offset = offset;
+        if (positionMs > 0) payload.position_ms = positionMs;
+
+        try {
+            await fetch('https://music-recommender-api.onrender.com/player/play', {
+                method: 'PUT',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        } catch (err) {
+            console.error('[ERROR] Failed to play track(s):', err);
+        }
+        setIsContextURI(isContext);
+        setOffset(offset);
+        setPositionMS(positionMs)
+        console.log(uriOrUris, isContextURI, offset, positionMS);
     };
-    checkSession();
-  }, []);
+    useEffect(() => {
+        if (!deviceId || !isPremium || !playbackInfo.uri) return;
 
-  const fetchDevices = async () => {
-    const res = await fetch('https://music-recommender-api.onrender.com/player/devices', { credentials: 'include' });
-    const data = await res.json();
-    setDevices(data.devices);
-    const active = data.devices.find(d => d.is_active);
-    setActiveDevice(active ? active.id : null);
-  };
+        const { uri, isContext, offset, positionMs } = playbackInfo;
 
-  const transferPlayback = async (targetDeviceId) => {
-    await fetch('https://music-recommender-api.onrender.com/player/transfer', {
+        playTrack(uri, isContext, offset, positionMs);
+    }, [deviceId, playbackInfo, isPremium]);
+
+
+    const togglePlay = () => {
+        if (player && isPremium) player.togglePlay();
+    };
+
+    const handleVolumeChange = (e) => {
+        const vol = parseFloat(e.target.value);
+        setVolume(vol);
+        if (player && isPremium) player.setVolume(vol);
+    };
+
+    const handleSeek = (e) => {
+        const newPos = parseFloat(e.target.value);
+        setPosition(newPos);
+        if (player && isPremium) player.seek(newPos);
+    };
+
+    const formatTime = (ms) => {
+        const mins = Math.floor(ms / 60000);
+        const secs = Math.floor((ms % 60000) / 1000);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    };
+
+const toggleShuffle = async () => {
+  try {
+    const res = await fetch('https://music-recommender-api.onrender.com/player/shuffle', {
       method: 'PUT',
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ device_id: targetDeviceId })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        state: !isShuffling, // boolean
+        device_id: deviceId || "" // optional
+      })
     });
-    setActiveDevice(targetDeviceId);
-    fetchDevices();
-  };
 
-  const togglePlay = () => {
-    if (player && isPremium) player.togglePlay();
-  };
-
-  const handleVolumeChange = (e) => {
-    const vol = parseFloat(e.target.value);
-    setVolume(vol);
-    if (player && isPremium) player.setVolume(vol);
-  };
-
-  const handleSeek = (e) => {
-    const newPos = parseFloat(e.target.value);
-    setPosition(newPos);
-    if (player && isPremium) player.seek(newPos);
-  };
-
-  useEffect(() => {
-    if (!isPremium || !isAuthenticated) return;
-
-    const script = document.createElement('script');
-    script.src = 'https://sdk.scdn.co/spotify-player.js';
-    script.async = true;
-    document.body.appendChild(script);
-
-    let localPlayer = null;
-    window.onSpotifyWebPlaybackSDKReady = () => {
-      localPlayer = new window.Spotify.Player({
-        name: 'Harmony Web Player',
-        getOAuthToken: cb => {
-          fetch('https://music-recommender-api.onrender.com/refresh_access_token', { credentials: 'include' })
-            .then(res => res.json())
-            .then(data => cb(data.access_token));
-        },
-        volume: 0.5
-      });
-
-      localPlayer.addListener('ready', ({ device_id }) => {
-        console.log('Ready with Device ID:', device_id);
-        setDeviceId(device_id);
-        fetchDevices();
-      });
-
-      localPlayer.addListener('player_state_changed', state => {
-        if (!state) return;
-        const track = state.track_window.current_track;
-        setIsPaused(state.paused);
-        setCurrentTrack({
-          title: track.name,
-          artists: track.artists.map(a => a.name).join(', '),
-          albumImage: track.album.images[0]?.url,
-        });
-        setPosition(state.position);
-        setDuration(state.duration);
-      });
-
-      localPlayer.connect();
-      setPlayer(localPlayer);
-    };
-
-    return () => {
-      if (localPlayer) localPlayer.disconnect();
-    };
-  }, [isPremium, isAuthenticated]);
-
-  useEffect(() => {
-    if (!player || !isPremium) return;
-    const poll = setInterval(() => {
-      player.getCurrentState().then(state => {
-        if (state) {
-          setPosition(state.position);
-          setDuration(state.duration);
-        }
-      });
-    }, 1000);
-    return () => clearInterval(poll);
-  }, [player, isPremium]);
-
-  useEffect(() => {
-    const playTrack = async (uri) => {
-      if (!deviceId || !uri || !isPremium) return;
-      try {
-        await fetch('https://music-recommender-api.onrender.com/player/play', {
-          method: 'PUT',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ device_id: deviceId, uris: [uri] })
-        });
-        console.log('[DEBUG] Track URI sent to player:', uri);
-      } catch (err) {
-        console.error('[ERROR] Failed to play track:', err);
-      }
-    };
-
-    if (deviceId && trackUri && isPremium) {
-      playTrack(trackUri);
+    const data = await res.json();
+    if (res.ok) {
+      setIsShuffling(!isShuffling);
+    } else {
+      console.error('[ERROR] Shuffle response:', data);
     }
-  }, [deviceId, trackUri, isPremium]);
+  } catch (err) {
+    console.error('[ERROR] Failed to toggle shuffle:', err);
+  }
+};
 
-  const formatTime = (ms) => {
-    const mins = Math.floor(ms / 60000);
-    const secs = Math.floor((ms % 60000) / 1000);
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
 
-  if (!visiblePlayer || !isAuthenticated) return null;
 
-  return (
-    <motion.div initial={{ opacity: 0, scale: 0.95, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.4, ease: 'easeOut' }} className="fixed bottom-20 left-1/2 -translate-x-1/2 backdrop-blur-md bg-black/10 border border-white/40 rounded-3xl shadow-xl max-w-md w-[95%] z-50">
-      <AnimatePresence initial={false}>
-        {isExpanded ? (
-          <motion.div key="expanded" initial={{ height: 0, scale: 0 }} animate={{ height: 'auto', scale: 1 }} exit={{ height: 0, scale: 0 }} transition={{ duration: 0.25 }} className="p-4 flex justify-center items-center flex-col">
+const cycleRepeatMode = async () => {
+  const nextMode = repeatMode === 'off' ? 'context' : repeatMode === 'context' ? 'track' : 'off';
 
-            <div className="flex justify-between items-center mb-2 w-full">
-              <h2 className="text-white text-lg font-semibold">Now Playing</h2>
-              <button onClick={() => setIsExpanded(false)}><ChevronDown className="text-white" /></button>
-            </div>
+  try {
+    const res = await fetch('https://music-recommender-api.onrender.com/player/repeat', {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        state: nextMode,
+        device_id: deviceId || ""
+      })
+    });
 
-            {currentTrack ? (
-              <>
-                <motion.div transition={{duration: 0.3}} className="flex items-center justify-center mb-3 gap-5">
-                  <img src={currentTrack.albumImage} alt="Album cover" className="rounded-xl w-40 h-40 object-cover mb-3" />
-                  <div className="flex flex-col text-left">
-                    <p className="text-white text-xl font-bold">{currentTrack.title}</p>
-                    <p className="text-gray-400 text-sm mb-3">{currentTrack.artists}</p>
-                  </div>
-                </motion.div>
-                <input type="range" min="0" max={duration} value={position} onChange={handleSeek} disabled={!isPremium} className="w-full accent-[#D50000] disabled:opacity-50 mb-2" />
-                <p className="text-center text-gray-300 text-xs mb-1">{formatTime(position)} / {formatTime(duration)}</p>
+    const data = await res.json();
+    if (res.ok) {
+      setRepeatMode(nextMode);
+    } else {
+      console.error('[ERROR] Repeat mode response:', data);
+    }
+  } catch (err) {
+    console.error('[ERROR] Failed to change repeat mode:', err);
+  }
+};
 
-                <div className="flex items-center justify-center gap-6 my-4">
-                  <button disabled={!isPremium} onClick={() => player?.previousTrack()} className={`rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition ${!isPremium ? 'bg-gray-600' : 'bg-white text-black hover:scale-105 active:scale-90'}`}>
-                    <SkipBack fill='#000' stroke='#000' />
-                  </button>
-                  <button disabled={!isPremium} onClick={togglePlay} className={`rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition ${!isPremium ? 'bg-gray-600' : 'bg-white text-black hover:scale-105 active:scale-90'}`}>
-                    {isPaused ? <Play fill='' /> : <Pause fill='' />}
-                  </button>
-                  <button disabled={!isPremium} onClick={() => player?.nextTrack()} className={`rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition ${!isPremium ? 'bg-gray-600' : 'bg-white text-black hover:scale-105 active:scale-90'}`}>
-                    <SkipForward fill='#000' stroke='#000' />
-                  </button>
-                </div>
 
-                <div className="flex items-center justify-center mb-3">
-                  {volume === 0 ? <VolumeX className="text-white mr-2" /> : volume < 0.6 ? <Volume1 className="text-white mr-2" /> : <Volume2 className="text-white mr-2" />}
-                  <input type="range" min="0" max="1" step="0.01" value={volume} onChange={handleVolumeChange} disabled={!isPremium} className="w-full accent-green-400 mx-2 disabled:opacity-50" />
-                  <span className="text-gray-300 text-sm">{Math.floor(volume * 100)}%</span>
-                </div>
 
-                <div className="mt-4 w-full">
-                  <h3 className="text-gray-300 text-md mb-2 text-center">Playback Device</h3>
-                  <select value={activeDevice || ''} onChange={(e) => transferPlayback(e.target.value)} disabled={!isPremium} className="w-full rounded-xl p-2 bg-gray-800 text-white text-sm">
-                    {devices.map(d => (
-                      <option key={d.id} value={d.id}>{d.name}{d.id === activeDevice ? ' (Active)' : ''}</option>
-                    ))}
-                  </select>
-                </div>
-              </>
-            ) : <div className="h-60 rounded-xl bg-gray-800 mb-3 flex items-center justify-center text-white">No Track</div>}
+    const [showQueue, setShowQueue] = useState(false);
+    const [queue, setQueue] = useState([]);
 
-            {!isPremium && <p className="text-red-500 text-center mt-2 text-sm">Spotify Premium required to control playback</p>}
+    useEffect(() => {
+        const fetchQueue = async () => {
+            try {
+                const res = await fetch(`https://music-recommender-api.onrender.com/player/queue`, {
+                    credentials: 'include',
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    setQueue(data.queue || []);
+                } else {
+                    console.error('[ERROR] Failed to fetch queue:', data);
+                }
+            } catch (err) {
+                console.error('[ERROR] Fetching queue:', err);
+            }
+        };
 
-          </motion.div>
+        fetchQueue();
+    }, [isPaused, showQueue]); // Refresh when track changes
+
+
+    const addToQueue = async (uri) => {
+        try {
+            const res = await fetch(`https://music-recommender-api.onrender.com/player/queue`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    uri: uri,
+                    device_id: deviceId || ""
+                })
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                console.error('[ERROR] Failed to add to queue:', err);
+            }
+        } catch (err) {
+            console.error('[ERROR] Failed to queue track:', err);
+        }
+    };
+
+
+
+    useEffect(() => {
+        let intervalId;
+        let animationFrameId;
+        let localProgress = 0;
+
+        const fetchPlayerState = async () => {
+            try {
+                const res = await fetch('https://music-recommender-api.onrender.com/player/state', {
+                    credentials: 'include',
+                });
+                if (res.ok) {
+                    const data = await res.json();
+
+
+                    const newTrack = {
+                        title: data.item.name,
+                        artists: data.item.artists.map((a) => a.name).join(', '),
+                        albumImage: data.item.album.images[0]?.url,
+                    };
+
+                    setIsPaused(!data.is_playing);
+                    setCurrentTrack(newTrack);
+                    setDuration(data.item.duration_ms);
+                    setPosition(data.progress_ms);
+                    localProgress = data.progress_ms;
+                    setVolume(data.device.volume_percent / 100);
+
+
+                }
+            } catch (err) {
+                console.error('[ERROR] Failed to fetch player state:', err);
+            }
+        };
+
+        if (isPremium) {
+            fetchPlayerState();
+            intervalId = setInterval(fetchPlayerState, 8000); // every 8s
+        }
+
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, [isPremium]);
+
+    useEffect(() => {
+        if (!currentTrack) return;
+
+        // Set document title to the current track's name
+        document.title = `${currentTrack.title} — ${currentTrack.artists}`;
+
+        // Change favicon to album image
+        // const favicon = document.querySelector('link[rel="icon"]') || document.createElement('link');
+        // favicon.rel = 'icon';
+        // favicon.type = 'image/png';
+        // favicon.href = currentTrack.albumImage;
+
+        // document.head.appendChild(favicon);
+
+        if ("mediaSession" in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: currentTrack.title,
+                artist: currentTrack.artists,
+                // album: "Album Name (optional)",
+                artwork: [
+                    { src: currentTrack.albumImage, sizes: "512x512", type: "image/png" }
+                ]
+            });
+        }
+
+
+        // Optional: Clean up on unmount
+        // return () => {
+        //     document.title = 'GrooveEstrella Music Recommender'; // Or your default app title
+        //     if (favicon) {
+        //         favicon.href = '/favicon.ico'; // Reset to default favicon
+        //     }
+        // };
+    }, [currentTrack]);
+
+
+    useEffect(() => {
+        if (!player || !isPremium) return;
+
+        const poll = setInterval(async () => {
+            const state = await player.getCurrentState();
+            if (state) {
+                const track = state.track_window.current_track;
+                setIsPaused(state.paused);
+                setPosition(state.position);
+                setDuration(state.duration);
+                setCurrentTrack({
+                    title: track.name,
+                    artists: track.artists.map((a) => a.name).join(', '),
+                    albumImage: track.album.images[0]?.url,
+                });
+            }
+        }, 1000);
+
+        return () => clearInterval(poll);
+    }, [player, isPremium]);
+
+    if (!visiblePlayer || !isAuthenticated) return null;
+
+    return (
+        <AnimatePresence mode="wait">
+            {isExpanded ? (
+                <motion.div
+                    key="expanded"
+                    initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 30 }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    className="fixed inset-0 sm:bottom-20 sm:left-1/2 sm:-translate-x-1/2 sm:w-[95%] sm:max-w-md backdrop-blur-md bg-[#121212]/90 border border-white/20 rounded-none sm:rounded-3xl shadow-xl z-[150] scrollb-none"
+                >
+                    <div className="p-5 pt-6 pb-10 flex flex-col items-center w-full space-y-5 overflow-y-auto max-h-[90vh] scrollb-none">
+                        {/* Header */}
+                        <div className="flex justify-between items-center w-full m-0">
+                            <h2 className="text-white text-base font-semibold">Now Playing</h2>
+                            <button onClick={() => setIsExpanded(false)}>
+                                <ChevronDown className="text-white" />
+                            </button>
+                        </div>
+                        {/* Spotify branding */}
+                        <div className="w-auto pb-3 text-center text-xs m-0 text-gray-400">
+                            <img
+                                src="/2024-spotify-full-logo/Full_Logo_White_CMYK.svg"
+                                alt="Spotify"
+                                className="mx-auto w-32"
+                            />
+                            <p className="mt-1">Powered by Spotify</p>
+                        </div>
+
+                        {/* Track info */}
+                        {currentTrack && (
+                            <>
+                                <img
+                                    src={currentTrack.albumImage}
+                                    alt="Album cover"
+                                    className="rounded-xl w-84 h-84 md:w-64 md:h-64 object-cover"
+                                />
+                                <div className="w-full text-left px-2 space-y-1">
+                                    <p className="text-white text-2xl font-bold truncate">
+                                        {currentTrack.title}
+                                    </p>
+                                    <p className="text-gray-400 text-sm truncate">
+                                        {currentTrack.artists}
+                                    </p>
+                                </div>
+
+                                {/* Seek bar */}
+                                {/* <input
+                                    type="range"
+
+                                    onChange={handleSeek}
+
+
+                                /> */}
+                                <Slider
+                                    size="small"
+                                    aria-label="Small"
+                                    onChange={(_, newValue) => handleSeek({ target: { value: newValue } })}
+                                    disabled={!isPremium}
+                                    className="w-full accent-green-500 disabled:opacity-50 mb-0"
+                                    min={0}
+                                    max={duration}
+                                    value={position}
+                                    step={1}
+                                    sx={{
+                                        '& .MuiSlider-thumb': {
+                                            color: '#870087',  // Spotify green
+                                        },
+                                        '& .MuiSlider-track': {
+                                            color: '#870087',
+                                        },
+                                        '& .MuiSlider-rail': {
+                                            color: '#ffffff40',
+                                        }
+                                    }}
+                                />
+                                <div className='w-full flex justify-between items-center mb-0'>
+                                    <p className="text-gray-400 text-xs tracking-wide text-center">
+                                        {formatTime(position)}
+                                    </p>
+                                    <p className="text-gray-400 text-xs tracking-wide text-center">
+                                        {formatTime(duration)}
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center justify-between w-full px-5 mt-2">
+                                    {/* Shuffle */}
+                                    <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        whileHover={{ scale: 1.1 }}
+                                        onClick={toggleShuffle}
+                                        disabled={!isPremium}
+                                        className={`rounded-full w-10 h-10 flex items-center justify-center transition ${isShuffling ? 'bg-green-600 text-black shadow-inner' : 'text-white bg-white/10'
+                                            }`}
+                                    >
+                                        <Shuffle size={20} />
+                                    </motion.button>
+
+
+                                    {/* Main Controls */}
+                                    {/* Controls */}
+                                    <div className="flex items-center justify-center gap-6">
+                                        <motion.button
+                                            whileTap={{ scale: 0.9 }}
+                                            whileHover={{ scale: 1.1 }}
+                                            disabled={!isPremium}
+                                            onClick={() => player?.previousTrack()}
+                                            className={`rounded-full w-12 h-12 flex items-center justify-center transition ${!isPremium
+                                                ? 'bg-gray-700'
+                                                : 'text-white'
+                                                }`}
+                                        >
+                                            <SkipBack size={32} fill='white' />
+                                        </motion.button>
+                                        <motion.button
+                                            whileTap={{ scale: 0.9 }}
+                                            whileHover={{ scale: 1.05 }}
+                                            disabled={!isPremium}
+                                            onClick={togglePlay}
+                                            className={`rounded-full w-16 h-16 flex items-center justify-center transition shadow-md ${!isPremium
+                                                ? 'bg-gray-700'
+                                                : 'bg-white text-black'
+                                                }`}
+                                        >
+                                            {isPaused ? <Play size={28} fill='black' /> : <Pause size={28} fill='black' />}
+                                        </motion.button>
+                                        <motion.button
+                                            whileTap={{ scale: 0.9 }}
+                                            whileHover={{ scale: 1.1 }}
+                                            disabled={!isPremium}
+                                            onClick={() => player?.nextTrack()}
+                                            className={`rounded-full w-12 h-12 flex items-center justify-center transition ${!isPremium
+                                                ? 'bg-gray-700'
+                                                : 'text-white'
+                                                }`}
+                                        >
+                                            <SkipForward size={32} fill='white' />
+                                        </motion.button>
+
+                                    </div>
+
+                                    {/* Repeat */}
+                                    <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        whileHover={{ scale: 1.1 }}
+                                        onClick={cycleRepeatMode}
+                                        disabled={!isPremium}
+                                        className={`rounded-full w-10 h-10 flex items-center justify-center transition ${repeatMode !== 'off' ? 'bg-green-600 text-black shadow-inner' : 'text-white bg-white/10'
+                                            }`}
+                                    >
+                                        <div className="relative flex items-center justify-center">
+                                            <Repeat size={20} />
+                                            {repeatMode === 'track' && (
+                                                <span className="absolute -bottom-1 -right-1 text-[10px] font-bold bg-black text-white px-[4px] rounded-full">
+                                                    1
+                                                </span>
+                                            )}
+                                        </div>
+                                    </motion.button>
+
+
+                                </div>
+
+
+                                {/* Volume */}
+                                <div className="flex items-center justify-between gap-4 px-2 w-full">
+                                    {/* Volume controls */}
+                                    <div className="flex items-center gap-3 flex-1">
+                                        <button className="w-8">
+                                            {volume === 0 ? (
+                                                <VolumeX className="text-white" />
+                                            ) : volume < 0.6 ? (
+                                                <Volume1 className="text-white" />
+                                            ) : (
+                                                <Volume2 className="text-white" />
+                                            )}
+                                        </button>
+                                        <Slider
+                                            size="small"
+                                            min={0}
+                                            max={1}
+                                            step={0.01}
+                                            value={volume}
+                                            onChange={(_, newValue) => handleVolumeChange({ target: { value: newValue } })}
+                                            disabled={!isPremium}
+                                            sx={{
+                                                flexGrow: 1,
+                                                width: 'auto',
+                                                '& .MuiSlider-thumb': {
+                                                    color: '#870087',
+                                                },
+                                                '& .MuiSlider-track': {
+                                                    color: '#870087',
+                                                },
+                                                '& .MuiSlider-rail': {
+                                                    color: '#ffffff40',
+                                                }
+                                            }}
+                                        />
+                                        <span className="text-gray-400 text-xs w-12 text-right">
+                                            {Math.floor(volume * 100)}%
+                                        </span>
+                                        {/* Queue button */}
+                                        <div className="flex justify-center">
+                                            <motion.button
+                                                whileTap={{ scale: 0.95 }}
+                                                whileHover={{ scale: 1.05 }}
+                                                onClick={() => setShowQueue(prev => !prev)}
+                                                disabled={!isPremium}
+                                                className="text-sm text-white px-4 py-2 rounded-lg"
+                                            >
+                                                <ListOrdered size={28} />
+                                            </motion.button>
+                                            {showQueue && (
+    <div className="fixed top-24 right-4 bg-black border border-white/20 rounded-lg p-4 z-50 w-[90%] max-w-md shadow-xl max-h-[50vh] overflow-y-auto">
+        <h2 className="text-white text-lg font-semibold mb-3">Upcoming Queue</h2>
+        {queue.length > 0 ? (
+            <ul className="space-y-3">
+                {queue.map((track, index) => (
+                    <li key={index} className="text-gray-300 text-sm flex items-center gap-3">
+                        <img src={track.album?.images?.[0]?.url} alt="" className="w-10 h-10 rounded" />
+                        <div>
+                            <p className="font-semibold text-white">{track.name}</p>
+                            <p className="text-xs text-gray-400">{track.artists?.map(a => a.name).join(", ")}</p>
+                        </div>
+                    </li>
+                ))}
+            </ul>
         ) : (
-          <motion.div key="miniplayer" initial={{ height: 0, scale: 0 }} animate={{ height: 'auto', scale: 1 }} exit={{ height: 0, scale: 0 }} transition={{ duration: 0.45 }} className="flex items-center justify-between px-4 py-2">
-            <div className="flex items-center gap-2">
-              {currentTrack?.albumImage ? <img src={currentTrack.albumImage} alt="" className="w-12 h-12 rounded-lg" /> : <div className="w-12 h-12 rounded-lg bg-gray-800"></div>}
-              <motion.div transition={{duration: 0.3}}>
-                <p className="text-white text-sm">{currentTrack?.title || 'No Track'}</p>
-                <p className="text-gray-400 text-xs">{currentTrack?.artists}</p>
-              </motion.div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button disabled={!isPremium} onClick={togglePlay} className="text-white">{isPaused ? <Play /> : <Pause />}</button>
-              <button onClick={() => setIsExpanded(true)}><ChevronUp className="text-white" /></button>
-            </div>
-          </motion.div>
+            <p className="text-gray-400 text-sm">Queue is empty.</p>
         )}
-      </AnimatePresence>
-    </motion.div>
-  );
+    </div>
+)}
+
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                {/* Devices */}
+                                <div className="w-full text-left px-2 mt-3">
+                                    <div>
+                                        {/* ...player UI */}
+                                        <SpotifyDevices isPremium={isPremium} />
+                                    </div>
+
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </motion.div>
+            ) : (
+                <motion.div
+                    key="collapsed"
+                    initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 30 }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    className="fixed bottom-20 left-1/2 -translate-x-1/2 backdrop-blur-md bg-[#121212]/90 border border-white/20 rounded-3xl shadow-lg max-w-md w-[95%] z-[100] px-4 py-3 flex items-center justify-between"
+                >
+                    {currentTrack && (
+                        <>
+                            <img
+                                src={currentTrack.albumImage}
+                                alt="Album"
+                                className="w-10 h-10 rounded-md object-cover"
+                            />
+                            <div className="ml-3 flex-1 truncate">
+                                <p className="text-white text-sm font-medium truncate">
+                                    {currentTrack.title}
+                                </p>
+                                <p className="text-gray-400 text-xs truncate">
+                                    {currentTrack.artists}
+                                </p>
+                            </div>
+                        </>
+                    )}
+                    <div className="ml-4 flex items-center space-x-3">
+                        <motion.button
+                            whileTap={{ scale: 1.1 }}
+                            whileHover={{ scale: 0.95 }}
+                            onClick={togglePlay}
+                            disabled={!isPremium}
+                            className={`rounded-full w-9 h-9 flex items-center justify-center shadow-md transition ${!isPremium
+                                ? 'bg-gray-700'
+                                : 'text-black bg-white'
+                                }`}
+                        >
+                            {isPaused ? <Play size={16} /> : <Pause size={16} />}
+                        </motion.button>
+                        <button onClick={() => setIsExpanded(true)}>
+                            <ChevronUp className="text-white" />
+                        </button>
+                    </div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+
+
+    );
 }

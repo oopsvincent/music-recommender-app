@@ -36,7 +36,7 @@ const ChipSection = ({ onChipSelect }) => {
 
 
   return (
-    <div className='flex flex-col justify-center'>
+    <div className='flex flex-col justify-center sticky left-0 top-0 z-100 bg-black/80 mb-5 pt-1'>
       {/* Dropdown Selector */}
       <CategorySelector
         selectedCategory={selectedCategory}

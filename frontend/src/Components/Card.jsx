@@ -24,27 +24,14 @@ const Card = ({
     // Inside your component:
     const [saved, setSaved] = useState(false);
     const { showPlayer } = usePlayer();
-    const [isHolding, setIsHolding] = useState(false);
+    const handlePlayClick = () => {
 
-    const holdTimeoutRef = useRef(null);
-
-    const handleHoldStart = () => {
-        clearTimeout(holdTimeoutRef.current); // clear previous (safety)
-        holdTimeoutRef.current = setTimeout(() => {
-            const spotifyURI = trackURI;
-            console.log('[DEBUG] Long hold detected, triggering player:', spotifyURI);
-            if (spotifyURI && spotifyURI.startsWith('spotify:')) {
-                showPlayer(spotifyURI);
-            } else {
-                console.warn('[WARN] Invalid Spotify URI:', spotifyURI);
-            }
-        }, 1000); // 1 second hold
-    };
-
-    const handleHoldEnd = () => {
-        clearTimeout(holdTimeoutRef.current);
-    };
-
+    if (trackURI && trackURI.startsWith("spotify:")) {
+        showPlayer(trackURI);
+    } else {
+        console.warn("Invalid Spotify URI:", trackURI);
+    }
+};
 
     useEffect(() => {
         const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
@@ -134,53 +121,66 @@ const Card = ({
                 {popularity >= 80 ? <span title="Trending RIght Now 🔥">🔥</span> : <span></span>}
             </div>
         ),
-        save: (
-            <div className="relative w-6 h-6 mr-3 inline-flex justify-center items-center group">
+                controls: (
+            <div className="absolute top-2 right-2 flex gap-3 items-center z-20">
+                {/* Play Button */}
                 <button
-                    onClick={toggleSave}
-                    className="relative w-full h-full hover:scale-110 transition-transform duration-300 ease-in-out"
+                    onClick={handlePlayClick}
+                    title="Play on Spotify"
+                    className="text-white bg-black/50 hover:bg-green-600 transition-colors p-1.5 rounded-full hover:scale-110 active:scale-95"
                 >
-                    {/* Saved Icon */}
-                    <svg
-                        className={`absolute inset-0 transition-all duration-500 ease-in-out ${saved ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="rgb(0, 255, 106)"
-                        stroke="black"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
-                        <path d="m9 12 2 2 4-4" />
-                    </svg>
-
-                    {/* Unsaved Icon */}
-                    <svg
-                        className={`absolute inset-0 transition-all duration-500 ease-in-out ${saved ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}`}
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="black"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
-                        <line x1="12" x2="12" y1="8" y2="16" />
-                        <line x1="8" x2="16" y1="12" y2="12" />
-                    </svg>
-
-                    <span className="absolute bottom-full mt-1 left-1/2 w-20 -translate-x-1/2 opacity-0 scale-95 group-hover:opacity-100 group-active:scale-100 group-active:opacity-100 group-hover:scale-100 transition-all duration-300 bg-black text-white px-2 py-1 rounded text-sm">
-                        {saved ? "Saved!" : "Save it bro"}
-                    </span>
+                    <CirclePlay size={24} strokeWidth={2.5} />
                 </button>
+
+                {/* Save Button */}
+                <div className="relative w-6 h-6 inline-flex justify-center items-center group">
+                    <button
+                        onClick={toggleSave}
+                        className="relative w-full h-full hover:scale-110 transition-transform duration-300 ease-in-out"
+                    >
+                        {/* Saved Icon */}
+                        <svg
+                            className={`absolute inset-0 transition-all duration-500 ease-in-out ${saved ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="rgb(0, 255, 106)"
+                            stroke="black"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+                            <path d="m9 12 2 2 4-4" />
+                        </svg>
+
+                        {/* Unsaved Icon */}
+                        <svg
+                            className={`absolute inset-0 transition-all duration-500 ease-in-out ${saved ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}`}
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="black"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+                            <line x1="12" x2="12" y1="8" y2="16" />
+                            <line x1="8" x2="16" y1="12" y2="12" />
+                        </svg>
+
+                        <span className="absolute bottom-full mt-1 left-1/2 w-20 -translate-x-1/2 opacity-0 scale-95 group-hover:opacity-100 group-active:scale-100 group-active:opacity-100 group-hover:scale-100 transition-all duration-300 bg-black text-white px-2 py-1 rounded text-sm">
+                            {saved ? "Saved!" : "Save it bro"}
+                        </span>
+                    </button>
+                </div>
             </div>
         ),
+
         ExplicitTag: (<div className="absolute top-33 md:top-55 bg-black right-0 m-2 rounded-xs" title="EXPLICIT"><svg xmlns="http://www.w3.org/2000/svg" fill="white" width="20" height="20" viewBox="0 0 24 24" id="explicit">
             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 6h-3v2h3c.55 0 1 .45 1 1s-.45 1-1 1h-3v2h3c.55 0 1 .45 1 1s-.45 1-1 1h-4c-.55 0-1-.45-1-1V8c0-.55.45-1 1-1h4c.55 0 1 .45 1 1s-.45 1-1 1z"></path>
         </svg></div>),
@@ -189,12 +189,8 @@ const Card = ({
 
     return type === "artist" ? sections["Artist"] :
         <motion.div
-            onMouseDown={handleHoldStart}
-            onMouseUp={handleHoldEnd}
-            onMouseLeave={handleHoldEnd}
-            onTouchStart={handleHoldStart}
-            onTouchEnd={handleHoldEnd}
-            animate={{ scale: isHolding ? 1.05 : 1 }}
+            onClick={handlePlayClick}
+            animate={{ scale: 1.05 }}
             transition={{ duration: 0.2 }}
 
             initial={{ opacity: 0, scale: 0.8, translateY: 100, translateX: 0 }}
@@ -246,9 +242,7 @@ const Card = ({
                 {type === "album" && <p className="text-white pl-3 pr-3">Released: {popularity}</p>}
                 {type === "playlist" && <p className="text-white pl-3 pr-3">Owner: {popularity}</p>}
 
-                {type === "track" && sections["save"]}
-                {type === "playlist" && sections["save"]}
-                {type === "album" && sections["save"]}
+                        {sections.controls}
 
             </div>
         </motion.div>

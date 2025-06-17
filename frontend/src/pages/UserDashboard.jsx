@@ -1,6 +1,7 @@
 // src/pages/UserDashboard.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Loader } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
 import { faSignOutAlt, faEnvelope, faGlobe, faUser, faCrown } from '@fortawesome/free-solid-svg-icons';
@@ -12,7 +13,6 @@ export default function UserDashboard() {
 
   const fetchUserProfile = async () => {
     try {
-      // Try refreshing access token before making call
       await fetch('https://music-recommender-api.onrender.com/refresh_access_token', {
         credentials: 'include',
       });
@@ -22,7 +22,6 @@ export default function UserDashboard() {
       });
 
       if (response.status === 401) {
-        console.warn('Session expired or user not logged in');
         setUserData(null);
         setLoading(false);
         return;
@@ -42,15 +41,13 @@ export default function UserDashboard() {
 
   useEffect(() => {
     fetchUserProfile();
-    const interval = setInterval(fetchUserProfile, 1000 * 60 * 10); // refresh every 10 minutes
+    const interval = setInterval(fetchUserProfile, 1000 * 60 * 10);
     return () => clearInterval(interval);
   }, []);
 
   const handleLogout = async () => {
     try {
       await fetch('https://music-recommender-api.onrender.com/logout', { credentials: 'include' });
-      localStorage.clear();
-      navigate('/');
       window.location.reload();
     } catch (err) {
       console.error('[ERROR] Logout failed:', err);
@@ -58,7 +55,7 @@ export default function UserDashboard() {
   };
 
   const Label = ({ icon, text }) => (
-    <div className='flex items-center gap-2 text-gray-300 text-sm'>
+    <div className='flex items-center gap-3 text-gray-300 text-sm'>
       <FontAwesomeIcon icon={icon} className='w-4 h-4 text-green-400' />
       <span>{text}</span>
     </div>
@@ -69,52 +66,72 @@ export default function UserDashboard() {
   }
 
   return (
-    <div className='min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-black via-zinc-900 to-gray-900 text-white px-4'>
-      {loading ? (
-        <p className='text-xl'>Loading your account…</p>
-      ) : userData ? (
-        <div className='bg-white/10 border border-white/20 backdrop-blur-md p-6 rounded-3xl shadow-2xl max-w-md w-full text-center space-y-5'>
-          <img src={userData.image} alt='User avatar' className='w-32 h-32 rounded-full mx-auto border-4 border-green-500 shadow-lg' />
-          <h2 className='text-3xl font-black text-white tracking-wide'>{userData.display_name}</h2>
+    <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-gray-900 text-white relative overflow-hidden px-6'>
+      <div className='absolute top-0 left-0 w-full h-full bg-gradient-radial from-emerald-500/10 to-transparent blur-3xl z-0' />
+      
+      <div className='relative z-10 w-full max-w-xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-[0_0_60px_5px_rgba(0,255,160,0.15)] rounded-3xl p-8 space-y-6 animate-fade-in'>
+        {loading ? (
+    <div className="flex items-center justify-center text-white">
+      <Loader className="animate-spin w-8 h-8 mr-3" />
+      <span className="text-lg">Loading Your Account...</span>
+    </div>
+        ) : userData ? (
+          <>
+            <div className='flex flex-col items-center space-y-4'>
+              <div className='relative'>
+                <img src={userData.image} alt='Avatar' className='w-32 h-32 rounded-full border-4 border-green-500 shadow-xl' />
+                {userData.product === 'premium' && (
+                  <div className='absolute -bottom-2 -right-2 bg-yellow-400 text-black p-2 rounded-full shadow-md animate-pulse'>
+                    <FontAwesomeIcon icon={faCrown} className='w-4 h-4' />
+                  </div>
+                )}
+              </div>
+              <h2 className='text-3xl font-bold tracking-tight text-white drop-shadow-md'>{userData.display_name}</h2>
+              <div className='flex items-center gap-2 text-sm uppercase tracking-widest text-green-300'>
+                <FontAwesomeIcon icon={faSpotify} />
+                <span>{userData.product}</span>
+              </div>
+            </div>
 
-          <div className='inline-flex justify-center items-center gap-2 text-xs'>
-            <FontAwesomeIcon icon={faSpotify} className='text-green-500' />
-            <span className='uppercase tracking-wider'>{userData.product}</span>
-            {userData.product === 'premium' && (
-              <FontAwesomeIcon icon={faCrown} className='text-yellow-400' title='Premium User' />
+            <div className='grid gap-2'>
+              <Label icon={faEnvelope} text={userData.email} />
+              <Label icon={faGlobe} text={userData.country} />
+              <Label icon={faUser} text={`Spotify ID: ${userData.id}`} />
+            </div>
+
+            {userData.product !== 'premium' && (
+              <div className='mt-4 text-center'>
+                <p className='text-yellow-300 italic text-sm'>Upgrade to Premium for uninterrupted magic 🎧</p>
+                <button
+                  onClick={() => window.open('https://www.spotify.com/premium/', '_blank')}
+                  className='mt-3 px-5 py-2 rounded-xl bg-gradient-to-r from-yellow-500 to-pink-500 text-white text-sm font-semibold shadow hover:scale-105 transition-transform'
+                >
+                  Upgrade to Premium
+                </button>
+              </div>
             )}
+
+            <button
+              onClick={handleLogout}
+              className='w-full py-2 mt-6 rounded-xl bg-red-500 hover:bg-red-600 active:scale-95 transition-all text-white font-medium shadow-lg flex items-center justify-center gap-2'
+            >
+              <FontAwesomeIcon icon={faSignOutAlt} />
+              Logout
+            </button>
+          </>
+        ) : (
+          <div className='text-center space-y-5'>
+            <p className='text-xl font-medium'>You’re not logged in.</p>
+            <button
+              onClick={() => window.open('https://music-recommender-api.onrender.com/login', '_self')}
+              className='inline-flex items-center px-6 py-3 bg-green-500 text-white text-lg gap-3 hover:text-black hover:scale-110 active:scale-90 transition-all duration-200 rounded-2xl shadow-lg'
+            >
+              <FontAwesomeIcon icon={faSpotify} />
+              Login with Spotify
+            </button>
           </div>
-
-          <div className='space-y-2 mt-3'>
-            <Label icon={faEnvelope} text={userData.email} />
-            <Label icon={faGlobe} text={userData.country} />
-            <Label icon={faUser} text={`Spotify ID: ${userData.id}`} />
-          </div>
-
-          {userData.product !== 'premium' && (
-            <p className='text-sm text-yellow-300 mt-3 italic'>Upgrade to Premium to unlock full music playback 🍷</p>
-          )}
-
-          <button
-            onClick={handleLogout}
-            className='mt-5 inline-flex justify-center items-center gap-2 px-6 py-2 rounded-xl bg-red-500 hover:bg-red-600 active:scale-95 transition-all text-white font-medium shadow-lg'
-          >
-            <FontAwesomeIcon icon={faSignOutAlt} />
-            Logout
-          </button>
-        </div>
-      ) : (
-        <>
-          <p className='text-xl mb-4'>You are not logged in</p>
-          <button
-            onClick={() => window.open('https://music-recommender-api.onrender.com/login', '_self')}
-            className='inline-flex justify-center items-center px-6 py-3 bg-green-500 text-white text-lg gap-3 hover:text-black hover:scale-110 active:scale-90 transition-all duration-200 rounded-2xl shadow-lg'
-          >
-            <FontAwesomeIcon icon={faSpotify} />
-            Login with Spotify
-          </button>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 }

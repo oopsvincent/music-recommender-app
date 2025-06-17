@@ -103,7 +103,7 @@ class Music(db.Model):
             "motivational_music": self.motivational_music,
             "trending_music": self.trending_music,
             "latest_music": self.latest_music,
-            "top10_music": self.top_music,
+            "top_music": self.top_music,
             "hidden_gems_music": self.hidden_gems_music,
             "developers_choice_music": self.developers_choice_music,
         }

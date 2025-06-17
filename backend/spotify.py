@@ -42,7 +42,7 @@ def get_token():
 @spotify.route("/login")
 def login():
     scopes = (
-        "user-read-private user-read-email "
+        "user-read-private user-read-email user-follow-read "
         "playlist-read-private playlist-modify-private playlist-modify-public playlist-read-collaborative "
         "streaming user-read-playback-state user-modify-playback-state user-read-currently-playing "
         "user-library-read user-library-modify user-read-recently-played"
@@ -162,10 +162,12 @@ def get_profile():
     except requests.exceptions.RequestException as e:
         return jsonify({"error": "Failed to fetch user data", "details": str(e)}), 400
 
+
 @spotify.route("/create_playlist", methods=["POST"])
 def create_playlist():
     token = session.get("access_token")
     if not token:
+
         return jsonify({"error": "Unauthorized"}), 401
 
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
@@ -207,17 +209,32 @@ def play_track():
         return jsonify({"error": "No access token in session"}), 401
 
     data = request.json
-    device_id = data.get("device_id")
+    device_id = data.get("device_id", "")
     uris = data.get("uris")
+    context_uri = data.get("context_uri")
+    offset = data.get("offset")  # can be index or uri
+    position_ms = data.get("position_ms")
 
-    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    payload = {"uris": uris} if uris else {}
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
 
-    res = requests.put(
-        f"https://api.spotify.com/v1/me/player/play?device_id={device_id}",
-        headers=headers,
-        json=payload,
-    )
+    payload = {}
+    if uris:
+        payload["uris"] = uris
+    if context_uri:
+        payload["context_uri"] = context_uri
+    if offset is not None:
+        payload["offset"] = offset
+    if position_ms is not None:
+        payload["position_ms"] = position_ms
+
+    url = f"https://api.spotify.com/v1/me/player/play"
+    if device_id:
+        url += f"?device_id={device_id}"
+
+    res = requests.put(url, headers=headers, json=payload)
 
     if res.status_code != 204:
         return jsonify({"error": "Failed to play track", "details": res.text}), 400
@@ -235,5 +252,201 @@ def get_current_playback():
 
     if res.status_code != 200:
         return jsonify({"error": "Failed to fetch playback state", "details": res.text}), 400
+
+    return jsonify(res.json())
+
+@spotify.route("/player/transfer", methods=["PUT"])
+def transfer_playback():
+    token = session.get("access_token")
+    if not token:
+        return jsonify({"error": "No access token in session"}), 401
+
+    data = request.json
+    device_ids = data.get("device_ids")
+
+    if not device_ids or not isinstance(device_ids, list):
+        return jsonify({"error": "Missing or invalid device_ids"}), 400
+
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    payload = {"device_ids": device_ids, "play": True}
+
+    res = requests.put(
+        "https://api.spotify.com/v1/me/player",
+        headers=headers,
+        json=payload,
+    )
+
+    if res.status_code != 204:
+        return jsonify({"error": "Failed to transfer playback", "details": res.text}), 400
+
+    return jsonify({"status": "playback transferred"})
+
+@spotify.route("/player/repeat", methods=["PUT"])
+def set_repeat():
+    if not refresh_access_token_if_expired():
+        return jsonify({"error": "Unauthorized"}), 401
+
+    token = session.get("access_token")
+    data = request.json
+    state = data.get("state")  # 'off', 'context', 'track'
+    device_id = data.get("device_id", "")
+
+    if state not in ["off", "context", "track"]:
+        return jsonify({"error": "Invalid repeat mode"}), 400
+
+    headers = {"Authorization": f"Bearer {token}"}
+    res = requests.put(
+        f"https://api.spotify.com/v1/me/player/repeat?state={state}&device_id={device_id}",
+        headers=headers,
+    )
+
+    if res.status_code != 204:
+        return jsonify({"error": "Failed to set repeat", "details": res.text}), 400
+
+    return jsonify({"status": "repeat set", "repeat": state})
+
+@spotify.route("/player/shuffle", methods=["PUT"])
+def set_shuffle():
+    if not refresh_access_token_if_expired():
+        return jsonify({"error": "Unauthorized"}), 401
+
+    token = session.get("access_token")
+    data = request.json
+    state = data.get("state")  # true or false
+    device_id = data.get("device_id", "")
+
+    if state is None:
+        return jsonify({"error": "Missing 'state' (true/false)"}), 400
+
+    headers = {"Authorization": f"Bearer {token}"}
+    res = requests.put(
+        f"https://api.spotify.com/v1/me/player/shuffle?state={str(state).lower()}&device_id={device_id}",
+        headers=headers,
+    )
+
+    if res.status_code != 204:
+        return jsonify({"error": "Failed to set shuffle", "details": res.text}), 400
+
+    return jsonify({"status": "shuffle set", "shuffle": state})
+
+@spotify.route("/player/queue")
+def get_queue():
+    if not refresh_access_token_if_expired():
+        return jsonify({"error": "Unauthorized"}), 401
+
+    token = session.get("access_token")
+    headers = {"Authorization": f"Bearer {token}"}
+    res = requests.get("https://api.spotify.com/v1/me/player/queue", headers=headers)
+
+    if res.status_code != 200:
+        return jsonify({"error": "Failed to fetch queue", "details": res.text}), 400
+
+    return jsonify(res.json())  # contains 'currently_playing' and 'queue' list
+
+@spotify.route("/player/queue", methods=["POST"])
+def add_to_queue():
+    if not refresh_access_token_if_expired():
+        return jsonify({"error": "Unauthorized"}), 401
+
+    token = session.get("access_token")
+    data = request.json
+    uri = data.get("uri")
+    device_id = data.get("device_id", "")
+
+    if not uri:
+        return jsonify({"error": "Missing track URI"}), 400
+
+    headers = {"Authorization": f"Bearer {token}"}
+    res = requests.post(
+        f"https://api.spotify.com/v1/me/player/queue?uri={uri}&device_id={device_id}",
+        headers=headers
+    )
+
+    if res.status_code != 204:
+        return jsonify({"error": "Failed to add to queue", "details": res.text}), 400
+
+    return jsonify({"status": "track queued", "uri": uri})
+
+
+# Helper
+def get_spotify_headers():
+    refresh_access_token_if_expired()
+    token = session.get("access_token")
+    if not token:
+        return None, jsonify({"error": "No access token in session"}), 401
+    return {"Authorization": f"Bearer {token}"}, None, None
+
+
+@spotify.route("/me/albums")
+def get_saved_albums():
+    headers, error_response, status = get_spotify_headers()
+    if error_response:
+        return error_response, status
+
+    limit = request.args.get("limit", 20)
+    offset = request.args.get("offset", 0)
+
+    url = f"https://api.spotify.com/v1/me/albums?limit={limit}&offset={offset}"
+    res = requests.get(url, headers=headers)
+
+    if res.status_code != 200:
+        return jsonify({"error": "Failed to fetch albums", "details": res.text}), 400
+
+    return jsonify(res.json())
+
+
+@spotify.route("/me/artists")
+def get_followed_artists():
+    headers, error_response, status = get_spotify_headers()
+    if error_response:
+        return error_response, status
+
+    limit = request.args.get("limit", 20)
+    after = request.args.get("after", "")
+
+    url = f"https://api.spotify.com/v1/me/following?type=artist&limit={limit}"
+    if after:
+        url += f"&after={after}"
+
+    res = requests.get(url, headers=headers)
+
+    if res.status_code != 200:
+        return jsonify({"error": "Failed to fetch followed artists", "details": res.text}), 400
+
+    return jsonify(res.json())
+
+
+@spotify.route("/me/shows")
+def get_saved_shows():
+    headers, error_response, status = get_spotify_headers()
+    if error_response:
+        return error_response, status
+
+    limit = request.args.get("limit", 20)
+    offset = request.args.get("offset", 0)
+
+    url = f"https://api.spotify.com/v1/me/shows?limit={limit}&offset={offset}"
+    res = requests.get(url, headers=headers)
+
+    if res.status_code != 200:
+        return jsonify({"error": "Failed to fetch saved shows", "details": res.text}), 400
+
+    return jsonify(res.json())
+
+
+@spotify.route("/me/playlists")
+def get_user_playlists():
+    headers, error_response, status = get_spotify_headers()
+    if error_response:
+        return error_response, status
+
+    limit = request.args.get("limit", 20)
+    offset = request.args.get("offset", 0)
+
+    url = f"https://api.spotify.com/v1/me/playlists?limit={limit}&offset={offset}"
+    res = requests.get(url, headers=headers)
+
+    if res.status_code != 200:
+        return jsonify({"error": "Failed to fetch playlists", "details": res.text}), 400
 
     return jsonify(res.json())
