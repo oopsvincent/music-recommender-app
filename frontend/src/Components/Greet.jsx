@@ -1,3 +1,4 @@
+// Greet.jsx
 import React from 'react'
 
 function greetBasedOnTime() {
@@ -16,15 +17,14 @@ function greetBasedOnTime() {
 const userName = localStorage.getItem('userName');
 
 const Greet = () => {
-    
   return (
     <h1
-    className="text-white pt-5 pl-5 text-md dark:text-white p-1 pb-4 boldonse line-h line-clamp-3 md:text-2xl md:p-4 bg-black"
-    title={userName}
->
-    {greetBasedOnTime()} {userName}
-</h1>
-  )
+      className="text-white text-lg md:text-2xl font-semibold tracking-tight px-5 py-3 md:px-8 md:py-4 border-b border-white/10 bg-black/80 backdrop-blur-md"
+      title={userName}
+    >
+      {greetBasedOnTime()} {userName}
+    </h1>
+  );
 }
 
-export default Greet
+export default Greet;

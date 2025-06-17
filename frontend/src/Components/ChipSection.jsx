@@ -1,3 +1,4 @@
+// ChipSection.jsx
 import React, { useState } from 'react';
 import Chip from './Chip';
 import CategorySelector from './CategorySelector';
@@ -24,27 +25,22 @@ const ChipSection = ({ onChipSelect }) => {
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
-    setActiveChip(null); // Reset selection when changing category
+    setActiveChip(null);
   };
-  
+
   const handleChipClick = (chipText) => {
     console.log(`Getting ${chipText} recommendation`);
     setActiveChip(chipText);
   };
-  
-  
-
 
   return (
-    <div className='flex flex-col justify-center sticky left-0 top-0 z-100 bg-black/80 mb-5 pt-1'>
-      {/* Dropdown Selector */}
+    <div className='flex flex-col w-full bg-black/70 z-40 px-4 py-3 sticky top-0 backdrop-blur-md border-b border-white/10'>
       <CategorySelector
         selectedCategory={selectedCategory}
         handleCategoryChange={handleCategoryChange}
       />
 
-      {/* Chips Section */}
-      <div className='pl-2 pr-2 flex overflow-auto [&::-webkit-scrollbar]:hidden h-13 overflow-y-hidden chips-container mt-4'>
+      <div className='mt-3 flex overflow-x-auto gap-2 py-1 px-1 chips-container no-scrollbar'>
         {categories[selectedCategory].map((element, index) => (
           <Chip 
             text={element} 

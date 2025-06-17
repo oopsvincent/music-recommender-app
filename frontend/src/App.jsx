@@ -6,7 +6,7 @@ import NotFound from './pages/NotFound';
 import PlaylistSection from './routes/PlaylistSection';
 import AppBar from './Components/AppBar';
 import SpotifyPlayer from './Components/SpotifyPlayer';
-import SpotifyAttribution from './Components/SpotifyAttribution';
+import Attribution from './Components/SpotifyAttribution';
 import SearchPage from './pages/SearchPage';
 import UserDashboard from './pages/UserDashboard';
 import SettingsPage from './pages/SettingsPage';
@@ -51,7 +51,7 @@ const App = () => {
             </div>
           ) : (
               <>
-              <SpotifyAttribution />
+              <Attribution />
               <AppBar selectedSection={selectedSection} setSection={setSection} />
               <Routes>
                 <Route path="/artist/:id" element={<ArtistPage />} />
