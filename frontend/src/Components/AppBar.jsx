@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Search, CircleUserRound, ListMusic, Music, Cog, UserCircleIcon } from "lucide-react";
+import { Search, CircleUserRound, ListMusic, Music, Cog, UserCircleIcon, Newspaper } from "lucide-react";
 import { motion } from "framer-motion";
 import '../index.css';
 
@@ -14,7 +14,7 @@ const AppBar = ({ selectedSection, setSection }) => {
 
         if (path === "/") setSection("Music");
         else if (path.startsWith("/search")) setSection("Search");
-        else if (path.startsWith("/account")) setSection("Account");
+        else if (path.startsWith("/feedback")) setSection("Account");
         else if (path.startsWith("/settings")) setSection("Settings");
         else if (path.startsWith("/library")) setSection("Playlist");
         else setSection(""); // fallback
@@ -67,7 +67,7 @@ const AppBar = ({ selectedSection, setSection }) => {
                 <motion.div
                     onClick={() => {
                         setSection("Account");
-                        navigate('/account');
+                        navigate('/feedback');
                         window.scrollTo(0, 0);
                     }}
                     initial={{ scale: 0.8 }}
@@ -80,8 +80,8 @@ const AppBar = ({ selectedSection, setSection }) => {
                         selectedSection === "Account" ? "bg-white text-black rounded-lg" : ""
                     }`}
                 >
-                    <UserCircleIcon />
-                    <p className="text-xs">Account</p>
+                    <Newspaper />
+                    <p className="text-xs">Review</p>
                 </motion.div>
 
                 <motion.div
