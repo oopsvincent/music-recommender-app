@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, redirect ,request ,session, url_for  
+tsufrom flask import Flask, jsonify, redirect ,request ,session, url_for  
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -49,7 +49,7 @@ db = SQLAlchemy(app)
 
 # Define Music Table Model
 class Music(db.Model):
-    __tablename__ = "music_table"
+    __tablename__ = "music_recommendations"
 
     id = db.Column(db.Integer, primary_key=True)
     sad_music = db.Column(db.String(100))
