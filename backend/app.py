@@ -1,4 +1,4 @@
-tsufrom flask import Flask, jsonify, redirect ,request ,session, url_for  
+from flask import Flask, jsonify, redirect ,request ,session, url_for  
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from dotenv import load_dotenv
