@@ -147,7 +147,7 @@ def get_profile():
 
         profile = profile_response.json()
         playlists = playlists_response.json()
-
+    
         return jsonify({
             "profile": {
                 "display_name": profile.get("display_name"),
@@ -180,6 +180,7 @@ def create_playlist():
     
     if not user_id:
         return jsonify({"error": "Could not get user ID"}), 400
+    
 @spotify.route("/logout")
 def logout():
     session.clear()
