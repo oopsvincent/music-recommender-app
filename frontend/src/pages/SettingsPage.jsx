@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-// import TracksDaily from '../Components/TracksDaily';
 
 function removeData() {
     localStorage.clear();
@@ -48,6 +46,21 @@ const SettingsPage = () => {
             Clear Playlist
         </motion.button>
     </h3>
+{/* 
+            <div>
+                <AddToPlaylist song={{
+  id: '6habFhsOp2NvshLv26DqMb',
+  title: 'Blinding Lights',
+  artists: [
+    { id: '1Xyo4u8uXC1ZmMpatF05PJ', name: 'The Weeknd' }
+  ],
+  albumId: '4yP0hdKOZPNshxUOjY0cZj',
+  albumImage: 'https://i.scdn.co/image/ab67616d0000b273c5f0a94fd66dd3f457182527'
+}
+} />
+                <ViewPlaylists />
+            </div> */}
+
     {/* <TracksDaily categoriesBaseUrls={'https://music-recommender-api.onrender.com/songs/'} /> */}
 </div>
   )

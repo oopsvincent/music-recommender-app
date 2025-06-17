@@ -135,6 +135,15 @@ body {
       "Helvetica Neue", sans-serif;
     letter-spacing: 1px;
   }
+  
+.space-grotesk{
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.host-grotesk{
+    font-family: 'Host Grotesk', sans-serif;
+}
+
   .line-h {
     line-height: 40px;
   }
