@@ -78,8 +78,8 @@ function toggleSave() {
 
     return (
         <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            initial={{ opacity: 0, translateY: 100, y: 20 }}
+            whileInView={{ opacity: 1, translateY: 0, y: 0 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="relative w-72 bg-gradient-to-br from-gray-900/80 to-black/10 backdrop-blur-xl border border-white/80 rounded-2xl overflow-hidden shadow-2xl hover:shadow-green-500/10 transition-all duration-500"
