@@ -26,6 +26,7 @@ import ArtistPage from './pages/ArtistPage';
 import AlbumPage from './pages/AlbumPage';
 import PlaylistPage from './pages/PlaylistPage';
 import TrackPage from './pages/TrackPage';
+import ChatPage from './pages/ChatPage';
 
 const App = () => {
   const [selectedSection, setSection] = useState('');
@@ -51,7 +52,7 @@ const App = () => {
             </div>
           ) : (
               <>
-              <Attribution />
+                {location.pathname !== '/chat' && <Attribution />}
               <AppBar selectedSection={selectedSection} setSection={setSection} />
               <Routes>
                 <Route path="/artist/:id" element={<ArtistPage />} />
@@ -65,16 +66,17 @@ const App = () => {
                 <Route path="/credits" element={<CreditsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/library" element={<LibrarySection />} />
+                <Route path='chat' element={<ChatPage />} />
                 <Route path="/feedback" element={<FeedbackPage />} />
                 <Route path='redirect' element={<Redirect />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
 
               {/* ✅ Globally available floating Spotify Player */}
-              <SpotifyPlayer />
-              <Footer />
+              {location.pathname !== "/chat" && <SpotifyPlayer />}
             </>
           )}
+          {location.pathname !== '/chat' && <Footer />}
         </AuthProvider>
       </Router>
     </PlayerProvider>
