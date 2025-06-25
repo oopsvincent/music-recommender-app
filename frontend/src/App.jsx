@@ -46,7 +46,7 @@ const App = () => {
         <AuthProvider>
           {showLogin ? (
             <div className="h-dvh flex justify-center items-center">
-              <div className="max-w-[90%] w-full">
+              <div className="md:max-w-[40%] max-w-[90%]">
                 <FirstTimeLogin onSubmit={handleUserInfo} />
               </div>
             </div>
