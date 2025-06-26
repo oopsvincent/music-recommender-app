@@ -669,49 +669,43 @@ class MusicNLPProcessor:
 
         return result[:5]  # Return top 5
 
+    def get_genre_recommendations(
+        self, emotions: List[str], activities: Optional[List[str]] = None
+    ) -> List[str]:
+        """Map emotions and activities to music genres with weighted scoring and add randomness to output"""
+        genre_scores = defaultdict(int)
 
-import random
-from collections import defaultdict
-from typing import List, Optional
+        # Primary recommendations based on emotions (higher weight)
+        for emotion in emotions:
+            if emotion in self.emotion_genre_mapping:
+                for genre in self.emotion_genre_mapping[emotion]:
+                    genre_scores[genre] += 3
 
+        # Secondary recommendations based on activities
+        if activities:
+            for activity in activities:
+                if activity in self.activity_mapping:
+                    for genre in self.activity_mapping[activity]:
+                        genre_scores[genre] += 2
 
-def get_genre_recommendations(
-    self, emotions: List[str], activities: Optional[List[str]] = None
-) -> List[str]:
-    """Map emotions and activities to music genres with weighted scoring and add randomness to output"""
-    genre_scores = defaultdict(int)
+        if genre_scores:
+            # Group genres by score
+            score_groups = defaultdict(list)
+            for genre, score in genre_scores.items():
+                score_groups[score].append(genre)
 
-    # Primary recommendations based on emotions (higher weight)
-    for emotion in emotions:
-        if emotion in self.emotion_genre_mapping:
-            for genre in self.emotion_genre_mapping[emotion]:
-                genre_scores[genre] += 3
+            # Sort scores descending, shuffle genres in each score group
+            final_list = []
+            for score in sorted(score_groups.keys(), reverse=True):
+                random.shuffle(score_groups[score])  # Add randomness here
+                final_list.extend(score_groups[score])
 
-    # Secondary recommendations based on activities
-    if activities:
-        for activity in activities:
-            if activity in self.activity_mapping:
-                for genre in self.activity_mapping[activity]:
-                    genre_scores[genre] += 2
-
-    if genre_scores:
-        # Group genres by score
-        score_groups = defaultdict(list)
-        for genre, score in genre_scores.items():
-            score_groups[score].append(genre)
-
-        # Sort scores descending, shuffle genres in each score group
-        final_list = []
-        for score in sorted(score_groups.keys(), reverse=True):
-            random.shuffle(score_groups[score])  # Add randomness here
-            final_list.extend(score_groups[score])
-
-        return final_list[:5]  # Pick top 5 genres randomly within top scores
-    else:
-        # Shuffle fallback genres too
-        fallback = ["trending_music", "top_music", "developers_choice_music"]
-        random.shuffle(fallback)
-        return fallback
+            return final_list[:5]  # Pick top 5 genres randomly within top scores
+        else:
+            # Shuffle fallback genres too
+            fallback = ["trending_music", "top_music", "developers_choice_music"]
+            random.shuffle(fallback)
+            return fallback
 
     def calculate_confidence(
         self, emotions: List[str], activities: List[str], text: str
