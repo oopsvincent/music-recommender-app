@@ -499,7 +499,7 @@ class MusicNLPProcessor:
             elif negative_count > positive_count and negative_count > 0:
                 emotion_scores["sad"] = 1
             else:
-                emotion_scores["relaxed"] = 1
+                return []
 
         # Return emotions sorted by frequency, max 3
         detected_emotions = [
@@ -812,7 +812,7 @@ class MusicNLPProcessor:
 
             # Handle low confidence or no emotions
             if confidence < 0.3 or not emotions:
-                base_message = "I'd love to help you discover the perfect music! Could you tell me more about your current mood or what you're planning to do?"
+                base_message = "I don't quite understand what you're looking for, but here are some trending and popular tracks that most people love!"
                 if has_explicit and explicit_severity in ["medium", "high"]:
                     base_message += " I notice you might be looking for music with explicit content - I can recommend tracks that match that vibe."
 
