@@ -85,6 +85,7 @@ function HomePage({ userName }) {
                     const isArtist = track.type === 'artist';
                     return (
                                 <TrackCard
+                                    key={index}
                                     followers={track.followers}
                                     url={track.url}
                                     title={track.title}

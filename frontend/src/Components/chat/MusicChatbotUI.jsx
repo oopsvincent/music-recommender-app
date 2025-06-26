@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Fan, Send, Music, Heart, Zap, Coffee, Headphones, ChevronDown, ChevronUp } from 'lucide-react';
 import { getMoodSuggestions } from '../../lib/chatAPI';
 
+const sentAudio = new Audio('/audio/message-send.wav');
+const receiveAudio = new Audio('/audio/message-receive.mp3');
+
 const MusicChatbot = () => {
   const [messages, setMessages] = useState([
     {
@@ -45,14 +48,19 @@ const handleSendMessage = async (messageText = inputText) => {
   setInputText('');
   setIsLoading(true);
 
+  // Play sent sound
+  try { sentAudio.currentTime = 0; sentAudio.play(); } catch (e) {}
+
   try {
     const data = await getMoodSuggestions(messageText.trim());
+    console.log(data);
+    
 
     if (!data) throw new Error('No response from API');
 
     const botMessage = {
       type: 'bot',
-      content: data.message || "Here are some suggestions based on your mood.",
+      content: data.bot_message || "Here are some suggestions based on your mood.",
       timestamp: new Date(),
       songs: data.recommended_songs || [],
       followUp: data.follow_up || '',
@@ -61,6 +69,10 @@ const handleSendMessage = async (messageText = inputText) => {
 
     setMessages(prev => [...prev, botMessage]);
     setRecommendedSongs(data.recommended_songs || []);
+
+    // Play receive sound
+    try { receiveAudio.currentTime = 0; receiveAudio.play(); } catch (e) {console.log(e);
+    }
   } catch (error) {
     const fallbackResponse = {
       type: 'bot',
@@ -72,6 +84,10 @@ const handleSendMessage = async (messageText = inputText) => {
 
     setMessages(prev => [...prev, fallbackResponse]);
     setRecommendedSongs(fallbackResponse.songs);
+
+    // Play receive sound
+    try { receiveAudio.currentTime = 0; receiveAudio.play(); } catch (e) {console.log(e);
+    }
   } finally {
     setIsLoading(false);
   }

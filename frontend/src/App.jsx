@@ -73,7 +73,9 @@ const App = () => {
               </Routes>
 
               {/* ✅ Globally available floating Spotify Player */}
-              {location.pathname !== "/chat" && <SpotifyPlayer />}
+              <div className={`${location.pathname === "/chat" && "hidden"}`}>
+             <SpotifyPlayer />
+              </div>
             </>
           )}
           {location.pathname !== '/chat' && <Footer />}
