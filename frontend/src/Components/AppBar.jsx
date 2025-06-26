@@ -10,6 +10,7 @@ import {
   ChevronDown,
   ChevronUp,
   UserRound,
+  Download,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -27,7 +28,8 @@ const AppBar = ({ selectedSection, setSection }) => {
     else if (path.startsWith("/account")) setSection("Account");
     else if (path.startsWith("/feedback")) setSection("Review");
     else if (path.startsWith("/settings")) setSection("Settings");
-    else if (path.startsWith("/library")) setSection("Playlist");
+    else if (path.endsWith("/library")) setSection("Playlist");
+    else if (path.startsWith("/library/saved")) setSection("Saved");
     else if (path.startsWith("/chat")) setSection("Chat");
     else setSection("");
   }, [location.pathname]);
@@ -46,16 +48,16 @@ const AppBar = ({ selectedSection, setSection }) => {
       route: "/search"
     },
     {
-        label: "Account",
-        icon: <UserRound size={20} />,
-        section: "Account",
-        route: "/account"
-    },
-    {
       label: "Chat",
       icon: <Bot size={20} />, 
       section: "Chat",
       route: "/chat"
+    },
+    {
+        label: "Account",
+        icon: <UserRound size={20} />,
+        section: "Account",
+        route: "/account"
     },
     {
       label: "More",
@@ -82,6 +84,12 @@ const AppBar = ({ selectedSection, setSection }) => {
       icon: <Newspaper size={18} />, 
       section: "Review",
       route: "/feedback"
+    },
+    {
+        label: "Saved",
+        icon: <Download size={18} />,
+        section: "Saved",
+        route: "/library/saved"
     }
   ];
 

@@ -1,11 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Fan, Send, Music, Heart, Zap, Coffee, Headphones, ChevronDown, ChevronUp } from 'lucide-react';
 import { getMoodSuggestions } from '../../lib/chatAPI';
+import { getSpotifyToken, fetchSpotifyData } from '../../hooks/useSpotify';
 
 const sentAudio = new Audio('/audio/message-send.wav');
 const receiveAudio = new Audio('/audio/message-receive.mp3');
 
 const MusicChatbot = () => {
+
+    // async function getDataforCard(track) {
+    //     const t = await getSpotifyToken();
+
+    //     const data = await fetchSpotifyData(track, t);
+    //     return data;
+    // }
+
   const [messages, setMessages] = useState([
     {
       type: 'bot',
@@ -66,6 +75,14 @@ const handleSendMessage = async (messageText = inputText) => {
       followUp: data.follow_up || '',
       analysis: { emotions: [data.mood] }
     };
+
+    // const songOBJ = botMessage.songs.map((m, i) => {
+    //     const data = getDataforCard(m).then;
+    //     console.log(data);
+    // })
+
+    console.log(songOBJ);
+    
 
     setMessages(prev => [...prev, botMessage]);
     setRecommendedSongs(data.recommended_songs || []);

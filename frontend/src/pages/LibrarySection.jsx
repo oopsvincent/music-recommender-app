@@ -284,7 +284,7 @@ const LibrarySection = () => {
       { key: 'playlists', label: 'Playlists', count: isAuthenticated ? playlists.length : 0 },
       { key: 'albums', label: 'Albums', count: isAuthenticated ? albums.length : localAlbums.length },
       { key: 'artists', label: 'Artists', count: isAuthenticated ? artists.length : localArtists.length },
-      { key: 'saved', label: 'Saved Songs', count: localSaved.length }
+    //   { key: 'saved', label: 'Saved Songs', count: localSaved.length }
     ];
 
     return (
