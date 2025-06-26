@@ -27,6 +27,7 @@ import AlbumPage from './pages/AlbumPage';
 import PlaylistPage from './pages/PlaylistPage';
 import TrackPage from './pages/TrackPage';
 import ChatPage from './pages/ChatPage';
+import LocallySavedSongs from './Components/LocallySavedSongs';
 
 const App = () => {
   const [selectedSection, setSection] = useState('');
@@ -66,6 +67,7 @@ const App = () => {
                 <Route path="/credits" element={<CreditsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/library" element={<LibrarySection />} />
+                <Route path="/library/saved" element={<LocallySavedSongs />} />
                 <Route path='chat' element={<ChatPage />} />
                 <Route path="/feedback" element={<FeedbackPage />} />
                 <Route path='redirect' element={<Redirect />} />
