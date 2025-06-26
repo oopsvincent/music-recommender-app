@@ -148,31 +148,46 @@ class MusicNLPProcessor:
         
         # Genre mapping for explicit content
         self.explicit_genre_mapping = {
-            'profanity': ['explicit_rap', 'hardcore_music', 'punk_music'],
-            'drugs': ['reggae_music', 'hip_hop_music', 'alternative_music'],
-            'violence': ['metal_music', 'hardcore_music', 'punk_music'],
-            'sexual': ['rnb_music', 'hip_hop_music', 'dance_music'],
-            'party_explicit': ['party_music', 'hip_hop_music', 'electronic_music']
+            'profanity': ['rap_music', 'rock_music'],
+            'drugs': ['rap_music', 'rock_music', 'blues_music'],
+            'violence': ['rock_music', 'rap_music'],
+            'sexual': ['rnb_music', 'rap_music', 'pop_music'],
+            'party_explicit': ['party_music', 'rap_music', 'electronic_music', 'pop_music']
         }
 
-    def _compile_patterns(self):
-        """Pre-compile regex patterns for better performance"""
-        self.emotion_patterns = {}
-        self.activity_patterns = {}
-        
-        # Compile emotion patterns
+def _compile_patterns(self):
+    """Pre-compile regex patterns for better performance"""
+    self.emotion_patterns = {}
+    self.activity_patterns = {}
+
+    # Compile emotion patterns (with safety check)
+    if hasattr(self, 'emotion_keywords') and self.emotion_keywords:
         for emotion, keywords in self.emotion_keywords.items():
-            pattern = r'\b(?:' + '|'.join(re.escape(keyword) for keyword in keywords) + r')\b'
-            self.emotion_patterns[emotion] = re.compile(pattern, re.IGNORECASE)
-        
-        # Compile activity patterns
+            if keywords:  # Check if keywords list is not empty
+                pattern = r'\b(?:' + '|'.join(re.escape(keyword) for keyword in keywords) + r')\b'
+                self.emotion_patterns[emotion] = re.compile(pattern, re.IGNORECASE)
+
+    # Compile activity patterns (with safety check)
+    if hasattr(self, 'activity_mapping') and self.activity_mapping:
         for activity, _ in self.activity_mapping.items():
             pattern = r'\b' + re.escape(activity) + r'\b'
             self.activity_patterns[activity] = re.compile(pattern, re.IGNORECASE)
-        
-        # Compile explicit word pattern for performance
+
+    # Compile explicit word pattern for performance (with safety check)
+    if hasattr(self, 'explicit_words') and self.explicit_words:
         explicit_words_pattern = r'\b(?:' + '|'.join(re.escape(word) for word in self.explicit_words) + r')\b'
         self.explicit_pattern = re.compile(explicit_words_pattern, re.IGNORECASE)
+    else:
+        # Create a pattern that never matches if explicit_words is not defined or empty
+        self.explicit_pattern = re.compile(r'(?!)', re.IGNORECASE)
+
+    # Compile explicit content patterns (if you have explicit content mapping)
+    if hasattr(self, 'explicit_content_mapping') and self.explicit_content_mapping:
+        self.explicit_content_patterns = {}
+        for content_type, keywords in self.explicit_content_mapping.items():
+            if keywords:  # Check if keywords list is not empty
+                pattern = r'\b(?:' + '|'.join(re.escape(keyword) for keyword in keywords) + r')\b'
+                self.explicit_content_patterns[content_type] = re.compile(pattern, re.IGNORECASE)
 
     def preprocess_text(self, text: Union[str, None]) -> str:
         """Clean and normalize input text with robust error handling"""
@@ -344,30 +359,46 @@ class MusicNLPProcessor:
         
         return result[:5]  # Return top 5
 
-    def get_genre_recommendations(self, emotions: List[str], activities: Optional[List[str]] = None) -> List[str]:
-        """Map emotions and activities to music genres with weighted scoring"""
-        genre_scores = defaultdict(int)
-        
-        # Primary recommendations based on emotions (higher weight)
-        for emotion in emotions:
-            if emotion in self.emotion_genre_mapping:
-                for genre in self.emotion_genre_mapping[emotion]:
-                    genre_scores[genre] += 3  # Higher weight for emotions
-        
-        # Secondary recommendations based on activities
-        if activities:
-            for activity in activities:
-                if activity in self.activity_mapping:
-                    for genre in self.activity_mapping[activity]:
-                        genre_scores[genre] += 2  # Lower weight for activities
-        
-        # Return top genres based on scores
-        if genre_scores:
-            sorted_genres = sorted(genre_scores.items(), key=lambda x: x[1], reverse=True)
-            return [genre for genre, _ in sorted_genres[:5]]
-        else:
-            # Fallback genres
-            return ['trending_music', 'top_music', 'developers_choice_music']
+import random
+from collections import defaultdict
+from typing import List, Optional
+
+def get_genre_recommendations(self, emotions: List[str], activities: Optional[List[str]] = None) -> List[str]:
+    """Map emotions and activities to music genres with weighted scoring and add randomness to output"""
+    genre_scores = defaultdict(int)
+
+    # Primary recommendations based on emotions (higher weight)
+    for emotion in emotions:
+        if emotion in self.emotion_genre_mapping:
+            for genre in self.emotion_genre_mapping[emotion]:
+                genre_scores[genre] += 3
+
+    # Secondary recommendations based on activities
+    if activities:
+        for activity in activities:
+            if activity in self.activity_mapping:
+                for genre in self.activity_mapping[activity]:
+                    genre_scores[genre] += 2
+
+    if genre_scores:
+        # Group genres by score
+        score_groups = defaultdict(list)
+        for genre, score in genre_scores.items():
+            score_groups[score].append(genre)
+
+        # Sort scores descending, shuffle genres in each score group
+        final_list = []
+        for score in sorted(score_groups.keys(), reverse=True):
+            random.shuffle(score_groups[score])  # Add randomness here
+            final_list.extend(score_groups[score])
+
+        return final_list[:5]  # Pick top 5 genres randomly within top scores
+    else:
+        # Shuffle fallback genres too
+        fallback = ['trending_music', 'top_music', 'developers_choice_music']
+        random.shuffle(fallback)
+        return fallback
+
 
     def calculate_confidence(self, emotions: List[str], activities: List[str], text: str) -> float:
         """Calculate confidence score with more realistic bounds"""
