@@ -102,8 +102,7 @@ class MusicNLPProcessor:
             'date': ['romantic_music', 'jazz_music', 'rnb_music']
         }
         
-        # Compile regex patterns for better performance
-        self._compile_patterns()
+        
         
         # Sentiment analysis fallback (without TextBlob dependency)
         self.positive_indicators = ['good', 'great', 'awesome', 'fantastic', 'wonderful', 'amazing', 'excellent', 'perfect', 'love', 'best']
@@ -129,6 +128,8 @@ class MusicNLPProcessor:
             'sex', 'sexual', 'porn', 'nude', 'naked', 'erotic', 'orgasm',
             'masturbate', 'horny', 'sexy', 'seduction', 'kinky', 'fetish'
         }
+        # Compile regex patterns for better performance
+        self._compile_patterns()
         
         # Context-based explicit phrases (more sophisticated detection)
         self.explicit_phrases = [
