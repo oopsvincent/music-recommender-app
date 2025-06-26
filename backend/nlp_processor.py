@@ -499,7 +499,7 @@ class MusicNLPProcessor:
             elif negative_count > positive_count and negative_count > 0:
                 emotion_scores["sad"] = 1
             else:
-                emotion_scores["relaxed"] = 1
+                return []
 
         # Return emotions sorted by frequency, max 3
         detected_emotions = [
