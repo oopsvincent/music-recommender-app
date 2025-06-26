@@ -129,7 +129,7 @@ class MusicNLPProcessor:
             'masturbate', 'horny', 'sexy', 'seduction', 'kinky', 'fetish'
         }
         # Compile regex patterns for better performance
-        self._compile_patterns()
+        self.compile_patterns()
         
         # Context-based explicit phrases (more sophisticated detection)
         self.explicit_phrases = [
@@ -155,7 +155,7 @@ class MusicNLPProcessor:
             'party_explicit': ['party_music', 'rap_music', 'electronic_music', 'pop_music']
         }
 
-def _compile_patterns(self):
+def compile_patterns(self):
     """Pre-compile regex patterns for better performance"""
     self.emotion_patterns = {}
     self.activity_patterns = {}
