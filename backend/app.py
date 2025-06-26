@@ -1,14 +1,16 @@
 from flask import Flask, jsonify, redirect, request, session, url_for
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from flask_cors import CORS
 from dotenv import load_dotenv
 from urllib.parse import urlencode
 from spotify import spotify  # This imports the blueprint
 from nlp_processor import MusicNLPProcessor
+from typing import List
 import os
 import time
 import requests
-import random
+import random 
 
 # Initialize NLP processor
 nlp_processor = MusicNLPProcessor()
@@ -200,9 +202,39 @@ def get_songs_by_genre(genre):
         }
     )
 
+def get_random_songs_by_genre(genre_name: str, limit: int = 5) -> List[str]:
+    """Get random songs from a specific genre"""
+    genre_column = getattr(Music, genre_name, None)
+    if not genre_column:
+        return []
+    
+    try:
+        # Method 1: Database-level randomization (preferred)
+        songs = Music.query.with_entities(genre_column).filter(
+            genre_column.isnot(None)
+        ).order_by(func.random()).limit(limit).all()
+        
+        return [song[0] for song in songs if song[0]]
+    
+    except Exception:
+        # Method 2: Fallback - Python-level randomization
+        try:
+            all_songs = Music.query.with_entities(genre_column).filter(
+                genre_column.isnot(None)
+            ).all()
+            
+            if not all_songs:
+                return []
+            
+            song_list = [song[0] for song in all_songs if song[0]]
+            return random.sample(song_list, min(limit, len(song_list)))
+        
+        except Exception:
+            return []
+
 @app.route("/chat", methods=["POST"])
-def chat_endpoint():
-    """NLP-powered music recommendation chat endpoint"""
+def enhanced_chat_endpoint():
+    """Enhanced NLP-powered music recommendation with guaranteed randomization"""
     try:
         data = request.get_json()
         user_message = data.get('message', '')
@@ -216,37 +248,35 @@ def chat_endpoint():
         # Generate conversational response
         response = nlp_processor.generate_response(analysis, user_message)
         
-        # Get actual songs from database based on recommended genres
+        # Get randomized songs for each genre
         recommended_songs = []
-        for genre in response['genres']:
-            # Query your database for songs in this genre
-            genre_column = getattr(Music, genre, None)
-            if genre_column:
-                songs = Music.query.with_entities(genre_column).filter(
-                    genre_column.isnot(None)
-                ).limit(5).all()
-                
-                genre_songs = [song[0] for song in songs if song[0]]
-                recommended_songs.extend(genre_songs)
+        songs_per_genre = max(2, 12 // len(response['genres']))
         
-        # Remove duplicates and limit results
-        unique_songs = list(set(recommended_songs))
+        for genre in response['genres']:
+            genre_songs = get_random_songs_by_genre(genre, songs_per_genre)
+            recommended_songs.extend(genre_songs)
+        
+        # Final shuffle to mix genres
+        random.shuffle(recommended_songs)
+        
+        # Remove duplicates while maintaining randomness
+        unique_songs = list(dict.fromkeys(recommended_songs))
         
         return jsonify({
             'bot_message': response['message'],
-            'recommended_songs': unique_songs[:10],  # Top 10 recommendations
+            'recommended_songs': unique_songs[:10],
             'genres': response['genres'],
             'follow_up': response.get('follow_up', ''),
             'analysis': {
                 'emotions': analysis['emotions'],
                 'activities': analysis['activities'],
                 'confidence': analysis['confidence']
-            }
+            },
+            'randomization_seed': random.randint(1000, 9999)
         })
     
     except Exception as e:
         return jsonify({'error': f'Chat processing failed: {str(e)}'}), 500
-
 
 # Alternative endpoint for getting songs by emotion/mood
 @app.route("/songs/by-mood", methods=["POST"])
