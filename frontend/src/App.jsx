@@ -28,6 +28,8 @@ import PlaylistPage from './pages/PlaylistPage';
 import TrackPage from './pages/TrackPage';
 import ChatPage from './pages/ChatPage';
 import LocallySavedSongs from './Components/LocallySavedSongs';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsAndConditions from './pages/TermsAndConditions';
 
 const App = () => {
   const [selectedSection, setSection] = useState('');
@@ -71,6 +73,8 @@ const App = () => {
                 <Route path='chat' element={<ChatPage />} />
                 <Route path="/feedback" element={<FeedbackPage />} />
                 <Route path='redirect' element={<Redirect />} />
+                <Route path='/terms' element={<TermsAndConditions />} />
+                <Route path='/privacy' element={<PrivacyPolicy />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
 
