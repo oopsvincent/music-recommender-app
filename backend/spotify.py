@@ -42,11 +42,11 @@ def get_token():
 @spotify.route("/login")
 def login():
     scopes = (
-        "user-read-private user-read-email user-follow-read "
-        "playlist-read-private playlist-modify-private playlist-modify-public playlist-read-collaborative "
-        "streaming user-read-playback-state user-modify-playback-state user-read-currently-playing "
-        "user-library-read user-library-modify user-read-recently-played"
-    )
+    "user-read-private user-follow-read "
+    "playlist-read-private playlist-read-collaborative "
+    "streaming user-read-playback-state user-modify-playback-state user-read-currently-playing "
+    "user-library-read"
+)
     query_params = {
         "response_type": "code",
         "client_id": CLIENT_ID,
@@ -151,7 +151,6 @@ def get_profile():
         return jsonify({
             "profile": {
                 "display_name": profile.get("display_name"),
-                "email": profile.get("email"),
                 "image": profile["images"][0]["url"] if profile.get("images") else None,
                 "country": profile.get("country"),
                 "product": profile.get("product"),
