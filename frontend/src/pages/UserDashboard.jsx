@@ -94,7 +94,7 @@ export default function UserDashboard() {
             </div>
 
             <div className='grid gap-2'>
-              <Label icon={faEnvelope} text={userData.email} />
+              {/* <Label icon={faEnvelope} text={userData.email} /> */}
               <Label icon={faGlobe} text={userData.country} />
               <Label icon={faUser} text={`Spotify ID: ${userData.id}`} />
             </div>
