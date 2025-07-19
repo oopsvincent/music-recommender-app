@@ -2,6 +2,8 @@ import React from 'react';
 import { ArrowLeft, Shield, Database, Lock, Eye, Headphones, AlertCircle } from 'lucide-react';
 
 const PrivacyPolicy = ({ onBack }) => {
+    scrollTo(0, 0)
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       {/* Header */}
