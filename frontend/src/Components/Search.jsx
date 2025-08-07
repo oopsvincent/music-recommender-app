@@ -73,8 +73,8 @@ const SearchComp = ({ handleChange }) => {
                     <option value="artist">Artist</option>
                     <option value="album">Album</option>
                     <option value="playlist">Playlist</option>
-                    <option value="show">Show</option>
-                    <option value="episode">Podcast Episode</option>
+                    {/* <option value="show">Show</option>
+                    <option value="episode">Podcast Episode</option> */}
                 </select>
             </div>
         </>
