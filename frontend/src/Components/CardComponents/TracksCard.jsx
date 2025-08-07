@@ -3,9 +3,18 @@ import { PlayButton } from "./PlayButton";
 import { usePlayer } from "../../contexts/PlayerContext";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Bookmark, BookmarkCheck, Award, CirclePlay } from "lucide-react";
+import { Bookmark, BookmarkCheck, Award, CirclePlay, EllipsisVertical } from "lucide-react";
 import { SpotifyButton, YouTubeButton } from "../MusicButtons";
 import { useNavigate } from "react-router-dom";
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+} from "../ui/dropdown-menu";
+
+
 
 export const TrackCard = ({
     url,
@@ -33,30 +42,30 @@ export const TrackCard = ({
         setSaved(isSaved);
     }, [trackURI]);
 
-function toggleSave() {
-    const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
+    function toggleSave() {
+        const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
 
-    if (saved) {
-        // REMOVE by trackURI
-        const updated = savedSongs.filter(song => song.trackURI !== trackURI);
-        localStorage.setItem("savedSongs", JSON.stringify(updated));
-        setSaved(false);
-    } else {
-        // ADD the song
-        const newSong = {
-            title,
-            artist,
-            spoURL,
-            image: url,
-            popularity,
-            explicit,
-            trackURI,
-        };
-        savedSongs.push(newSong);
-        localStorage.setItem("savedSongs", JSON.stringify(savedSongs));
-        setSaved(true);
+        if (saved) {
+            // REMOVE by trackURI
+            const updated = savedSongs.filter(song => song.trackURI !== trackURI);
+            localStorage.setItem("savedSongs", JSON.stringify(updated));
+            setSaved(false);
+        } else {
+            // ADD the song
+            const newSong = {
+                title,
+                artist,
+                spoURL,
+                image: url,
+                popularity,
+                explicit,
+                trackURI,
+            };
+            savedSongs.push(newSong);
+            localStorage.setItem("savedSongs", JSON.stringify(savedSongs));
+            setSaved(true);
+        }
     }
-}
 
 
     const handlePlayClick = () => {
@@ -82,7 +91,7 @@ function toggleSave() {
             whileInView={{ opacity: 1, translateY: 0, y: 0 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="relative w-72 bg-gradient-to-br from-gray-900/80 to-black/10 backdrop-blur-xl border border-white/80 rounded-2xl overflow-hidden shadow-2xl hover:shadow-green-500/10 transition-all duration-500"
+            className="relative w-48 sm:w-72 bg-gradient-to-br from-gray-900/80 to-black/10 backdrop-blur-xl border border-white/80 rounded-2xl overflow-hidden shadow-2xl hover:shadow-green-500/10 transition-all duration-500"
         >
 
             {/* Image */}
@@ -96,20 +105,20 @@ function toggleSave() {
             </div>
 
             {/* Content */}
-            <div className="p-4 space-y-3">
+            <div className="p-3 sm:p-4 space-y-3">
                 <div>
 
                     <div className="relative w-full h-full">
-                        <div className="absolute top-15 right-3">
+                        <div className="absolute top-12.5 right-2 sm:top-15 sm:right-3">
                             {explicit && <ExplicitBadge />}
                         </div>
                         {/* Controls */}
-                        <div className="absolute top-0 right-0 flex gap-2 items-center z-10">
+                        <div className="absolute top-0 right-0 hidden gap-2 items-center z-10 sm:flex">
                             <PlayButton onPlay={handlePlayClick} />
                             {saved ? <BookmarkCheck stroke="white" fill="green" onClick={handleSave} /> : <Bookmark stroke="white" onClick={handleSave} />}
                         </div>
                     </div>
-                    <h3 className="text-xl font-bold text-white overflow-scroll w-45 text-nowrap scrollb-none cursor-pointer hover:underline" title={title}
+                    <h3 className="text-xs sm:text-lg font-bold text-white overflow-scroll w-32 sm:w-45 text-nowrap scrollb-none cursor-pointer hover:underline" title={title}
                         onClick={() => {
                             navigate(`/album/${albumID}`)
                         }}
@@ -120,7 +129,7 @@ function toggleSave() {
                     {artist.map((a, i) => (
                         <span
                             key={a.id}
-                            className="text-gray-300 text-sm truncate cursor-pointer hover:underline"
+                            className="text-gray-300 text-xs m-0 p-0 truncate cursor-pointer hover:underline"
                             title={a.name}
                             onClick={() => navigate(`/artist/${a.id}`)}
                         >
@@ -129,8 +138,43 @@ function toggleSave() {
                     ))}
                 </div>
 
+                <div className="flex sm:hidden justify-end items-start z-30 absolute bottom-38 right-1">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="text-white p-2 rounded-md hover:bg-white/10 transition">
+                                <EllipsisVertical />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="bg-black text-white min-w-[8rem] rounded-md p-1 z-200">
+                            <DropdownMenuItem
+                                onSelect={handlePlayClick}
+                                className="cursor-pointer px-3 py-2 hover:bg-white/10"
+                            >
+                                <CirclePlay className="mr-2" size={16} /> Play
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="my-1 bg-gray-700" />
+                            <DropdownMenuItem
+                                onSelect={handleSave}
+                                className="cursor-pointer px-3 py-2 hover:bg-white/10"
+                            >
+                                {saved ? (
+                                    <>
+                                        <BookmarkCheck className="mr-2" size={16} /> Saved
+                                    </>
+                                ) : (
+                                    <>
+                                        <Bookmark className="mr-2" size={16} /> Save
+                                    </>
+                                )}
+                            </DropdownMenuItem>
+
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+
+
                 {/* Popularity */}
-                <div className={`flex items-center gap-1 text-sm ${popularity >= 80 ? "text-green-400" : "text-yellow-400"}`}>
+                <div className={`flex items-center gap-1 text-sm p-0 m-0 ${popularity >= 80 ? "text-green-400" : "text-yellow-400"}`}>
                     <Award size={16} />
                     <span>Popularity: {popularity}</span>
                     {popularity >= 80 && <span title="Trending">🔥</span>}
