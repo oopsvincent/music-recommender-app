@@ -179,7 +179,7 @@ const MusicChatbot = () => {
                             : 'bg-white/95 text-gray-900 rounded-bl-none shadow-lg'
                             }`}>
                             <p>{message.content}</p>
-                            
+
                             {/* Analysis Data */}
                             {message.analysis && (
                                 <div className="mt-3 space-y-2">
@@ -238,7 +238,7 @@ const MusicChatbot = () => {
                                         <Music className="w-4 h-4 text-blue-500" />
                                         Recommended Songs ({message.songs.length})
                                     </p>
-                                    
+
                                     {/* Grid Layout for Track Cards */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-132 overflow-x-auto">
                                         {trackData.map((track, i) => (
@@ -323,6 +323,7 @@ const MusicChatbot = () => {
                                 <button
                                     key={i}
                                     onClick={() => handleSendMessage(s.text)}
+                                    disabled={isLoading}
                                     className="flex items-center gap-1 px-3 py-1 bg-white/10 text-white/80 rounded-full text-xs hover:bg-white/20 transition-colors transform hover:scale-105 active:scale-95"
                                 >
                                     {s.icon}

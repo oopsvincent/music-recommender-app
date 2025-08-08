@@ -12,7 +12,7 @@ export const AlbumCard = ({
   artist,
   trackURI,
 }) => {
-    console.log(artist);
+    // console.log(artist);
     
   const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
