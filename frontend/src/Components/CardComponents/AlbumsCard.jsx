@@ -12,6 +12,8 @@ export const AlbumCard = ({
   artist,
   trackURI,
 }) => {
+    console.log(artist);
+    
   const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
   const { showPlayer } = usePlayer();
@@ -55,7 +57,7 @@ const toggleSave = () => {
     const handleCardClick = (e) => {
         // Prevent conflict when clicking save button
         if (e.target.closest(".noskip")) return;
-        navigate(`/artist/${id}`);
+        navigate(`/album/${id}`);
     };
 
   const handlePlay = () => {
@@ -76,7 +78,7 @@ const toggleSave = () => {
       className="relative w-64 bg-gradient-to-br from-blue-900/80 to-gray/80 backdrop-blur-xl rounded-md overflow-hidden shadow-2xl hover:shadow-blue-500/10 transition-all duration-500"
     >
       {/* Album Cover */}
-      <div className="relative overflow-hidden rounded-xl p-5 ">
+      <div className="relative overflow-hidden rounded-xl p-5">
         <img
           src={url}
           alt={title}
@@ -109,6 +111,7 @@ const toggleSave = () => {
 
             {title}
           </h3>
+          <h4 className="truncate text-white">
 {Array.isArray(artist) &&
   artist.map((a, i) => (
     <span
@@ -120,6 +123,7 @@ const toggleSave = () => {
       {a.name}{i < artist.length - 1 && ', '}
     </span>
 ))}
+          </h4>
             <h2 className="text-sm text-gray-400">
                 album
             </h2>

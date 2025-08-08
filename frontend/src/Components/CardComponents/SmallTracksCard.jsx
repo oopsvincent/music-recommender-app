@@ -1,10 +1,17 @@
 import { PlayButton } from "./PlayButton";
 import { usePlayer } from "../../contexts/PlayerContext";
-import { MoreVertical, Bookmark } from "lucide-react";
+import { MoreVertical, Bookmark, EllipsisVertical, CirclePlay } from "lucide-react";
 import { faYoutube } from "@fortawesome/free-brands-svg-icons";
 import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+} from "../ui/dropdown-menu";
 
 export const AlbumTrackCard = ({
     title,
@@ -33,8 +40,7 @@ export const AlbumTrackCard = ({
     };
 
     const handleSave = () => {
-        console.log("Saved", title);
-        // Your save logic here
+        toggleSave();
     };
 
     // Close menu when clicking outside
@@ -60,7 +66,7 @@ export const AlbumTrackCard = ({
                 <div className="flex-shrink-0">
                     <PlayButton onPlay={handlePlayClick} />
                 </div>
-                
+
                 {/* Title & Artist - with proper overflow handling */}
                 <div className="flex flex-col gap-1 min-w-0 flex-1">
                     <h3
@@ -91,16 +97,16 @@ export const AlbumTrackCard = ({
             <div className="flex items-center gap-2 flex-shrink-0">
                 {/* Desktop Buttons */}
                 <div className="hidden sm:flex items-center gap-3">
-                    <img 
-                        src="/2024-spotify-logo-icon/Primary_Logo_Green_RGB.svg" 
-                        className="w-6 h-6 cursor-pointer hover:opacity-80 transition-opacity" 
+                    <img
+                        src="/2024-spotify-logo-icon/Primary_Logo_Green_RGB.svg"
+                        className="w-6 h-6 cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={() => handleClick(spoURL)}
                         alt="Spotify"
                     />
-                    <FontAwesomeIcon 
-                        icon={faYoutube} 
-                        className="text-2xl cursor-pointer text-red-500 hover:text-red-400 transition-colors" 
-                        onClick={() => handleClick(YTURL)} 
+                    <FontAwesomeIcon
+                        icon={faYoutube}
+                        className="text-2xl cursor-pointer text-red-500 hover:text-red-400 transition-colors"
+                        onClick={() => handleClick(YTURL)}
                     />
                 </div>
 
@@ -122,9 +128,9 @@ export const AlbumTrackCard = ({
                                     setMenuOpen(false);
                                 }}
                             >
-                                <img 
-                                    src="/2024-spotify-logo-icon/Primary_Logo_Green_RGB.svg" 
-                                    className="w-4 h-4" 
+                                <img
+                                    src="/2024-spotify-logo-icon/Primary_Logo_Green_RGB.svg"
+                                    className="w-4 h-4"
                                     alt="Spotify"
                                 />
                                 Open in Spotify
@@ -172,6 +178,45 @@ export const ArtistTrackCard = ({
     const [menuOpen, setMenuOpen] = useState(false);
     const navigate = useNavigate();
     const menuRef = useRef(null);
+        const [saved, setSaved] = useState(false);
+
+
+    // console.log(albumID);
+
+
+    useEffect(() => {
+        const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
+        const isSaved = savedSongs.some(
+            (album) => album.trackURI === trackURI
+        );
+        setSaved(isSaved);
+    }, [trackURI]);
+
+    function toggleSave() {
+        const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
+
+        if (saved) {
+            // REMOVE by trackURI
+            const updated = savedSongs.filter(song => song.trackURI !== trackURI);
+            localStorage.setItem("savedSongs", JSON.stringify(updated));
+            setSaved(false);
+        } else {
+            // ADD the song
+            const newSong = {
+                title,
+                artist,
+                spoURL,
+                image: url,
+                popularity,
+                explicit,
+                trackURI,
+                album,
+            };
+            savedSongs.push(newSong);
+            localStorage.setItem("savedSongs", JSON.stringify(savedSongs));
+            setSaved(true);
+        }
+    }
 
     const handlePlayClick = () => {
         if (trackURI && trackURI.startsWith("spotify:")) {
@@ -186,8 +231,7 @@ export const ArtistTrackCard = ({
     };
 
     const handleSave = () => {
-        console.log("Saved", title);
-        // Your save logic here
+        toggleSave();
     };
 
     // Close menu when clicking outside
@@ -208,7 +252,7 @@ export const ArtistTrackCard = ({
     }, [menuOpen]);
 
     return (
-        <div className="flex items-center justify-between px-3 sm:px-4 py-2 border border-gray-700 hover:bg-gray-800 transition-colors duration-300 rounded-xl w-full min-w-0">
+        <div className="flex items-center justify-between px-3 sm:px-4 py-2 border border-gray-700 hover:bg-gray-800 transition-colors duration-300 rounded-xl w-full min-w-0 relative">
             <div className="flex items-center gap-3 sm:gap-5 min-w-0 flex-1">
                 {/* Album Cover */}
                 <div className="flex-shrink-0 relative group">
@@ -224,13 +268,13 @@ export const ArtistTrackCard = ({
                         <PlayButton onPlay={handlePlayClick} size="small" />
                     </div>
                 </div>
-                
+
                 {/* Title & Album */}
                 <div className="flex flex-col gap-1 min-w-0 flex-1">
                     <h3
                         className="text-sm font-semibold text-white truncate cursor-pointer hover:underline leading-tight"
                         title={title}
-                        onClick={() => navigate(`/track/${trackID}`)}
+                        onClick={() => navigate(`/album/${album.id}`)}
                     >
                         {title}
                     </h3>
@@ -257,66 +301,52 @@ export const ArtistTrackCard = ({
             <div className="flex items-center gap-2 flex-shrink-0">
                 {/* Desktop Buttons */}
                 <div className="hidden sm:flex items-center gap-3">
-                    <img 
-                        src="/2024-spotify-logo-icon/Primary_Logo_Green_RGB.svg" 
-                        className="w-6 h-6 cursor-pointer hover:opacity-80 transition-opacity" 
+                    <img
+                        src="/2024-spotify-logo-icon/Primary_Logo_Green_RGB.svg"
+                        className="w-6 h-6 cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={() => handleClick(spoURL)}
                         alt="Spotify"
                     />
-                    <FontAwesomeIcon 
-                        icon={faYoutube} 
-                        className="text-2xl cursor-pointer text-red-500 hover:text-red-400 transition-colors" 
-                        onClick={() => handleClick(YTURL)} 
+                    <FontAwesomeIcon
+                        icon={faYoutube}
+                        className="text-2xl cursor-pointer text-red-500 hover:text-red-400 transition-colors"
+                        onClick={() => handleClick(YTURL)}
                     />
                 </div>
 
                 {/* Mobile Menu Toggle */}
-                <div className="sm:hidden relative" ref={menuRef}>
-                    <MoreVertical
-                        size={20}
-                        className="cursor-pointer text-white hover:text-gray-300 transition-colors"
-                        onClick={() => setMenuOpen((prev) => !prev)}
-                    />
+                <div className="flex sm:hidden justify-end items-start z-30 absolute bottom-0 right-1">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="text-white p-2 rounded-md hover:bg-white/10 transition">
+                                <EllipsisVertical />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="bg-black text-white min-w-[8rem] rounded-md p-1 z-200">
+                            <DropdownMenuItem
+                                onSelect={handlePlayClick}
+                                className="cursor-pointer px-3 py-2 hover:bg-white/10"
+                            >
+                                <CirclePlay className="mr-2" size={16} /> Play
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="my-1 bg-gray-700" />
+                            <DropdownMenuItem
+                                onSelect={handleSave}
+                                className="cursor-pointer px-3 py-2 hover:bg-white/10"
+                            >
+                                {saved ? (
+                                    <>
+                                        <BookmarkCheck className="mr-2" size={16} /> Saved
+                                    </>
+                                ) : (
+                                    <>
+                                        <Bookmark className="mr-2" size={16} /> Save
+                                    </>
+                                )}
+                            </DropdownMenuItem>
 
-                    {/* Dropdown Menu */}
-                    {menuOpen && (
-                        <div className="absolute right-0 top-8 z-50 bg-gray-900 border border-gray-700 rounded-md shadow-lg w-44 p-2 space-y-1 text-sm">
-                            <div
-                                className="flex items-center gap-3 text-white hover:bg-gray-800 p-2 rounded cursor-pointer transition-colors"
-                                onClick={() => {
-                                    handleClick(spoURL);
-                                    setMenuOpen(false);
-                                }}
-                            >
-                                <img 
-                                    src="/2024-spotify-logo-icon/Primary_Logo_Green_RGB.svg" 
-                                    className="w-4 h-4" 
-                                    alt="Spotify"
-                                />
-                                Open in Spotify
-                            </div>
-                            <div
-                                className="flex items-center gap-3 text-white hover:bg-gray-800 p-2 rounded cursor-pointer transition-colors"
-                                onClick={() => {
-                                    handleClick(YTURL);
-                                    setMenuOpen(false);
-                                }}
-                            >
-                                <FontAwesomeIcon icon={faYoutube} className="w-4 h-4 text-red-500" />
-                                Open on YouTube
-                            </div>
-                            <div
-                                className="flex items-center gap-3 text-white hover:bg-gray-800 p-2 rounded cursor-pointer transition-colors"
-                                onClick={() => {
-                                    handleSave();
-                                    setMenuOpen(false);
-                                }}
-                            >
-                                <Bookmark size={16} />
-                                Save Track
-                            </div>
-                        </div>
-                    )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </div>
         </div>
@@ -354,8 +384,7 @@ export const PlaylistTrackCard = ({
     };
 
     const handleSave = () => {
-        console.log("Saved", title);
-        // Your save logic here
+        toggleSave();
     };
 
     const handleRemoveFromPlaylist = () => {
@@ -397,7 +426,7 @@ export const PlaylistTrackCard = ({
                         <PlayButton onPlay={handlePlayClick} size="small" />
                     </div>
                 </div>
-                
+
                 {/* Title & Artist */}
                 <div className="flex flex-col gap-1 min-w-0 flex-1">
                     <h3
@@ -446,16 +475,16 @@ export const PlaylistTrackCard = ({
             <div className="flex items-center gap-2 flex-shrink-0">
                 {/* Desktop Buttons */}
                 <div className="hidden sm:flex items-center gap-3">
-                    <img 
-                        src="/2024-spotify-logo-icon/Primary_Logo_Green_RGB.svg" 
-                        className="w-6 h-6 cursor-pointer hover:opacity-80 transition-opacity" 
+                    <img
+                        src="/2024-spotify-logo-icon/Primary_Logo_Green_RGB.svg"
+                        className="w-6 h-6 cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={() => handleClick(spoURL)}
                         alt="Spotify"
                     />
-                    <FontAwesomeIcon 
-                        icon={faYoutube} 
-                        className="text-2xl cursor-pointer text-red-500 hover:text-red-400 transition-colors" 
-                        onClick={() => handleClick(YTURL)} 
+                    <FontAwesomeIcon
+                        icon={faYoutube}
+                        className="text-2xl cursor-pointer text-red-500 hover:text-red-400 transition-colors"
+                        onClick={() => handleClick(YTURL)}
                     />
                 </div>
 
@@ -477,9 +506,9 @@ export const PlaylistTrackCard = ({
                                     setMenuOpen(false);
                                 }}
                             >
-                                <img 
-                                    src="/2024-spotify-logo-icon/Primary_Logo_Green_RGB.svg" 
-                                    className="w-4 h-4" 
+                                <img
+                                    src="/2024-spotify-logo-icon/Primary_Logo_Green_RGB.svg"
+                                    className="w-4 h-4"
                                     alt="Spotify"
                                 />
                                 Open in Spotify
@@ -553,8 +582,7 @@ export const SmallTrackCardWithCover = ({
     };
 
     const handleSave = () => {
-        console.log("Saved", title);
-        // Your save logic here
+        toggleSave();
     };
 
     // Close menu when clicking outside
@@ -591,7 +619,7 @@ export const SmallTrackCardWithCover = ({
                         <PlayButton onPlay={handlePlayClick} size="small" />
                     </div>
                 </div>
-                
+
                 {/* Title & Artist/Subtitle */}
                 <div className="flex flex-col gap-1 min-w-0 flex-1">
                     <h3
@@ -627,18 +655,18 @@ export const SmallTrackCardWithCover = ({
                 {/* Desktop Buttons */}
                 <div className="hidden sm:flex items-center gap-3">
                     {spoURL && (
-                        <img 
-                            src="/2024-spotify-logo-icon/Primary_Logo_Green_RGB.svg" 
-                            className="w-6 h-6 cursor-pointer hover:opacity-80 transition-opacity" 
+                        <img
+                            src="/2024-spotify-logo-icon/Primary_Logo_Green_RGB.svg"
+                            className="w-6 h-6 cursor-pointer hover:opacity-80 transition-opacity"
                             onClick={() => handleClick(spoURL)}
                             alt="Spotify"
                         />
                     )}
                     {YTURL && (
-                        <FontAwesomeIcon 
-                            icon={faYoutube} 
-                            className="text-2xl cursor-pointer text-red-500 hover:text-red-400 transition-colors" 
-                            onClick={() => handleClick(YTURL)} 
+                        <FontAwesomeIcon
+                            icon={faYoutube}
+                            className="text-2xl cursor-pointer text-red-500 hover:text-red-400 transition-colors"
+                            onClick={() => handleClick(YTURL)}
                         />
                     )}
                 </div>
@@ -662,9 +690,9 @@ export const SmallTrackCardWithCover = ({
                                         setMenuOpen(false);
                                     }}
                                 >
-                                    <img 
-                                        src="/2024-spotify-logo-icon/Primary_Logo_Green_RGB.svg" 
-                                        className="w-4 h-4" 
+                                    <img
+                                        src="/2024-spotify-logo-icon/Primary_Logo_Green_RGB.svg"
+                                        className="w-4 h-4"
                                         alt="Spotify"
                                     />
                                     Open in Spotify

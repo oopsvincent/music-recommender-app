@@ -25,7 +25,9 @@ const PrivacyPolicy = ({ onBack }) => {
         <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl p-8 space-y-6">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Privacy Policy</h1>
-            <p className="text-gray-600">Last Updated: {new Date().toLocaleDateString()}</p>
+            <p className="text-gray-600">
+                Last Updated: {new Date().toLocaleDateString()}
+            </p>
           </div>
 
           <section className="space-y-4">
@@ -233,9 +235,9 @@ const PrivacyPolicy = ({ onBack }) => {
                 For any questions, concerns, or requests regarding this Privacy Policy or our data practices:
               </p>
               <div className="space-y-1 text-blue-800">
-                <p><strong>Privacy Email:</strong> [privacy@yourdomain.com]</p>
-                <p><strong>General Contact:</strong> [contact@yourdomain.com]</p>
-                <p><strong>Website:</strong> [your-website.com/privacy]</p>
+                <p><strong>Privacy Email:</strong> soumocollage@gmail.com</p>
+                <p><strong>General Contact:</strong> seinheim@gmail.com</p>
+                {/* <p><strong>Website:</strong> [your-website.com/privacy]</p> */}
                 <p><strong>Response Time:</strong> We aim to respond within 72 hours</p>
               </div>
             </div>

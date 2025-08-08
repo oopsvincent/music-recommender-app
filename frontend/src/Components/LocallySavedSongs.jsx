@@ -49,7 +49,7 @@ const LocallySavedSongs = ({ initialSection = "songs" }) => {
             count: artists.length,
             data: artists 
         }
-    ];
+    ];  
 
     // Load data from localStorage
     const loadLocalData = () => {
@@ -317,7 +317,7 @@ const LocallySavedSongs = ({ initialSection = "songs" }) => {
                         key={`${artist.id || index}`}
                         followers={artist.followers}
                         url={artist.image}
-                        artist={artist.artist}
+                        artist={artist.title}
                         YTURL={artist.YTURL}
                         spoURL={artist.spoURL}
                         id={artist.id}
@@ -375,7 +375,9 @@ const LocallySavedSongs = ({ initialSection = "songs" }) => {
             )}
 
             {/* Content Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"> */}
+            <div className='flex justify-center items-center flex-wrap gap-2'>
+
                 {renderContent()}
             </div>
         </div>

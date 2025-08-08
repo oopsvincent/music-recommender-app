@@ -31,7 +31,7 @@ export const TrackCard = ({
     const [saved, setSaved] = useState(false);
 
 
-    // console.log(artist);
+    // console.log(albumID);
 
 
     useEffect(() => {
@@ -60,6 +60,7 @@ export const TrackCard = ({
                 popularity,
                 explicit,
                 trackURI,
+                albumID,
             };
             savedSongs.push(newSong);
             localStorage.setItem("savedSongs", JSON.stringify(savedSongs));
