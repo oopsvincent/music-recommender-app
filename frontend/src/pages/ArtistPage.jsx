@@ -175,7 +175,7 @@ export default function ArtistPage() {
                 <h2 className="text-3xl font-bold mb-4">Top Tracks</h2>
                 <div className="flex flex-row flex-wrap justify-center gap-5">
                     {topTracks.map((track, index) => (
-                        <ArtistTrackCard
+                        <TrackCard
                             key={index}
                             url={track.album.images[0]?.url}
                             title={track.name}

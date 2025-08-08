@@ -16,7 +16,7 @@ export const ArtistCard = ({
     id,
     URI,
 }) => {
-    // console.log(artist);
+    console.log(artist);
 
     const navigate = useNavigate();
     const { showPlayer } = usePlayer();

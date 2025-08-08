@@ -38,7 +38,7 @@ export default function AlbumPage() {
             const newAlbum = {
                 id: album.id,
                 title: album.name,
-                artist: album.artists.map(a => a.name).join(", "),
+                artist: album.artists,
                 image: album.images[0]?.url,
                 spoURL: album.external_urls.spotify,
                 release_date: album.release_date,

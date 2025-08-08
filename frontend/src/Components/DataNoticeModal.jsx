@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const DataNoticeModal = ({ isOpen: externalOpen = false, onClose }) => {
+    const navigate = useNavigate();
   const [acknowledged, setAcknowledged] = useState(() =>
     localStorage.getItem("dataNoticeAcknowledged") === "true"
   );
@@ -58,6 +60,7 @@ const DataNoticeModal = ({ isOpen: externalOpen = false, onClose }) => {
             >
               Understood
             </motion.button>
+            <p className="text-white py-2 text-sm">By clicking the <strong>Understood</strong> button, you agree to our app's <span className="underline cursor-pointer" onClick={() => navigate("/terms")}>Terms and Condidtions</span> & <span className="underline cursor-pointer" onClick={() => navigate("/privacy")}>Privacy Policy</span></p>
           </motion.div>
         </motion.div>
       )}

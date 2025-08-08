@@ -28,7 +28,7 @@ export default function Redirect() {
         name: "OopsVincent Discord",
       },
       "portfolio": {
-        url: "https://oopsvincent.dev",
+        url: "https://oopsvincent.vercel.app",
         newTab: false,
         name: "Vincent’s Portfolio",
       },
