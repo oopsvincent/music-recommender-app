@@ -78,9 +78,31 @@ function HomePage({ userName }) {
 
             {chipKey && <RandomTrackButton categoryBaseUrl={`https://music-recommender-api.onrender.com/songs/${chipKey}`} />}
 
-            <div className="flex flex-row flex-wrap justify-center mb-5 gap-5">
+            <div className="hidden sm:flex flex-row flex-wrap justify-center mb-5 gap-5">
                 {loading ? Array.from({ length: 20 }).map((_, i) => (
                     <Skeleton key={i} height={450} width={270} className="m-2 glassmorpho rounded-2xl" />
+                )) : trackData.map((track, index) => {
+                    const isArtist = track.type === 'artist';
+                    return (
+                                <TrackCard
+                                    key={index}
+                                    followers={track.followers}
+                                    url={track.url}
+                                    title={track.title}
+                                    artist={track.artists.map((artist) => ({ name: artist.name, id: artist.id }))}
+                                    spoURL={track.spoURL}
+                                    YTURL={fetchYouTubeData(track.title + " " + track.artists)}
+                                    popularity={track.popularity}
+                                    explicit={track.explicit}
+                                    trackURI={track.trackURI}
+                                    albumID={track.albumID}
+                                />
+                    );
+                })}
+            </div>
+            <div className="flex sm:hidden flex-row flex-wrap justify-center mb-5 gap-5">
+                {loading ? Array.from({ length: 20 }).map((_, i) => (
+                    <Skeleton key={i} height={400} width={190} className="m-1 glassmorpho rounded-2xl" />
                 )) : trackData.map((track, index) => {
                     const isArtist = track.type === 'artist';
                     return (
