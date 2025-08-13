@@ -27,7 +27,7 @@ export default function CreditsPage() {
       <div className="w-full max-w-2xl space-y-6 text-sm md:text-base">
         <section className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
           <h2 className="text-xl font-semibold text-green-400 mb-1">Lead Developer & Designer</h2>
-          <p><span className="font-semibold text-white">Farhan Ali rReza</span> — Frontend, UI/UX, partial backend, project vision & architecture.</p>
+          <p><span className="font-semibold text-white">Farhan Ali Reza</span> — Frontend, UI/UX, partial backend, project vision & architecture.</p>
         </section>
 
         <section className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10">
