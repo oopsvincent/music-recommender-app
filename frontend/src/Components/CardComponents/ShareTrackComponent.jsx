@@ -30,7 +30,7 @@ export const ShareTrackComponent = ({
     const [copied, setCopied] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
 
-    const shareUrl = `https://localhost:5173/track/${trackId}`;
+    const shareUrl = `https://music-recommender-app.vercel.app/track/${trackId}`;
 
     // Generate shareable image
     const generateShareImage = async () => {
