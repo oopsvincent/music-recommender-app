@@ -54,6 +54,7 @@ async function fetchSpotifyData(title, token) {
         //   prev: prevResults,
           trackURI: track.uri,
           albumID: track.album.id,
+          trackId: track.id,
         };
 }
 
@@ -111,6 +112,7 @@ async function fetchSpotifySearchResults(
           explicit: item.explicit,
           trackURI: item.uri,
           albumID: item.album.id,
+          trackId: item.id,
         };
       } else if (type === "artist") {
         return {

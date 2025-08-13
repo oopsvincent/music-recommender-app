@@ -84,19 +84,20 @@ function HomePage({ userName }) {
                 )) : trackData.map((track, index) => {
                     const isArtist = track.type === 'artist';
                     return (
-                                <TrackCard
-                                    key={index}
-                                    followers={track.followers}
-                                    url={track.url}
-                                    title={track.title}
-                                    artist={track.artists.map((artist) => ({ name: artist.name, id: artist.id }))}
-                                    spoURL={track.spoURL}
-                                    YTURL={fetchYouTubeData(track.title + " " + track.artists)}
-                                    popularity={track.popularity}
-                                    explicit={track.explicit}
-                                    trackURI={track.trackURI}
-                                    albumID={track.albumID}
-                                />
+                        <TrackCard
+                            key={index}
+                            followers={track.followers}
+                            url={track.url}
+                            title={track.title}
+                            artist={track.artists.map((artist) => ({ name: artist.name, id: artist.id }))}
+                            spoURL={track.spoURL}
+                            YTURL={fetchYouTubeData(track.title + " " + track.artists)}
+                            popularity={track.popularity}
+                            explicit={track.explicit}
+                            trackURI={track.trackURI}
+                            albumID={track.albumID}
+                            trackId={track.trackId}
+                        />
                     );
                 })}
             </div>
@@ -106,19 +107,20 @@ function HomePage({ userName }) {
                 )) : trackData.map((track, index) => {
                     const isArtist = track.type === 'artist';
                     return (
-                                <TrackCard
-                                    key={index}
-                                    followers={track.followers}
-                                    url={track.url}
-                                    title={track.title}
-                                    artist={track.artists.map((artist) => ({ name: artist.name, id: artist.id }))}
-                                    spoURL={track.spoURL}
-                                    YTURL={fetchYouTubeData(track.title + " " + track.artists)}
-                                    popularity={track.popularity}
-                                    explicit={track.explicit}
-                                    trackURI={track.trackURI}
-                                    albumID={track.albumID}
-                                />
+                        <TrackCard
+                            key={index}
+                            followers={track.followers}
+                            url={track.url}
+                            title={track.title}
+                            artist={track.artists.map((artist) => ({ name: artist.name, id: artist.id }))}
+                            spoURL={track.spoURL}
+                            YTURL={fetchYouTubeData(track.title + " " + track.artists)}
+                            popularity={track.popularity}
+                            explicit={track.explicit}
+                            trackURI={track.trackURI}
+                            albumID={track.albumID}
+                            trackId={track.trackId}
+                        />
                     );
                 })}
             </div>

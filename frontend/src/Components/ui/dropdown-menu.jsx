@@ -6,11 +6,15 @@ export const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 
 export const DropdownMenuContent = React.forwardRef(
   ({ className = "", ...props }, ref) => (
-    <DropdownMenuPrimitive.Content
-      ref={ref}
-      className={`z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-black shadow-md animate-in fade-in-0 slide-in-from-top-2 ${className}`}
-      {...props}
-    />
+    <DropdownMenuPrimitive.Portal>
+      <DropdownMenuPrimitive.Content
+        ref={ref}
+        className={`z-[9999] min-w-[8rem] overflow-hidden rounded-xl border border-white/20 bg-black/95 backdrop-blur-lg p-2 text-white shadow-2xl shadow-black/50 animate-in fade-in-0 slide-in-from-top-2 ${className}`}
+        sideOffset={8}
+        alignOffset={-4}
+        {...props}
+      />
+    </DropdownMenuPrimitive.Portal>
   )
 );
 DropdownMenuContent.displayName = "DropdownMenuContent";
@@ -19,7 +23,7 @@ export const DropdownMenuItem = React.forwardRef(
   ({ className = "", ...props }, ref) => (
     <DropdownMenuPrimitive.Item
       ref={ref}
-      className={`cursor-default select-none rounded-sm px-2 py-1.5 text-sm text-gray-700 outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100 z-50 ${className}`}
+      className={`cursor-pointer select-none rounded-lg px-3 py-2.5 text-sm text-white outline-none transition-all duration-200 hover:bg-white/10 focus:bg-white/10 active:bg-white/20 active:scale-95 z-[9999] flex items-center gap-2 ${className}`}
       {...props}
     />
   )
@@ -30,7 +34,7 @@ export const DropdownMenuSeparator = React.forwardRef(
   ({ className = "", ...props }, ref) => (
     <DropdownMenuPrimitive.Separator
       ref={ref}
-      className={`-mx-1 my-1 h-px bg-gray-200 ${className}`}
+      className={`-mx-1 my-2 h-px bg-white/20 ${className}`}
       {...props}
     />
   )
