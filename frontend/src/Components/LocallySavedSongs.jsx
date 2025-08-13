@@ -21,41 +21,41 @@ const LocallySavedSongs = ({ initialSection = "songs" }) => {
 
     // Section configuration
     const sections = [
-        { 
-            key: "songs", 
-            label: "Songs", 
-            icon: Music, 
+        {
+            key: "songs",
+            label: "Songs",
+            icon: Music,
             count: songs.length,
-            data: songs 
+            data: songs
         },
-        { 
-            key: "albums", 
-            label: "Albums", 
-            icon: Album, 
+        {
+            key: "albums",
+            label: "Albums",
+            icon: Album,
             count: albums.length,
-            data: albums 
+            data: albums
         },
-        { 
-            key: "playlists", 
-            label: "Playlists", 
-            icon: ListMusic, 
+        {
+            key: "playlists",
+            label: "Playlists",
+            icon: ListMusic,
             count: playlists.length,
-            data: playlists 
+            data: playlists
         },
-        { 
-            key: "artists", 
-            label: "Artists", 
-            icon: Users, 
+        {
+            key: "artists",
+            label: "Artists",
+            icon: Users,
             count: artists.length,
-            data: artists 
+            data: artists
         }
-    ];  
+    ];
 
     // Load data from localStorage
     const loadLocalData = () => {
         setLoading(true);
         setError(null);
-        
+
         try {
             const savedSongs = JSON.parse(localStorage.getItem("savedSongs")) || [];
             const savedAlbums = JSON.parse(localStorage.getItem("savedAlbums")) || [];
@@ -92,11 +92,11 @@ const LocallySavedSongs = ({ initialSection = "songs" }) => {
             const query = searchQuery.toLowerCase();
             data = data.filter(item => {
                 const title = (item.title || item.name || '').toLowerCase();
-                const artist = Array.isArray(item.artist) 
+                const artist = Array.isArray(item.artist)
                     ? item.artist.join(' ').toLowerCase()
                     : (item.artist || '').toLowerCase();
                 const owner = (item.owner || '').toLowerCase();
-                
+
                 return title.includes(query) || artist.includes(query) || owner.includes(query);
             });
         }
@@ -133,20 +133,18 @@ const LocallySavedSongs = ({ initialSection = "songs" }) => {
                 <button
                     key={key}
                     onClick={() => handleSectionChange(key)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm whitespace-nowrap transition-all duration-200 ${
-                        section === key
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm whitespace-nowrap transition-all duration-200 ${section === key
                             ? 'bg-green-500 text-black shadow-lg'
                             : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50 hover:text-white'
-                    }`}
+                        }`}
                 >
                     <Icon className="w-4 h-4" />
                     {label}
                     {count > 0 && (
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
-                            section === key 
-                                ? 'bg-black/20 text-black' 
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${section === key
+                                ? 'bg-black/20 text-black'
                                 : 'bg-gray-600 text-gray-300'
-                        }`}>
+                            }`}>
                             {count}
                         </span>
                     )}
@@ -237,14 +235,14 @@ const LocallySavedSongs = ({ initialSection = "songs" }) => {
         if (data.length === 0) {
             const currentSection = sections.find(s => s.key === section);
             const hasOriginalData = currentSection && currentSection.count > 0;
-            
+
             return (
                 <div className="text-center py-16">
                     <div className="text-gray-400 text-lg mb-2">
                         {hasOriginalData && searchQuery ? 'No matching results' : `No saved ${section}`}
                     </div>
                     <p className="text-gray-500 text-sm">
-                        {hasOriginalData && searchQuery 
+                        {hasOriginalData && searchQuery
                             ? 'Try adjusting your search terms'
                             : `Start saving ${section} to see them here`
                         }
@@ -276,6 +274,7 @@ const LocallySavedSongs = ({ initialSection = "songs" }) => {
                         explicit={track.explicit}
                         trackURI={track.trackURI}
                         albumID={track.albumID}
+                        trackId={track.trackId}
                     />
                 ));
 
@@ -348,7 +347,7 @@ const LocallySavedSongs = ({ initialSection = "songs" }) => {
                         {totalCount > 0 ? `${totalCount} items saved offline` : 'No items saved yet'}
                     </p>
                 </div>
-                
+
                 {totalCount > 0 && (
                     <button
                         onClick={loadLocalData}

@@ -152,7 +152,7 @@ const MusicChatbot = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex flex-col pb-16">
             {/* Header */}
-            <div className="bg-black/60 backdrop-blur-md border-b border-white/10 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+            <div className="bg-black/60 backdrop-blur-md border-b border-white/10 px-4 py-3 flex items-center justify-between sticky top-0 lg:top-16 z-40">
                 <div className="flex items-center gap-2">
                     <Headphones className="w-5 h-5 text-white/80" />
                     <div>
@@ -171,7 +171,7 @@ const MusicChatbot = () => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-3 py-4 space-y-4 pb-32">
+            <div className="flex-1 overflow-y-auto px-3 py-4 space-y-4 pb-32 pt-18">
                 {messages.map((message, index) => (
                     <div key={index} className={`text-sm ${message.type === 'user' ? 'text-right' : 'text-left'}`}>
                         <div className={`inline-block px-4 py-2 rounded-lg max-w-[85%] ${message.type === 'user'
@@ -312,7 +312,7 @@ const MusicChatbot = () => {
             </div>
 
             {/* Sticky Bottom Container */}
-            <div className="fixed bottom-16 left-0 right-0 bg-black/60 backdrop-blur-md border-t border-white/10">
+            <div className="fixed bottom-16 lg:bottom-0 left-0 right-0 bg-black/60 backdrop-blur-md border-t border-white/10">
                 {/* Quick Suggestions */}
                 <div className={`transition-all duration-300 ease-in-out overflow-hidden ${showSuggestions ? 'max-h-auto opacity-100' : 'max-h-0 opacity-0'
                     }`}>
