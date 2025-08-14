@@ -1,6 +1,6 @@
 // AlbumPage.jsx
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { getSpotifyToken } from "../hooks/useSpotify";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -10,8 +10,10 @@ import { TrackCard } from "../Components/CardComponents/TracksCard";
 import { usePlayer } from "../contexts/PlayerContext";
 import { AlbumTrackCard } from "../Components/CardComponents/SmallTracksCard";
 import { Play } from "lucide-react";
+import { ShareTrackComponent } from "../Components/CardComponents/ShareTrackComponent";
 
 export default function AlbumPage() {
+    const navigate = useNavigate();
     const { id } = useParams();
     const [token, setToken] = useState("");
     const [album, setAlbum] = useState(null);
@@ -88,11 +90,16 @@ export default function AlbumPage() {
                 <Link to="/" className="flex items-center gap-2 text-gray-300 hover:text-white text-sm">
                     <ArrowLeft size={18} /> Back To Home
                 </Link>
-                {saved ? (
-                    <BookmarkCheck stroke="white" fill="green" onClick={toggleSave} className="cursor-pointer" />
-                ) : (
-                    <Bookmark stroke="white" onClick={toggleSave} className="cursor-pointer" />
-                )}
+                <div className="flex justify-center items-center gap-2">
+                    <div>
+                        <ShareTrackComponent trackId={album.id} artist={album.artists} explicit={album.explicit} title={album.name} popularity={album.popularity} url={album.images[0]?.url} type="album" />
+                    </div>
+                    {saved ? (
+                        <BookmarkCheck stroke="white" fill="green" onClick={toggleSave} className="cursor-pointer" />
+                    ) : (
+                        <Bookmark stroke="white" onClick={toggleSave} className="cursor-pointer" />
+                    )}
+                </div>
             </div>
 
             {/* Album Header */}
@@ -102,7 +109,16 @@ export default function AlbumPage() {
                 <div>
                     <h1 className="text-5xl font-extrabold mb-2">{album.name}</h1>
                     <p className="text-lg text-gray-300">
-                        {album.artists.map(a => a.name).join(", ")} • {album.release_date}
+                        {album.artists.map((a, i) => (
+                            <span
+                                key={a.id}
+                                className="cursor-pointer hover:underline hover:text-white transition-colors duration-200 active:underline"
+                                title={a.name}
+                                onClick={() => navigate(`/artist/${a.id}`)}
+                            >
+                                {a.name}{i < album.artists.length - 1 && ', '}
+                            </span>
+                        ))} • {album.release_date}
                     </p>
                     <p className="text-sm text-gray-400 mt-1">{album.total_tracks} tracks</p>
                     <div className="flex flex-col md:flex-row justify-center mt-5">

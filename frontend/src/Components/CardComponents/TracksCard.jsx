@@ -26,7 +26,7 @@ export const TrackCard = ({
     albumID,
     trackId, // Add this prop for the share component
 }) => {
-    console.log(trackURI);
+    // console.log(trackURI);
     
 
     const navigate = useNavigate();
@@ -223,7 +223,7 @@ export const TrackCard = ({
 
     {/* Explicit Badge - positioned over the image */}
     {explicit && (
-        <div className="absolute top-2 right-2 z-10">
+        <div className="absolute top-2 right-2 sm:top-20 sm:right-8 z-10">
             <ExplicitBadge />
         </div>
     )}
