@@ -5,6 +5,7 @@ import { SpotifyButton, YouTubeButton } from "../MusicButtons";
 import { useNavigate } from "react-router-dom";
 import { usePlayer } from "../../contexts/PlayerContext";
 import { PlayButton } from "./PlayButton";
+import { ShareArtistComponent } from "../ArtistShareComponent";
 
 export const ArtistCard = ({
     url,
@@ -32,30 +33,30 @@ export const ArtistCard = ({
 
 
 
-const toggleSave = () => {
-    const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
+    const toggleSave = () => {
+        const savedArtists = JSON.parse(localStorage.getItem("savedArtists")) || [];
 
-    if (saved) {
-        const updated = savedArtists.filter((a) => a.id !== id);
-        localStorage.setItem("savedArtists", JSON.stringify(updated));
-        setSaved(false);
-    } else {
-        const newArtist = {
-            id,
-            artist,   // string like "Adele"
-            spoURL,
-            YTURL,
-            image: url,
-            followers,
-            popularity,
-            uri: URI,
-        };
+        if (saved) {
+            const updated = savedArtists.filter((a) => a.id !== id);
+            localStorage.setItem("savedArtists", JSON.stringify(updated));
+            setSaved(false);
+        } else {
+            const newArtist = {
+                id,
+                artist,   // string like "Adele"
+                spoURL,
+                YTURL,
+                image: url,
+                followers,
+                popularity,
+                uri: URI,
+            };
 
-        savedArtists.push(newArtist);
-        localStorage.setItem("savedArtists", JSON.stringify(savedArtists));
-        setSaved(true);
-    }
-};
+            savedArtists.push(newArtist);
+            localStorage.setItem("savedArtists", JSON.stringify(savedArtists));
+            setSaved(true);
+        }
+    };
 
 
     const handleSave = () => {
@@ -90,12 +91,25 @@ const toggleSave = () => {
             className="relative w-72 bg-gradient-to-br from-purple-900/80 to-black/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl hover:shadow-purple-500/10 transition-all duration-500"
         >
             {/* Save Icon */}
-            <div className="absolute top-4 right-4 z-10 noskip cursor-pointer">
-                {saved ? (
-                    <BookmarkCheck stroke="white" fill="green" onClick={handleSave} />
-                ) : (
-                    <Bookmark stroke="white" onClick={handleSave} />
-                )}
+            <div className="absolute right-2 top-2 flex justify-between items-center mb-6 noskip">
+
+                <div className="flex items-center gap-2 noskip">
+                    {/* Add Share Component */}
+                    <ShareArtistComponent
+                        artistId={id}
+                        name={artist}
+                        imageUrl={url}
+                        followers={followers}
+                        popularity={popularity}
+                        genres={artist.genres}
+                    />
+
+                    {saved ? (
+                        <BookmarkCheck stroke="white" fill="green" onClick={handleSave} className="cursor-pointer" />
+                    ) : (
+                        <Bookmark stroke="white" onClick={handleSave} className="cursor-pointer" />
+                    )}
+                </div>
             </div>
 
             <div className="absolute top-5 left-5 flex gap-2 items-center z-10 noskip">

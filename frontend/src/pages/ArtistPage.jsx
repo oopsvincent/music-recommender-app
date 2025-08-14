@@ -10,6 +10,7 @@ import { TrackCard } from "../Components/CardComponents/TracksCard";
 import { AlbumCard } from "../Components/CardComponents/AlbumsCard";
 import { usePlayer } from "../contexts/PlayerContext";
 import { ArtistTrackCard } from "../Components/CardComponents/SmallTracksCard";
+import { ShareArtistComponent } from "../Components/ArtistShareComponent";
 
 export default function ArtistPage() {
     const { id } = useParams();
@@ -120,11 +121,24 @@ export default function ArtistPage() {
                 <Link to="/" className="flex items-center gap-2 text-gray-300 hover:text-white text-sm">
                     <ArrowLeft size={18} /> Back to Home
                 </Link>
-                {saved ? (
-                    <BookmarkCheck stroke="white" fill="green" onClick={handleSave} className="cursor-pointer" />
-                ) : (
-                    <Bookmark stroke="white" onClick={handleSave} className="cursor-pointer" />
-                )}
+
+                <div className="flex items-center gap-2">
+                    {/* Add Share Component */}
+                    <ShareArtistComponent
+                        artistId={artist.id}
+                        name={artist.name}
+                        imageUrl={artist.images[0]?.url}
+                        followers={artist.followers.total}
+                        popularity={artist.popularity}
+                        genres={artist.genres}
+                    />
+
+                    {saved ? (
+                        <BookmarkCheck stroke="white" fill="green" onClick={handleSave} className="cursor-pointer" />
+                    ) : (
+                        <Bookmark stroke="white" onClick={handleSave} className="cursor-pointer" />
+                    )}
+                </div>
             </div>
 
             {/* Artist Header */}
@@ -184,7 +198,6 @@ export default function ArtistPage() {
                                 id: artist.id
                             }))}
                             spoURL={track.external_urls.spotify}
-                            YTURL={""} // You can plug this from YouTube API if needed
                             popularity={track.popularity}
                             explicit={track.explicit}
                             trackURI={track.uri}
