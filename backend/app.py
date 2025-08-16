@@ -26,7 +26,7 @@ app = Flask(__name__)
 CORS(
     app,
     origins=[
-        "https://music-recommender-app.vercel.app",
+        "https://grooveestrella.vercel.app/",
         "http://localhost:5173",
         "http://192.168.29.8:5173/",
     ],
