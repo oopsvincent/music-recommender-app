@@ -392,7 +392,7 @@ const cycleRepeatMode = async () => {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 30 }}
                     transition={{ duration: 0.3, ease: 'easeOut' }}
-                    className="fixed inset-0 sm:bottom-20 sm:left-1/2 sm:-translate-x-1/2 sm:w-[95%] sm:max-w-md backdrop-blur-md bg-[#121212]/90 border border-white/20 rounded-none sm:rounded-3xl shadow-xl z-[150] scrollb-none"
+                    className="fixed inset-0 bottom-20 sm:bottom-5 sm:left-1/2 sm:-translate-x-1/2 sm:w-[95%] sm:max-w-md backdrop-blur-md bg-[#121212]/90 border border-white/20 rounded-none sm:rounded-3xl shadow-xl z-[450] scrollb-none"
                 >
                     <div className="p-5 pt-6 pb-10 flex flex-col items-center w-full space-y-5 overflow-y-auto max-h-[90vh] scrollb-none">
                         {/* Header */}
@@ -641,7 +641,7 @@ const cycleRepeatMode = async () => {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 30 }}
                     transition={{ duration: 0.3, ease: 'easeOut' }}
-                    className="fixed bottom-20 left-1/2 -translate-x-1/2 backdrop-blur-md bg-[#121212]/90 border border-white/20 rounded-3xl shadow-lg max-w-md w-[95%] z-[100] px-4 py-3 flex items-center justify-between"
+                    className="fixed bottom-20 sm:bottom-5 left-1/2 -translate-x-1/2 backdrop-blur-md bg-[#121212]/90 border border-white/20 rounded-3xl shadow-lg max-w-md w-[95%] z-[100] px-4 py-3 flex items-center justify-between"
                 >
                     {currentTrack && (
                         <>
