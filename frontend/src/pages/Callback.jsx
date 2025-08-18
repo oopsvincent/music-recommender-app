@@ -49,7 +49,7 @@ export default function Callback() {
         // Step 3: Set dummy token to indicate 'authenticated'
         setAuthTokens({ sessionActive: true });  // We're just marking login status
 
-        navigate("/account");
+        navigate("/account?key=spotify-login");
       })
       .catch((error) => {
         console.error("❌ Error during callback/session verification:", error);
