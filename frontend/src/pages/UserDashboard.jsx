@@ -109,6 +109,7 @@ export default function UserDashboard() {
               <div className='text-center space-y-2'>
                 <h1 className='text-3xl font-bold text-white'>{userName}</h1>
                 <p className='text-emerald-400 text-sm uppercase tracking-wider'>Music Explorer</p>
+                <p className='text-emerald-400 text-sm hover::underline active::underline cursor-pointer' onClick={() => {navigate("/account?key=spotify-login")}}>Open Spotify Login</p>
               </div>
             </div>
           </div>
