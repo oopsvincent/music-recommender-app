@@ -29,7 +29,7 @@ export const ShareArtistComponent = ({
     const [copied, setCopied] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
 
-    const shareUrl = `https://music-recommender-app.vercel.app/artist/${artistId}`;
+    const shareUrl = `https://grooveestrella.vercel.app/artist/${artistId}`;
 
     // Generate shareable image
     const generateShareImage = async () => {

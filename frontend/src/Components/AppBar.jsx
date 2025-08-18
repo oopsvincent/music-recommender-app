@@ -222,7 +222,8 @@ const AppBar = ({ selectedSection, setSection }) => {
               {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </motion.button>
             
-            <h1 className="text-xl font-bold text-white">
+            <h1 className="text-xl font-bold text-white cursor-pointer flex justify-center items-center" onClick={() => {navigate("/")}}>
+                <img src="/in.svg" alt="logo" className="w-8" />
               Groove<span className="text-green-400">Estrella</span>
             </h1>
           </div>

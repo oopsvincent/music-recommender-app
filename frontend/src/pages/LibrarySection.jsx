@@ -352,7 +352,7 @@ const LibrarySection = () => {
 
         <div className='h-full w-full flex flex-col justify-center items-center p-5 text-center'>
             <h1 className='text-4xl'>Coming Soon...</h1>
-            <p>Spotify declined our application twice, so there's a chance that this page might not be ever available</p>
+            <p>There are some issues with the page, it will be available soon.</p>
         </div>
 
 
