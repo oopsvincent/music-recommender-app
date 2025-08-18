@@ -34,10 +34,10 @@ export const ShareTrackComponent = ({
 
     switch (type) {
         case "track":
-        Surl = `https://music-recommender-app.vercel.app/track/${trackId}`;
+        Surl = `https://grooveestrella.vercel.app/track/${trackId}`;
             break;
         case "album":
-            Surl = `https://music-recommender-app.vercel.app/album/${trackId}`;
+            Surl = `https://grooveestrella.vercel.app/album/${trackId}`;
             break;
         default:
             break;
