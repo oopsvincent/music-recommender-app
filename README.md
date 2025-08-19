@@ -94,9 +94,3 @@ Start the server
 ## 🛠 Our Skills
 - Javascript, HTML, CSS, React.js, Node.js, Tailwind CSS
 - Python, Flask
-
-
-## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
-
