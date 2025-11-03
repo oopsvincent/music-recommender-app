@@ -78,6 +78,11 @@ function HomePage({ userName }) {
 
             {chipKey && <RandomTrackButton categoryBaseUrl={`https://music-recommender-api.onrender.com/songs/${chipKey}`} />}
 
+            <div className="flex flex-col justify-center items-center text-white bg-gray-800 border-b-2 mb-4 p-3 text-justify">
+                <h1 className="text-4xl">GrooveShare: The universal way of sharing music</h1>
+                <h2>Coming Soon.....</h2>
+            </div>
+
             <div className="hidden sm:flex flex-row flex-wrap justify-center mb-5 gap-5">
                 {loading ? Array.from({ length: 20 }).map((_, i) => (
                     <Skeleton key={i} height={450} width={270} className="m-2 glassmorpho rounded-2xl" />
