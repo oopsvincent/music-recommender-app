@@ -27,7 +27,6 @@ const MusicChatbot = () => {
     const [recommendedSongs, setRecommendedSongs] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(true);
     const messagesEndRef = useRef(null);
-    const [trackData, setTrackData] = useState([]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -35,7 +34,7 @@ const MusicChatbot = () => {
 
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
+    }, [messages, isLoading]);
 
     const moodSuggestions = [
         { text: "I'm feeling sad and need comfort", icon: <Heart className="w-4 h-4" /> },
@@ -49,6 +48,7 @@ const MusicChatbot = () => {
         if (!messageText.trim()) return;
 
         const userMessage = {
+            id: `msg_${Date.now()}_user`,
             type: 'user',
             content: messageText.trim(),
             timestamp: new Date()
@@ -59,15 +59,14 @@ const MusicChatbot = () => {
         setIsLoading(true);
 
         // Play sent sound
-        try { sentAudio.currentTime = 0; sentAudio.play(); } catch (e) { }
+        try { sentAudio.currentTime = 0; sentAudio.play(); } catch (e) { /* ignore */ }
 
         try {
             const data = await getMoodSuggestions(messageText.trim());
-            console.log(data);
-
             if (!data) throw new Error('No response from API');
 
             const botMessage = {
+                id: `msg_${Date.now()}_bot`,
                 type: 'bot',
                 content: data.bot_message || "Here are some suggestions based on your mood.",
                 timestamp: new Date(),
@@ -75,38 +74,46 @@ const MusicChatbot = () => {
                 followUp: data.follow_up || '',
                 analysis: data.analysis || { emotions: [data.mood] },
                 genres: data.genres || [],
-                confidence: data.analysis?.confidence || null,
+                confidence: data.analysis?.confidence ?? null,
                 activities: data.analysis?.activities || [],
-                randomizationSeed: data.randomization_seed || null
+                randomizationSeed: data.randomization_seed || null,
+                // we'll attach trackData below
+                trackData: []
             };
 
+            // fetch track details in parallel
             const trackPromises = botMessage.songs.map(track => getDataforCard(track));
             const allTrackData = await Promise.all(trackPromises);
-            setTrackData(allTrackData);
 
+            // attach fetched data to this specific message
+            botMessage.trackData = allTrackData;
+
+            // push the bot message with its own trackData
             setMessages(prev => [...prev, botMessage]);
+
+            // update general recommendedSongs state if you use it elsewhere
             setRecommendedSongs(data.recommended_songs || []);
 
             // Play receive sound
-            try { receiveAudio.currentTime = 0; receiveAudio.play(); } catch (e) {
-                console.log(e);
-            }
+            try { receiveAudio.currentTime = 0; receiveAudio.play(); } catch (e) { /* ignore */ }
+
         } catch (error) {
+            console.error(error);
             const fallbackResponse = {
+                id: `msg_${Date.now()}_bot_fallback`,
                 type: 'bot',
                 content: "Couldn't reach the music mood engine. Here's something calming meanwhile:",
                 timestamp: new Date(),
                 songs: ["Explosions in the Sky – Your Hand in Mine", "Bon Iver – Holocene", "Tycho – Awake"],
                 followUp: "Try again in a bit?",
+                trackData: [] // no track details available
             };
 
             setMessages(prev => [...prev, fallbackResponse]);
             setRecommendedSongs(fallbackResponse.songs);
 
             // Play receive sound
-            try { receiveAudio.currentTime = 0; receiveAudio.play(); } catch (e) {
-                console.log(e);
-            }
+            try { receiveAudio.currentTime = 0; receiveAudio.play(); } catch (e) { /* ignore */ }
         } finally {
             setIsLoading(false);
         }
@@ -172,130 +179,145 @@ const MusicChatbot = () => {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-3 py-4 space-y-4 pb-32 pt-18">
-                {messages.map((message, index) => (
-                    <div key={index} className={`text-sm ${message.type === 'user' ? 'text-right' : 'text-left'}`}>
-                        <div className={`inline-block px-4 py-2 rounded-lg max-w-[85%] ${message.type === 'user'
-                            ? 'ml-auto bg-blue-600 text-white rounded-br-none'
-                            : 'bg-white/95 text-gray-900 rounded-bl-none shadow-lg'
+                {messages.map((message, index) => {
+                    const isUser = message.type === 'user';
+
+                    // tracks for THIS message (attached during fetch)
+                    const tracksForMessage = message.trackData || [];
+
+                    return (
+                        <div key={message.id || index} className={`text-sm ${isUser ? 'text-right' : 'text-left'}`}>
+                            <div className={`inline-block px-4 py-2 rounded-lg max-w-[85%] ${isUser
+                                ? 'ml-auto bg-blue-600 text-white rounded-br-none'
+                                : 'bg-white/95 text-gray-900 rounded-bl-none shadow-lg'
                             }`}>
-                            <p>{message.content}</p>
+                                <p>{message.content}</p>
 
-                            {/* Analysis Data */}
-                            {message.analysis && (
-                                <div className="mt-3 space-y-2">
-                                    {/* Emotions */}
-                                    {message.analysis.emotions?.length > 0 && (
-                                        <div>
-                                            <p className="text-xs font-medium text-gray-600 mb-1">😊 Emotions:</p>
-                                            <div className="flex flex-wrap gap-1">
-                                                {message.analysis.emotions.map((emotion, i) => (
-                                                    <EmotionBadge key={i} emotion={emotion} />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Confidence */}
-                                    {message.confidence !== null && message.confidence !== undefined && (
-                                        <div className="flex items-center gap-1">
-                                            <Target className="w-3 h-3 text-gray-500" />
-                                            <span className="text-xs text-gray-600">
-                                                Confidence: {Math.round(message.confidence * 100)}%
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    {/* Activities */}
-                                    {message.activities?.length > 0 && (
-                                        <div>
-                                            <p className="text-xs font-medium text-gray-600 mb-1">🎯 Activities:</p>
-                                            <div className="flex flex-wrap gap-1">
-                                                {message.activities.map((activity, i) => (
-                                                    <ActivityBadge key={i} activity={activity} />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Genres */}
-                                    {message.genres?.length > 0 && (
-                                        <div>
-                                            <p className="text-xs font-medium text-gray-600 mb-1">🎵 Genres:</p>
-                                            <div className="flex flex-wrap gap-1">
-                                                {message.genres.map((genre, i) => (
-                                                    <GenreBadge key={i} genre={genre} />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Recommended Songs */}
-                            {message.songs?.length > 0 && (
-                                <div className="mt-4 bg-gray-50 text-gray-800 p-3 rounded-lg">
-                                    <p className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                                        <Music className="w-4 h-4 text-blue-500" />
-                                        Recommended Songs ({message.songs.length})
-                                    </p>
-
-                                    {/* Grid Layout for Track Cards */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-132 overflow-x-auto">
-                                        {trackData.map((track, i) => (
-                                            <div key={i} className="min-w-0">
-                                                <TrackCard
-                                                    url={track.url}
-                                                    title={track.title}
-                                                    artist={track.artists?.map((artist) => ({ name: artist.name, id: artist.id }))}
-                                                    spoURL={track.spoURL}
-                                                    YTURL={"https://youtube.com/search?query=" + encodeURIComponent(track.title + " - " + track.artists)}
-                                                    popularity={track.popularity}
-                                                    explicit={track.explicit}
-                                                    trackURI={track.trackURI}
-                                                    albumID={track.albumID}
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Fallback: Show song names if TrackCard data is not available */}
-                                    {trackData.length === 0 && (
-                                        <div className="space-y-1">
-                                            {message.songs.slice(0, 5).map((song, i) => (
-                                                <div key={i} className="flex items-center gap-2 text-sm">
-                                                    <Music className="w-3 h-3 text-blue-500 flex-shrink-0" />
-                                                    <span className="truncate">{song}</span>
+                                {/* Analysis Data */}
+                                {message.analysis && (
+                                    <div className="mt-3 space-y-2">
+                                        {/* Emotions */}
+                                        {message.analysis.emotions?.length > 0 && (
+                                            <div>
+                                                <p className="text-xs font-medium text-gray-600 mb-1">😊 Emotions:</p>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {message.analysis.emotions.map((emotion, i) => (
+                                                        <EmotionBadge key={i} emotion={emotion} />
+                                                    ))}
                                                 </div>
-                                            ))}
-                                            {message.songs.length > 5 && (
-                                                <p className="text-xs text-gray-500 mt-2">
-                                                    +{message.songs.length - 5} more songs
-                                                </p>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                                            </div>
+                                        )}
 
-                            {/* Follow Up */}
-                            {message.followUp && (
-                                <div className="mt-3 p-2 bg-blue-50 rounded text-xs text-blue-800 italic">
-                                    💭 {message.followUp}
-                                </div>
-                            )}
+                                        {/* Confidence */}
+                                        {message.confidence !== null && message.confidence !== undefined && (
+                                            <div className="flex items-center gap-1">
+                                                <Target className="w-3 h-3 text-gray-500" />
+                                                <span className="text-xs text-gray-600">
+                                                    Confidence: {Math.round(message.confidence * 100)}%
+                                                </span>
+                                            </div>
+                                        )}
 
-                            {/* Debug Info (Optional) */}
-                            {message.randomizationSeed && (
-                                <div className="mt-2 text-[10px] text-gray-400">
-                                    Seed: {message.randomizationSeed}
-                                </div>
-                            )}
+                                        {/* Activities */}
+                                        {message.activities?.length > 0 && (
+                                            <div>
+                                                <p className="text-xs font-medium text-gray-600 mb-1">🎯 Activities:</p>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {message.activities.map((activity, i) => (
+                                                        <ActivityBadge key={i} activity={activity} />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Genres */}
+                                        {message.genres?.length > 0 && (
+                                            <div>
+                                                <p className="text-xs font-medium text-gray-600 mb-1">🎵 Genres:</p>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {message.genres.map((genre, i) => (
+                                                        <GenreBadge key={i} genre={genre} />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Recommended Songs */}
+                                {message.songs?.length > 0 && (
+                                    <div className="mt-4 bg-gray-50 text-gray-800 p-3 rounded-lg">
+                                        <p className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                                            <Music className="w-4 h-4 text-blue-500" />
+                                            Recommended Songs ({message.songs.length})
+                                        </p>
+
+                                        {/* If we have fetched track details for this message show them in a responsive grid */}
+                                        {tracksForMessage.length > 0 ? (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                                {tracksForMessage.map((trackObj) => {
+                                                    const key = trackObj?.id || trackObj?.trackURI || `${trackObj?.title}-${Math.random()}`;
+                                                    // artist names for YT search
+                                                    const artistNames = (trackObj?.artists || []).map(a => a.name).join(' ');
+                                                    const ytSearch = `https://youtube.com/search?query=${encodeURIComponent(trackObj?.title + ' ' + artistNames)}`;
+
+                                                    return (
+                                                        <div key={key} className="min-w-0">
+                                                            <TrackCard
+                                                                url={trackObj?.url}
+                                                                title={trackObj?.title}
+                                                                artist={(trackObj?.artists || []).map((artist) => ({ name: artist.name, id: artist.id }))}
+                                                                spoURL={trackObj?.spoURL}
+                                                                YTURL={ytSearch}
+                                                                popularity={trackObj?.popularity}
+                                                                explicit={trackObj?.explicit}
+                                                                trackURI={trackObj?.trackURI}
+                                                                albumID={trackObj?.albumID}
+                                                            />
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            // Fallback: Show song names if TrackCard data is not available
+                                            <div className="space-y-1">
+                                                {message.songs.slice(0, 5).map((song, i) => (
+                                                    <div key={i} className="flex items-center gap-2 text-sm">
+                                                        <Music className="w-3 h-3 text-blue-500 flex-shrink-0" />
+                                                        <span className="truncate">{song}</span>
+                                                    </div>
+                                                ))}
+                                                {message.songs.length > 5 && (
+                                                    <p className="text-xs text-gray-500 mt-2">
+                                                        +{message.songs.length - 5} more songs
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Follow Up */}
+                                {message.followUp && (
+                                    <div className="mt-3 p-2 bg-blue-50 rounded text-xs text-blue-800 italic">
+                                        💭 {message.followUp}
+                                    </div>
+                                )}
+
+                                {/* Debug Info (Optional) */}
+                                {message.randomizationSeed && (
+                                    <div className="mt-2 text-[10px] text-gray-400">
+                                        Seed: {message.randomizationSeed}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="text-[10px] text-white/60 mt-1">
+                                {new Date(message.timestamp).toLocaleTimeString()}
+                            </div>
                         </div>
-                        <div className="text-[10px] text-white/60 mt-1">
-                            {message.timestamp.toLocaleTimeString()}
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
 
                 {isLoading && (
                     <div className="text-left">
